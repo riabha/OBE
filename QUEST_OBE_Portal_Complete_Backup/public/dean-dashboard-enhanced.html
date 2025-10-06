@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dean Dashboard - QUEST University Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .sidebar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            margin: 2px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .stat-card-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        .stat-card-3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        .stat-card-4 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+        .btn-dean {
+            background: linear-gradient(135deg, #c2185b 0%, #ad1457 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-dean:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(173, 20, 87, 0.4);
+            color: white;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar position-fixed top-0 start-0" style="width: 250px; z-index: 1000;">
+        <div class="p-3">
+            <div class="d-flex align-items-center mb-4">
+                <img src="quest_logo.png" alt="QUEST Logo" class="me-2" style="height: 40px; width: 40px; border-radius: 50%;">
+                <div>
+                    <div class="fw-bold text-white">QUEST</div>
+                    <small class="text-light">Dean Portal</small>
+                </div>
+            </div>
+            
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#dashboard" onclick="showSection('dashboard')">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#departments" onclick="showSection('departments')">
+                        <i class="fas fa-building me-2"></i>Managed Departments
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#faculty" onclick="showSection('faculty')">
+                        <i class="fas fa-chalkboard-teacher me-2"></i>Faculty Overview
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#students" onclick="showSection('students')">
+                        <i class="fas fa-graduation-cap me-2"></i>Student Overview
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#plos" onclick="showSection('plos')">
+                        <i class="fas fa-sitemap me-2"></i>PLO Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#reports" onclick="showSection('reports')">
+                        <i class="fas fa-chart-bar me-2"></i>Analytics
+                    </a>
+                </li>
+                <li class="nav-item mt-3">
+                    <a class="nav-link" href="/login" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Dashboard Section -->
+        <div id="dashboard-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Dean Dashboard</h2>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-dean" onclick="assignPLO()">
+                        <i class="fas fa-sitemap me-2"></i>Assign PLOs
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="refreshData()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Managed Departments</h6>
+                                    <h2 class="mb-0" id="managedDepts">3</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-building fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card-2">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Total Faculty</h6>
+                                    <h2 class="mb-0" id="totalFaculty">78</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Total Students</h6>
+                                    <h2 class="mb-0" id="totalStudents">1,247</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-graduation-cap fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Average GPA</h6>
+                                    <h2 class="mb-0" id="avgGPA">3.4</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-chart-line fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="row mb-4">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Department Performance</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="deptPerformanceChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Faculty Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="facultyDistributionChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Recent Activity Across Departments</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Activity</th>
+                                            <th>Department</th>
+                                            <th>User</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentActivity">
+                                        <!-- Recent activity will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" onclick="manageDepartments()">
+                                    <i class="fas fa-building me-2"></i>Manage Departments
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="assignPLO()">
+                                    <i class="fas fa-sitemap me-2"></i>Assign PLOs
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="reviewFaculty()">
+                                    <i class="fas fa-chalkboard-teacher me-2"></i>Review Faculty
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="generateReport()">
+                                    <i class="fas fa-file-pdf me-2"></i>Generate Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Departments Section -->
+        <div id="departments-section" style="display: none;">
+            <h2 class="fw-bold mb-4">Managed Departments</h2>
+            
+            <div class="row" id="departmentsGrid">
+                <!-- Departments will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Faculty Section -->
+        <div id="faculty-section" style="display: none;">
+            <h2 class="fw-bold mb-4">Faculty Overview</h2>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Total Faculty</th>
+                                    <th>Professors</th>
+                                    <th>Associate Profs</th>
+                                    <th>Assistant Profs</th>
+                                    <th>Lecturers</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="facultyOverviewTable">
+                                <!-- Faculty overview will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Section -->
+        <div id="students-section" style="display: none;">
+            <h2 class="fw-bold mb-4">Student Overview</h2>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Total Students</th>
+                                    <th>1st Year</th>
+                                    <th>2nd Year</th>
+                                    <th>3rd Year</th>
+                                    <th>4th Year</th>
+                                    <th>Avg GPA</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsOverviewTable">
+                                <!-- Students overview will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLO Management Section -->
+        <div id="plos-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">PLO Management</h2>
+                <button class="btn btn-primary" onclick="showPLOModal()">
+                    <i class="fas fa-plus me-2"></i>Assign PLOs
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Subject</th>
+                                    <th>Assigned PLOs</th>
+                                    <th>CLO Coverage</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ploTable">
+                                <!-- PLO assignments will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reports-section" style="display: none;">
+            <h2 class="fw-bold mb-4">Analytics & Reports</h2>
+            
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">GPA Trends by Department</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="gpaTrendsChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Student Enrollment</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="enrollmentChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentUser = null;
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (!token || !user) {
+                window.location.href = '/login';
+                return;
+            }
+            
+            try {
+                const userData = JSON.parse(user);
+                if (userData.role !== 'dean') {
+                    // Redirect to appropriate dashboard
+                    const dashboardMap = {
+                        'superadmin': '/admin',
+                        'student': '/student-dashboard-enhanced.html',
+                        'teacher': '/teacher-dashboard.html',
+                        'focal': '/focal-dashboard-enhanced.html',
+                        'chairman': '/chairman-dashboard-enhanced.html',
+                        'controller': '/controller-dashboard-enhanced.html'
+                    };
+                    
+                    const dashboardFile = dashboardMap[userData.role] || '/student-dashboard-enhanced.html';
+                    window.location.href = dashboardFile;
+                    return;
+                }
+                
+                currentUser = userData;
+                loadDashboardData();
+                
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+            }
+        });
+
+        // Navigation functions
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('[id$="-section"]').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').style.display = 'block';
+            
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Load section-specific data
+            if (sectionName === 'departments') {
+                loadDepartments();
+            } else if (sectionName === 'faculty') {
+                loadFacultyOverview();
+            } else if (sectionName === 'students') {
+                loadStudentsOverview();
+            } else if (sectionName === 'plos') {
+                loadPLOs();
+            } else if (sectionName === 'reports') {
+                loadReports();
+            }
+        }
+
+        // Load dashboard data
+        function loadDashboardData() {
+            loadRecentActivity();
+            createDashboardCharts();
+        }
+
+        // Load recent activity
+        function loadRecentActivity() {
+            const activities = [
+                { activity: 'PLO Assigned', department: 'Computer Science', user: 'Prof. Dr. Ali Raza', date: '2024-01-15', status: 'Completed' },
+                { activity: 'Faculty Added', department: 'Electrical Engineering', user: 'Prof. Aisha Malik', date: '2024-01-14', status: 'Completed' },
+                { activity: 'Department Review', department: 'Mechanical Engineering', user: 'You', date: '2024-01-13', status: 'In Progress' },
+                { activity: 'Student Performance Review', department: 'Computer Science', user: 'You', date: '2024-01-12', status: 'Completed' }
+            ];
+            
+            const tbody = document.getElementById('recentActivity');
+            tbody.innerHTML = activities.map(activity => `
+                <tr>
+                    <td>${activity.activity}</td>
+                    <td><span class="badge bg-primary">${activity.department}</span></td>
+                    <td>${activity.user}</td>
+                    <td>${activity.date}</td>
+                    <td><span class="badge bg-${getStatusColor(activity.status)}">${activity.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Create dashboard charts
+        function createDashboardCharts() {
+            // Department Performance Chart
+            const deptPerfCtx = document.getElementById('deptPerformanceChart').getContext('2d');
+            new Chart(deptPerfCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Computer Science', 'Electrical Engineering', 'Mechanical Engineering'],
+                    datasets: [{
+                        label: 'Average GPA',
+                        data: [3.5, 3.3, 3.4],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 4.0 }
+                    }
+                }
+            });
+
+            // Faculty Distribution Chart
+            const facultyDistCtx = document.getElementById('facultyDistributionChart').getContext('2d');
+            new Chart(facultyDistCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Computer Science', 'Electrical Engineering', 'Mechanical Engineering'],
+                    datasets: [{
+                        data: [28, 25, 25],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Load departments
+        function loadDepartments() {
+            const departments = [
+                { name: 'Computer Science', faculty: 28, students: 450, avgGPA: 3.5, chairman: 'Prof. Dr. Ali Raza' },
+                { name: 'Electrical Engineering', faculty: 25, students: 320, avgGPA: 3.3, chairman: 'Prof. Dr. Usman Khan' },
+                { name: 'Mechanical Engineering', faculty: 25, students: 280, avgGPA: 3.4, chairman: 'Prof. Dr. Ahmad Sheikh' }
+            ];
+            
+            const container = document.getElementById('departmentsGrid');
+            container.innerHTML = departments.map(dept => `
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title">${dept.name}</h6>
+                                <span class="badge bg-primary">Active</span>
+                            </div>
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <h6 class="text-primary">${dept.faculty}</h6>
+                                    <small class="text-muted">Faculty</small>
+                                </div>
+                                <div class="col-6">
+                                    <h6 class="text-success">${dept.students}</h6>
+                                    <small class="text-muted">Students</small>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">Chairman: ${dept.chairman}</small><br>
+                                <small class="text-muted">Avg GPA: ${dept.avgGPA}</small>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-outline-primary w-100" onclick="manageDepartment('${dept.name}')">
+                                    Manage Department
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load faculty overview
+        function loadFacultyOverview() {
+            const faculty = [
+                { department: 'Computer Science', total: 28, profs: 8, assoc: 6, assist: 10, lect: 4 },
+                { department: 'Electrical Engineering', total: 25, profs: 6, assoc: 5, assist: 9, lect: 5 },
+                { department: 'Mechanical Engineering', total: 25, profs: 7, assoc: 4, assist: 8, lect: 6 }
+            ];
+            
+            const tbody = document.getElementById('facultyOverviewTable');
+            tbody.innerHTML = faculty.map(dept => `
+                <tr>
+                    <td><span class="badge bg-primary">${dept.department}</span></td>
+                    <td>${dept.total}</td>
+                    <td>${dept.profs}</td>
+                    <td>${dept.assoc}</td>
+                    <td>${dept.assist}</td>
+                    <td>${dept.lect}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="reviewDepartmentFaculty('${dept.department}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Load students overview
+        function loadStudentsOverview() {
+            const students = [
+                { department: 'Computer Science', total: 450, year1: 120, year2: 115, year3: 110, year4: 105, avgGPA: 3.5 },
+                { department: 'Electrical Engineering', total: 320, year1: 85, year2: 80, year3: 78, year4: 77, avgGPA: 3.3 },
+                { department: 'Mechanical Engineering', total: 280, year1: 75, year2: 70, year3: 68, year4: 67, avgGPA: 3.4 }
+            ];
+            
+            const tbody = document.getElementById('studentsOverviewTable');
+            tbody.innerHTML = students.map(dept => `
+                <tr>
+                    <td><span class="badge bg-primary">${dept.department}</span></td>
+                    <td>${dept.total}</td>
+                    <td>${dept.year1}</td>
+                    <td>${dept.year2}</td>
+                    <td>${dept.year3}</td>
+                    <td>${dept.year4}</td>
+                    <td>${dept.avgGPA}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="reviewDepartmentStudents('${dept.department}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Load PLOs
+        function loadPLOs() {
+            const plos = [
+                { department: 'Computer Science', subject: 'Data Structures', plos: 'PLO1,PLO3,PLO5', coverage: '85%', status: 'Active' },
+                { department: 'Electrical Engineering', subject: 'Circuit Analysis', plos: 'PLO1,PLO2,PLO4', coverage: '78%', status: 'Active' },
+                { department: 'Mechanical Engineering', subject: 'Thermodynamics', plos: 'PLO1,PLO3,PLO6', coverage: '82%', status: 'Active' }
+            ];
+            
+            const tbody = document.getElementById('ploTable');
+            tbody.innerHTML = plos.map(plo => `
+                <tr>
+                    <td><span class="badge bg-primary">${plo.department}</span></td>
+                    <td>${plo.subject}</td>
+                    <td><small>${plo.plos}</small></td>
+                    <td><span class="badge bg-success">${plo.coverage}</span></td>
+                    <td><span class="badge bg-success">${plo.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editPLO('${plo.subject}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Load reports
+        function loadReports() {
+            // GPA Trends Chart
+            const gpaTrendsCtx = document.getElementById('gpaTrendsChart').getContext('2d');
+            new Chart(gpaTrendsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                    datasets: [{
+                        label: 'Computer Science',
+                        data: [3.4, 3.5, 3.4, 3.6, 3.5],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Electrical Engineering',
+                        data: [3.2, 3.3, 3.2, 3.4, 3.3],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Mechanical Engineering',
+                        data: [3.3, 3.4, 3.3, 3.5, 3.4],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 4.0 }
+                    }
+                }
+            });
+
+            // Enrollment Chart
+            const enrollmentCtx = document.getElementById('enrollmentChart').getContext('2d');
+            new Chart(enrollmentCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Computer Science', 'Electrical Engineering', 'Mechanical Engineering'],
+                    datasets: [{
+                        label: 'Total Students',
+                        data: [450, 320, 280],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Utility functions
+        function getStatusColor(status) {
+            switch(status) {
+                case 'Completed': return 'success';
+                case 'Pending': return 'warning';
+                case 'In Progress': return 'primary';
+                default: return 'secondary';
+            }
+        }
+
+        // Interactive functions
+        function manageDepartments() {
+            showAlert('Department management functionality will be implemented', 'info');
+        }
+
+        function assignPLO() {
+            showAlert('PLO assignment functionality will be implemented', 'info');
+        }
+
+        function reviewFaculty() {
+            showAlert('Faculty review functionality will be implemented', 'info');
+        }
+
+        function generateReport() {
+            showAlert('Generating comprehensive report...', 'success');
+        }
+
+        function manageDepartment(name) {
+            showAlert(`Managing department: ${name}`, 'info');
+        }
+
+        function reviewDepartmentFaculty(department) {
+            showAlert(`Reviewing faculty for: ${department}`, 'info');
+        }
+
+        function reviewDepartmentStudents(department) {
+            showAlert(`Reviewing students for: ${department}`, 'info');
+        }
+
+        function editPLO(subject) {
+            showAlert(`Editing PLO for subject: ${subject}`, 'info');
+        }
+
+        function showPLOModal() {
+            showAlert('PLO assignment modal functionality will be implemented', 'info');
+        }
+
+        function refreshData() {
+            loadDashboardData();
+            showAlert('Data refreshed successfully!', 'success');
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
