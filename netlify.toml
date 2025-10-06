@@ -1,0 +1,30 @@
+# Netlify Configuration for QUEST OBE Portal
+
+[build]
+  publish = "public"
+  command = "echo 'No build step required'"
+
+# Redirect rules for SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Environment variables (set in Netlify dashboard)
+# DB_HOST=mysql.gb.stackcp.com
+# DB_PORT=39558
+# DB_NAME=questobe-35313139c836
+# DB_USER=questobe
+# DB_PASSWORD=Quest123@
+# JWT_SECRET=quest_obe_jwt_secret_key_2024
+# SESSION_SECRET=quest_obe_session_secret_key_2024
+# NODE_ENV=production
