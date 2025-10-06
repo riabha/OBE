@@ -20,7 +20,9 @@ app.use(express.static('public'));
 
 // Include routes
 const reportsRouter = require('./routes/reports');
+const usersRouter = require('./routes/users');
 app.use('/api/reports', reportsRouter);
+app.use('/api/users', usersRouter);
 
 // CORS configuration for production
 if (isProduction) {

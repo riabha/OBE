@@ -1,393 +1,495 @@
 const express = require('express');
-const { body, validationResult } = require('express-validator');
-const User = require('../models/User');
-const Department = require('../models/Department');
-const { authenticateToken, authorize, checkDepartmentAccess } = require('../middleware/auth');
-
 const router = express.Router();
+const mysql = require('mysql2/promise');
+const bcrypt = require('bcryptjs');
 
-// @route   GET /api/users
-// @desc    Get all users (with role-based filtering)
-// @access  Private (Admin roles only)
-router.get('/', authenticateToken, authorize('dean', 'controller'), async (req, res) => {
+// Database connection
+const dbConfig = {
+    host: process.env.DB_HOST || 'mysql.gb.stackcp.com',
+    port: process.env.DB_PORT || 39558,
+    user: process.env.DB_USER || 'questobe',
+    password: process.env.DB_PASSWORD || 'Quest123@',
+    database: process.env.DB_NAME || 'questobe-35313139c836'
+};
+
+// Helper function to get database connection
+async function getConnection() {
     try {
-        const { role, department, page = 1, limit = 10 } = req.query;
-        
-        // Build query based on user role and permissions
-        let query = { isActive: true };
-        
-        if (role) {
-            query.role = role;
-        }
-        
-        if (department) {
-            query.department = department;
-        }
-        
-        // Dean can only see users from assigned faculties
-        if (req.user.role === 'dean') {
-            const userDepartments = req.user.assignedFaculties.map(faculty => faculty._id);
-            query.department = { $in: userDepartments };
-        }
-        
-        // Focal can only see users from assigned departments
-        if (req.user.role === 'focal') {
-            const userDepartments = req.user.assignedDepartments.map(dept => dept._id);
-            query.department = { $in: userDepartments };
-        }
-        
-        // Chairman can only see users from managed departments
-        if (req.user.role === 'chairman') {
-            const userDepartments = req.user.managedDepartments.map(dept => dept._id);
-            query.department = { $in: userDepartments };
-        }
+        return await mysql.createConnection(dbConfig);
+    } catch (error) {
+        console.error('Database connection error:', error);
+        throw error;
+    }
+}
 
-        const users = await User.find(query)
-            .populate('department', 'name code')
-            .select('-password')
-            .limit(limit * 1)
-            .skip((page - 1) * limit)
-            .sort({ createdAt: -1 });
+// Helper function to execute query
+async function executeQuery(query, params = []) {
+    const connection = await getConnection();
+    try {
+        const [rows] = await connection.execute(query, params);
+        return rows;
+    } finally {
+        await connection.end();
+    }
+}
 
-        const total = await User.countDocuments(query);
+// ==================== USER MANAGEMENT ROUTES ====================
 
+// Get all users
+router.get('/', async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                id,
+                name,
+                email,
+                role,
+                department,
+                employee_id as employeeId,
+                student_id as studentId,
+                designation,
+                semester,
+                batch,
+                created_at as createdAt,
+                updated_at as updatedAt,
+                is_active as isActive
+            FROM users 
+            ORDER BY created_at DESC
+        `;
+        
+        const users = await executeQuery(query);
+        
         res.json({
             success: true,
-            data: {
-                users,
-                pagination: {
-                    current: parseInt(page),
-                    pages: Math.ceil(total / limit),
-                    total
-                }
+            users: users
+        });
+        
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to fetch users' 
+        });
+    }
+});
+
+// Get user by ID
+router.get('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const query = `
+            SELECT 
+                id,
+                name,
+                email,
+                role,
+                department,
+                employee_id as employeeId,
+                student_id as studentId,
+                designation,
+                semester,
+                batch,
+                created_at as createdAt,
+                updated_at as updatedAt,
+                is_active as isActive
+            FROM users 
+            WHERE id = ?
+        `;
+        
+        const users = await executeQuery(query, [id]);
+        
+        if (users.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+        
+        res.json({
+            success: true,
+            user: users[0]
+        });
+        
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to fetch user' 
+        });
+    }
+});
+
+// Create new user
+router.post('/', async (req, res) => {
+    try {
+        const {
+            name,
+            email,
+            password,
+            role,
+            department,
+            employeeId,
+            studentId,
+            designation,
+            semester,
+            batch
+        } = req.body;
+        
+        // Validate required fields
+        if (!name || !email || !password || !role) {
+            return res.status(400).json({
+                success: false,
+                error: 'Name, email, password, and role are required'
+            });
+        }
+        
+        // Check if user already exists
+        const existingUserQuery = 'SELECT id FROM users WHERE email = ?';
+        const existingUsers = await executeQuery(existingUserQuery, [email]);
+        
+        if (existingUsers.length > 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'User with this email already exists'
+            });
+        }
+        
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 12);
+        
+        // Insert new user
+        const insertQuery = `
+            INSERT INTO users (
+                name, email, password, role, department, 
+                employee_id, student_id, designation, semester, batch,
+                created_at, updated_at, is_active
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 1)
+        `;
+        
+        const result = await executeQuery(insertQuery, [
+            name, email, hashedPassword, role, department,
+            employeeId || null, studentId || null, designation || null,
+            semester || null, batch || null
+        ]);
+        
+        res.json({
+            success: true,
+            message: 'User created successfully',
+            userId: result.insertId
+        });
+        
+    } catch (error) {
+        console.error('Error creating user:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to create user' 
+        });
+    }
+});
+
+// Update user
+router.put('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {
+            name,
+            email,
+            password,
+            role,
+            department,
+            employeeId,
+            studentId,
+            designation,
+            semester,
+            batch,
+            isActive
+        } = req.body;
+        
+        // Check if user exists
+        const existingUserQuery = 'SELECT id FROM users WHERE id = ?';
+        const existingUsers = await executeQuery(existingUserQuery, [id]);
+        
+        if (existingUsers.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+        
+        // Check if email is already taken by another user
+        if (email) {
+            const emailCheckQuery = 'SELECT id FROM users WHERE email = ? AND id != ?';
+            const emailUsers = await executeQuery(emailCheckQuery, [email, id]);
+            
+            if (emailUsers.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Email already taken by another user'
+                });
             }
-        });
-
-    } catch (error) {
-        console.error('Get users error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Server error',
-            error: error.message
-        });
-    }
-});
-
-// @route   GET /api/users/:id
-// @desc    Get user by ID
-// @access  Private
-router.get('/:id', authenticateToken, async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id)
-            .populate('department', 'name code')
-            .populate('assignedDepartments', 'name code')
-            .populate('managedDepartments', 'name code')
-            .populate('assignedFaculties', 'name code')
-            .select('-password');
-
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
         }
-
-        // Check if user has permission to view this user
-        if (req.user.role === 'student' && req.user._id.toString() !== user._id.toString()) {
-            return res.status(403).json({
-                success: false,
-                message: 'Access denied'
-            });
-        }
-
-        res.json({
-            success: true,
-            data: { user }
-        });
-
-    } catch (error) {
-        console.error('Get user error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Server error',
-            error: error.message
-        });
-    }
-});
-
-// @route   PUT /api/users/:id
-// @desc    Update user
-// @access  Private (Admin roles or self)
-router.put('/:id', authenticateToken, [
-    body('firstName').optional().trim().isLength({ min: 2, max: 50 }).withMessage('First name must be 2-50 characters'),
-    body('lastName').optional().trim().isLength({ min: 2, max: 50 }).withMessage('Last name must be 2-50 characters'),
-    body('phone').optional().isMobilePhone().withMessage('Please provide a valid phone number'),
-    body('bio').optional().isLength({ max: 500 }).withMessage('Bio cannot exceed 500 characters'),
-], async (req, res) => {
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                success: false,
-                message: 'Validation failed',
-                errors: errors.array()
-            });
-        }
-
-        const userId = req.params.id;
-        const currentUser = req.user;
-
-        // Check permissions
-        const canUpdate = currentUser._id.toString() === userId.toString() || 
-                         ['dean', 'controller', 'chairman', 'focal'].includes(currentUser.role);
         
-        if (!canUpdate) {
-            return res.status(403).json({
-                success: false,
-                message: 'Access denied'
-            });
+        // Build update query dynamically
+        let updateQuery = 'UPDATE users SET ';
+        const updateParams = [];
+        const updateFields = [];
+        
+        if (name) {
+            updateFields.push('name = ?');
+            updateParams.push(name);
         }
-
-        const allowedUpdates = ['firstName', 'lastName', 'phone', 'bio'];
-        const updates = {};
-
-        // Only allow specific fields for non-admin users
-        if (currentUser._id.toString() === userId.toString()) {
-            allowedUpdates.forEach(field => {
-                if (req.body[field] !== undefined) {
-                    updates[field] = req.body[field];
-                }
-            });
-        } else {
-            // Admin can update more fields
-            const adminUpdates = [...allowedUpdates, 'role', 'isActive', 'department'];
-            adminUpdates.forEach(field => {
-                if (req.body[field] !== undefined) {
-                    updates[field] = req.body[field];
-                }
-            });
+        
+        if (email) {
+            updateFields.push('email = ?');
+            updateParams.push(email);
         }
-
-        const user = await User.findByIdAndUpdate(
-            userId,
-            updates,
-            { new: true, runValidators: true }
-        )
-        .populate('department', 'name code')
-        .select('-password');
-
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
+        
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 12);
+            updateFields.push('password = ?');
+            updateParams.push(hashedPassword);
         }
-
-        res.json({
-            success: true,
-            message: 'User updated successfully',
-            data: { user }
-        });
-
-    } catch (error) {
-        console.error('Update user error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Server error',
-            error: error.message
-        });
-    }
-});
-
-// @route   DELETE /api/users/:id
-// @desc    Deactivate user (soft delete)
-// @access  Private (Admin roles only)
-router.delete('/:id', authenticateToken, authorize('dean', 'controller', 'chairman'), async (req, res) => {
-    try {
-        const userId = req.params.id;
-
-        // Don't allow users to deactivate themselves
-        if (req.user._id.toString() === userId.toString()) {
-            return res.status(400).json({
-                success: false,
-                message: 'Cannot deactivate your own account'
-            });
-        }
-
-        const user = await User.findByIdAndUpdate(
-            userId,
-            { isActive: false },
-            { new: true }
-        ).select('-password');
-
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
-
-        res.json({
-            success: true,
-            message: 'User deactivated successfully',
-            data: { user }
-        });
-
-    } catch (error) {
-        console.error('Deactivate user error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Server error',
-            error: error.message
-        });
-    }
-});
-
-// @route   GET /api/users/department/:departmentId
-// @desc    Get users by department
-// @access  Private
-router.get('/department/:departmentId', authenticateToken, checkDepartmentAccess, async (req, res) => {
-    try {
-        const { departmentId } = req.params;
-        const { role } = req.query;
-
-        let query = { 
-            department: departmentId, 
-            isActive: true 
-        };
-
+        
         if (role) {
-            query.role = role;
+            updateFields.push('role = ?');
+            updateParams.push(role);
         }
-
-        const users = await User.find(query)
-            .populate('department', 'name code')
-            .select('-password')
-            .sort({ role: 1, firstName: 1 });
-
+        
+        if (department !== undefined) {
+            updateFields.push('department = ?');
+            updateParams.push(department);
+        }
+        
+        if (employeeId !== undefined) {
+            updateFields.push('employee_id = ?');
+            updateParams.push(employeeId);
+        }
+        
+        if (studentId !== undefined) {
+            updateFields.push('student_id = ?');
+            updateParams.push(studentId);
+        }
+        
+        if (designation !== undefined) {
+            updateFields.push('designation = ?');
+            updateParams.push(designation);
+        }
+        
+        if (semester !== undefined) {
+            updateFields.push('semester = ?');
+            updateParams.push(semester);
+        }
+        
+        if (batch !== undefined) {
+            updateFields.push('batch = ?');
+            updateParams.push(batch);
+        }
+        
+        if (isActive !== undefined) {
+            updateFields.push('is_active = ?');
+            updateParams.push(isActive ? 1 : 0);
+        }
+        
+        updateFields.push('updated_at = NOW()');
+        updateQuery += updateFields.join(', ') + ' WHERE id = ?';
+        updateParams.push(id);
+        
+        await executeQuery(updateQuery, updateParams);
+        
         res.json({
             success: true,
-            data: { users }
+            message: 'User updated successfully'
         });
-
+        
     } catch (error) {
-        console.error('Get department users error:', error);
-        res.status(500).json({
+        console.error('Error updating user:', error);
+        res.status(500).json({ 
             success: false,
-            message: 'Server error',
-            error: error.message
+            error: 'Failed to update user' 
         });
     }
 });
 
-// @route   GET /api/users/role/:role
-// @desc    Get users by role
-// @access  Private (Admin roles only)
-router.get('/role/:role', authenticateToken, authorize('dean', 'controller'), async (req, res) => {
+// Delete user
+router.delete('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Check if user exists
+        const existingUserQuery = 'SELECT id FROM users WHERE id = ?';
+        const existingUsers = await executeQuery(existingUserQuery, [id]);
+        
+        if (existingUsers.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+        
+        // Soft delete (set is_active to 0)
+        const deleteQuery = 'UPDATE users SET is_active = 0, updated_at = NOW() WHERE id = ?';
+        await executeQuery(deleteQuery, [id]);
+        
+        res.json({
+            success: true,
+            message: 'User deleted successfully'
+        });
+        
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to delete user' 
+        });
+    }
+});
+
+// Get users by role
+router.get('/role/:role', async (req, res) => {
     try {
         const { role } = req.params;
         
-        const validRoles = ['student', 'teacher', 'focal', 'chairman', 'dean', 'controller'];
-        if (!validRoles.includes(role)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid role'
-            });
-        }
-
-        const users = await User.findByRole(role)
-            .populate('department', 'name code')
-            .select('-password')
-            .sort({ firstName: 1 });
-
+        const query = `
+            SELECT 
+                id,
+                name,
+                email,
+                role,
+                department,
+                employee_id as employeeId,
+                student_id as studentId,
+                designation,
+                semester,
+                batch,
+                created_at as createdAt,
+                updated_at as updatedAt,
+                is_active as isActive
+            FROM users 
+            WHERE role = ? AND is_active = 1
+            ORDER BY name
+        `;
+        
+        const users = await executeQuery(query, [role]);
+        
         res.json({
             success: true,
-            data: { users }
+            users: users
         });
-
+        
     } catch (error) {
-        console.error('Get users by role error:', error);
-        res.status(500).json({
+        console.error('Error fetching users by role:', error);
+        res.status(500).json({ 
             success: false,
-            message: 'Server error',
-            error: error.message
+            error: 'Failed to fetch users by role' 
         });
     }
 });
 
-// @route   POST /api/users/:id/assign-department
-// @desc    Assign user to department (for focal persons)
-// @access  Private (Admin roles only)
-router.post('/:id/assign-department', authenticateToken, authorize('dean', 'controller'), [
-    body('departmentId').isMongoId().withMessage('Valid department ID required'),
-    body('responsibilities').optional().isArray().withMessage('Responsibilities must be an array'),
-], async (req, res) => {
+// Get user statistics
+router.get('/stats/overview', async (req, res) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                success: false,
-                message: 'Validation failed',
-                errors: errors.array()
-            });
-        }
-
-        const { id } = req.params;
-        const { departmentId, responsibilities = [] } = req.body;
-
-        const user = await User.findById(id);
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
-
-        if (user.role !== 'focal') {
-            return res.status(400).json({
-                success: false,
-                message: 'Can only assign departments to focal persons'
-            });
-        }
-
-        // Check if department exists
-        const department = await Department.findById(departmentId);
-        if (!department) {
-            return res.status(404).json({
-                success: false,
-                message: 'Department not found'
-            });
-        }
-
-        // Add department to assigned departments if not already assigned
-        if (!user.assignedDepartments.includes(departmentId)) {
-            user.assignedDepartments.push(departmentId);
-            await user.save();
-
-            // Add user as focal person to department
-            await department.addFocalPerson(user._id, responsibilities);
-        }
-
-        const updatedUser = await User.findById(id)
-            .populate('assignedDepartments', 'name code')
-            .select('-password');
-
+        const query = `
+            SELECT 
+                COUNT(*) as totalUsers,
+                COUNT(CASE WHEN role = 'student' THEN 1 END) as totalStudents,
+                COUNT(CASE WHEN role = 'teacher' THEN 1 END) as totalTeachers,
+                COUNT(CASE WHEN role = 'focal' THEN 1 END) as totalFocals,
+                COUNT(CASE WHEN role = 'chairman' THEN 1 END) as totalChairmen,
+                COUNT(CASE WHEN role = 'dean' THEN 1 END) as totalDeans,
+                COUNT(CASE WHEN role = 'controller' THEN 1 END) as totalControllers,
+                COUNT(CASE WHEN role = 'superadmin' THEN 1 END) as totalSuperAdmins,
+                COUNT(CASE WHEN is_active = 1 THEN 1 END) as activeUsers,
+                COUNT(CASE WHEN is_active = 0 THEN 1 END) as inactiveUsers
+            FROM users
+        `;
+        
+        const stats = await executeQuery(query);
+        
         res.json({
             success: true,
-            message: 'Department assigned successfully',
-            data: { user: updatedUser }
+            stats: stats[0]
         });
-
+        
     } catch (error) {
-        console.error('Assign department error:', error);
-        res.status(500).json({
+        console.error('Error fetching user statistics:', error);
+        res.status(500).json({ 
             success: false,
-            message: 'Server error',
-            error: error.message
+            error: 'Failed to fetch user statistics' 
+        });
+    }
+});
+
+// Bulk operations
+router.post('/bulk', async (req, res) => {
+    try {
+        const { action, userIds, data } = req.body;
+        
+        if (!action || !userIds || !Array.isArray(userIds)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid bulk operation parameters'
+            });
+        }
+        
+        let query;
+        let params;
+        
+        switch (action) {
+            case 'activate':
+                query = 'UPDATE users SET is_active = 1, updated_at = NOW() WHERE id IN (?)';
+                params = [userIds.join(',')];
+                break;
+                
+            case 'deactivate':
+                query = 'UPDATE users SET is_active = 0, updated_at = NOW() WHERE id IN (?)';
+                params = [userIds.join(',')];
+                break;
+                
+            case 'changeRole':
+                if (!data.role) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Role is required for bulk role change'
+                    });
+                }
+                query = 'UPDATE users SET role = ?, updated_at = NOW() WHERE id IN (?)';
+                params = [data.role, userIds.join(',')];
+                break;
+                
+            case 'changeDepartment':
+                if (!data.department) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Department is required for bulk department change'
+                    });
+                }
+                query = 'UPDATE users SET department = ?, updated_at = NOW() WHERE id IN (?)';
+                params = [data.department, userIds.join(',')];
+                break;
+                
+            default:
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid bulk action'
+                });
+        }
+        
+        await executeQuery(query, params);
+        
+        res.json({
+            success: true,
+            message: `Bulk ${action} operation completed successfully`,
+            affectedUsers: userIds.length
+        });
+        
+    } catch (error) {
+        console.error('Error in bulk operation:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to perform bulk operation' 
         });
     }
 });
 
 module.exports = router;
-
-
