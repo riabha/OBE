@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chairman Dashboard - QUEST University Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        .sidebar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            height: 100vh;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            z-index: 1001;
+            overflow-y: auto;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            margin: 2px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            width: calc(100% - 250px);
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            position: relative;
+            z-index: 1;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+        }
+        .stat-card-2 {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+        }
+        .stat-card-3 {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+        }
+        .stat-card-4 {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .section-title {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .table th {
+            background-color: #f8f9fa;
+            border-top: none;
+            font-weight: 600;
+            color: #374151;
+        }
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.5em 0.75em;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+        }
+        .alert {
+            border: none;
+            border-radius: 10px;
+        }
+        .progress {
+            height: 8px;
+            border-radius: 10px;
+        }
+        .progress-bar {
+            border-radius: 10px;
+        }
+        /* Ensure all sections are properly contained */
+        #faculty-section, #focal-section, #courses-section, #students-section, 
+        #assessments-section, #performance-section, #reports-section, 
+        #notifications-section, #profile-section {
+            position: relative;
+            z-index: 1;
+            background-color: transparent;
+        }
+
+        /* Ensure cards don't extend beyond main content */
+        .card {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Ensure container-fluid respects sidebar boundaries */
+        .main-content .container-fluid {
+            max-width: 100%;
+            overflow-x: hidden;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .sidebar {
+                left: -250px;
+                transition: left 0.3s ease;
+            }
+            .sidebar.show {
+                left: 0;
+            }
+            .sidebar .nav-link {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="p-3">
+            <div class="d-flex align-items-center mb-4">
+                <img src="quest_logo.png" alt="QUEST Logo" class="me-2" style="height: 40px; width: 40px; background: white; border-radius: 50%; padding: 2px;">
+                <div>
+                    <h5 class="text-white mb-0">Chairman Portal</h5>
+                    <small class="text-white-50">Department Management</small>
+                </div>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" onclick="showSection('overview')">
+                        <i class="fas fa-tachometer-alt me-2"></i>Overview
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('faculty')">
+                        <i class="fas fa-chalkboard-teacher me-2"></i>Faculty Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('focal')">
+                        <i class="fas fa-user-tie me-2"></i>Focal Person Assignment
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('courses')">
+                        <i class="fas fa-book me-2"></i>Course Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('students')">
+                        <i class="fas fa-user-graduate me-2"></i>Student Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('assessments')">
+                        <i class="fas fa-clipboard-check me-2"></i>Assessment Review
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('performance')">
+                        <i class="fas fa-chart-line me-2"></i>Performance Analysis
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('reports')">
+                        <i class="fas fa-file-alt me-2"></i>Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('notifications')">
+                        <i class="fas fa-bell me-2"></i>Notifications
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('profile')">
+                        <i class="fas fa-user-cog me-2"></i>Profile
+                    </a>
+                </li>
+                <li class="nav-item mt-3">
+                    <a class="nav-link text-danger" href="login.html">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <button class="btn btn-outline-primary d-md-none me-3" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2 class="mb-0 d-inline-block">Chairman Dashboard</h2>
+                <p class="text-muted mb-0">Welcome back, Prof. Dr. Ali Raza</p>
+            </div>
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <small class="text-muted">Last login: Today, 2:30 PM</small>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-2"></i>Profile
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>My Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="login.html"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview Section -->
+        <div id="overview-section">
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title text-white-50">Total Faculty</h6>
+                                    <h3 class="mb-0">28</h3>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-chalkboard-teacher fa-2x text-white-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card-2">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title text-white-50">Active Courses</h6>
+                                    <h3 class="mb-0">45</h3>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-book fa-2x text-white-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title text-white-50">Enrolled Students</h6>
+                                    <h3 class="mb-0">450</h3>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-user-graduate fa-2x text-white-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title text-white-50">Avg. GPA</h6>
+                                    <h3 class="mb-0">3.5</h3>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-chart-line fa-2x text-white-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row mb-4">
+                <div class="col-lg-8 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Department Performance Trends</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Course Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="courseChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Department Summary -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-building me-2"></i>Department Summary - Computer Science</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <h4 class="text-primary">28</h4>
+                                        <p class="text-muted mb-0">Faculty Members</p>
+                                        <small class="text-success">6 Active, 2 On Leave</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <h4 class="text-success">450</h4>
+                                        <p class="text-muted mb-0">Students Enrolled</p>
+                                        <small class="text-info">Batch 2021-25, 2022-26, 2023-27</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <h4 class="text-info">12</h4>
+                                        <p class="text-muted mb-0">Ongoing Courses</p>
+                                        <small class="text-warning">8 Core, 4 Electives</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <h4 class="text-warning">3.4</h4>
+                                        <p class="text-muted mb-0">Average GPA</p>
+                                        <small class="text-success">+0.1 from last semester</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities and Notifications -->
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Recent Activity</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-sign-in-alt text-success me-2"></i>
+                                            <div>
+                                                <h6 class="mb-1">Recent Logins</h6>
+                                                <small class="text-muted">Dr. Sarah Ahmed, Prof. Muhammad Ali, Dr. Fatima Khan</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">2 hours ago</small>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-bullhorn text-info me-2"></i>
+                                            <div>
+                                                <h6 class="mb-1">New Announcement</h6>
+                                                <small class="text-muted">Final exam schedule posted</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">4 hours ago</small>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-book text-primary me-2"></i>
+                                            <div>
+                                                <h6 class="mb-1">Course Update</h6>
+                                                <small class="text-muted">CS-301 syllabus updated by Dr. Sarah</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">6 hours ago</small>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-clipboard-check text-warning me-2"></i>
+                                            <div>
+                                                <h6 class="mb-1">Assessment Submitted</h6>
+                                                <small class="text-muted">Midterm results for CS-302 uploaded</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">8 hours ago</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Notifications & Alerts</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center border-start border-danger border-3">
+                                    <div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                                            <div>
+                                                <h6 class="mb-1 text-danger">Critical Deadline</h6>
+                                                <small class="text-muted">Grade submission deadline approaching</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-danger">Due Soon</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-check text-success me-2"></i>
+                                            <div>
+                                                <h6 class="mb-1">Request Pending</h6>
+                                                <small class="text-muted">8 students awaiting approval</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-warning">5</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-chart-line text-info me-2"></i>
+                                            <div>
+                                                <h6 class="mb-1">Performance Review</h6>
+                                                <small class="text-muted">Monthly performance report ready</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-info">Available</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                            <div>
+                                                <h6 class="mb-1">Upcoming Meeting</h6>
+                                                <small class="text-muted">Faculty meeting scheduled for next week</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-primary">Scheduled</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Faculty Management Section -->
+        <div id="faculty-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Faculty Management</h2>
+                <button class="btn btn-primary" onclick="showAddFacultyModal()">
+                    <i class="fas fa-plus me-2"></i>Add Faculty Member
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Faculty Members</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Designation</th>
+                                    <th>Email</th>
+                                    <th>Courses</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">Dr. Sarah Ahmed</h6>
+                                                <small class="text-muted">ID: FAC001</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Assistant Professor</td>
+                                    <td>sarah.ahmed@quest.edu.pk</td>
+                                    <td>
+                                        <span class="badge bg-primary me-1">CS-301</span>
+                                        <span class="badge bg-primary">CS-302</span>
+                                    </td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewFaculty('FAC001')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" onclick="editFaculty('FAC001')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="deleteFaculty('FAC001')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">Prof. Muhammad Ali</h6>
+                                                <small class="text-muted">ID: FAC002</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Professor</td>
+                                    <td>muhammad.ali@quest.edu.pk</td>
+                                    <td>
+                                        <span class="badge bg-primary me-1">CS-401</span>
+                                        <span class="badge bg-primary">CS-402</span>
+                                    </td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewFaculty('FAC002')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" onclick="editFaculty('FAC002')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="deleteFaculty('FAC002')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Focal Person Assignment Section -->
+        <div id="focal-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Department Focal Person</h2>
+                <button class="btn btn-primary" onclick="showAssignFocalModal()">
+                    <i class="fas fa-user-plus me-2"></i>Assign Department Focal Person
+                </button>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Current Department Focal Person</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Department Focal Person manages all courses and activities within the Computer Science department.
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Department</th>
+                                            <th>Focal Person</th>
+                                            <th>Designation</th>
+                                            <th>Assigned Date</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="focalPersonTable">
+                                        <tr>
+                                            <td><span class="badge bg-primary">Computer Science</span></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                                        <i class="fas fa-user"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0">Dr. Sarah Ahmed</h6>
+                                                        <small class="text-muted">sarah.ahmed@quest.edu.pk</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>Assistant Professor</td>
+                                            <td>Jan 15, 2024</td>
+                                            <td><span class="badge bg-success">Active</span></td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-warning" onclick="editFocalAssignment()">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-danger" onclick="removeFocalAssignment()">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Available Faculty</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Dr. Fatima Khan</h6>
+                                        <small class="text-muted">Assistant Professor</small>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="assignFocalToFaculty('FAC003', 'Dr. Fatima Khan')">
+                                        Assign
+                                    </button>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Dr. Ahmed Hassan</h6>
+                                        <small class="text-muted">Associate Professor</small>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="assignFocalToFaculty('FAC004', 'Dr. Ahmed Hassan')">
+                                        Assign
+                                    </button>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Dr. Zainab Malik</h6>
+                                        <small class="text-muted">Assistant Professor</small>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="assignFocalToFaculty('FAC005', 'Dr. Zainab Malik')">
+                                        Assign
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Department Focal Person Responsibilities -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Department Focal Person Responsibilities</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary">Department Management</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Oversee all department courses</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Coordinate faculty activities</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Manage student enrollment across courses</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Ensure grade submission compliance</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary">Quality Assurance</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Monitor CLO attainment department-wide</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Review assessment quality across courses</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Analyze overall department performance</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Implement department improvement initiatives</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Course Management Section -->
+        <div id="courses-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Course Management</h2>
+                <button class="btn btn-primary" onclick="showAddCourseModal()">
+                    <i class="fas fa-plus me-2"></i>Add Course
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Department Courses</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Course Name</th>
+                                    <th>Credits</th>
+                                    <th>Instructor</th>
+                                    <th>Students</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge bg-primary">CS-301</span></td>
+                                    <td>Data Structures</td>
+                                    <td>3</td>
+                                    <td>Dr. Sarah Ahmed</td>
+                                    <td>45</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewCourse('CS-301')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" onclick="editCourse('CS-301')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-primary">CS-302</span></td>
+                                    <td>Algorithms</td>
+                                    <td>3</td>
+                                    <td>Dr. Sarah Ahmed</td>
+                                    <td>42</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewCourse('CS-302')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" onclick="editCourse('CS-302')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Management Section -->
+        <div id="students-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Student Management</h2>
+                <div>
+                    <button class="btn btn-success me-2" onclick="exportStudentData()">
+                        <i class="fas fa-download me-2"></i>Export Data
+                    </button>
+                    <button class="btn btn-primary" onclick="showAddStudentModal()">
+                        <i class="fas fa-plus me-2"></i>Add Student
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Department Students</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Program</th>
+                                    <th>Semester</th>
+                                    <th>CGPA</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge bg-info">QUEST-2024-001</span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">Ahmed Hassan</h6>
+                                                <small class="text-muted">ahmed.hassan@quest.edu.pk</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>BS Computer Science</td>
+                                    <td>6th</td>
+                                    <td><span class="badge bg-success">3.7</span></td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewStudent('QUEST-2024-001')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" onclick="editStudent('QUEST-2024-001')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Review Section -->
+        <div id="assessments-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Assessment Review</h2>
+                <button class="btn btn-primary" onclick="generateAssessmentReport()">
+                    <i class="fas fa-file-alt me-2"></i>Generate Report
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Assessments</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Assessment</th>
+                                    <th>Instructor</th>
+                                    <th>Students</th>
+                                    <th>Avg. Score</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge bg-primary">CS-301</span></td>
+                                    <td>Midterm Exam</td>
+                                    <td>Dr. Sarah Ahmed</td>
+                                    <td>45</td>
+                                    <td><span class="badge bg-success">78%</span></td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewAssessment('CS-301-MID')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info" onclick="downloadResults('CS-301-MID')">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Analysis Section -->
+        <div id="performance-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Performance Analysis</h2>
+                <button class="btn btn-primary" onclick="exportPerformanceReport()">
+                    <i class="fas fa-download me-2"></i>Export Report
+                </button>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Course Performance</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="coursePerformanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Faculty Performance</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="facultyPerformanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reports-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Reports</h2>
+                <button class="btn btn-primary" onclick="generateComprehensiveReport()">
+                    <i class="fas fa-file-alt me-2"></i>Generate Comprehensive Report
+                </button>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chart-bar fa-3x text-primary mb-3"></i>
+                            <h5>Academic Performance</h5>
+                            <p class="text-muted">Detailed analysis of student performance across all courses</p>
+                            <button class="btn btn-primary" onclick="generateAcademicReport()">Generate</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users fa-3x text-success mb-3"></i>
+                            <h5>Faculty Report</h5>
+                            <p class="text-muted">Comprehensive faculty performance and workload analysis</p>
+                            <button class="btn btn-success" onclick="generateFacultyReport()">Generate</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-graduation-cap fa-3x text-warning mb-3"></i>
+                            <h5>Graduation Report</h5>
+                            <p class="text-muted">Analysis of graduation rates and student outcomes</p>
+                            <button class="btn btn-warning" onclick="generateGraduationReport()">Generate</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div id="notifications-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Role-Based Notifications</h2>
+                <div>
+                    <button class="btn btn-success me-2" onclick="markAllAsRead()">
+                        <i class="fas fa-check-double me-2"></i>Mark All as Read
+                    </button>
+                    <button class="btn btn-primary" onclick="configureNotifications()">
+                        <i class="fas fa-cog me-2"></i>Notification Settings
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notification Categories -->
+            <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x text-danger mb-2"></i>
+                        <h5 class="card-title">2</h5>
+                        <p class="text-muted">Deadlines</p>
+                    </div>
+                </div>
+            </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-user-check fa-2x text-warning mb-2"></i>
+                            <h5 class="card-title">5</h5>
+                            <p class="text-muted">Pending Approvals</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
+                            <h5 class="card-title">3</h5>
+                            <p class="text-muted">Reports Ready</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-calendar-alt fa-2x text-primary mb-2"></i>
+                            <h5 class="card-title">1</h5>
+                            <p class="text-muted">Upcoming Meetings</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications List -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Notifications</h5>
+                        <div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="filterNotifications('urgent')">Urgent</button>
+                            <button class="btn btn-sm btn-outline-warning" onclick="filterNotifications('important')">Important</button>
+                            <button class="btn btn-sm btn-outline-info" onclick="filterNotifications('all')">All</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item border-start border-danger border-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-1 text-danger">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            CRITICAL: Grade Submission Deadline
+                                        </h6>
+                                        <span class="badge bg-danger">URGENT</span>
+                                    </div>
+                                    <p class="mb-1">Grade submission deadline is approaching for CS-301, CS-302, CS-401 courses. Please ensure all faculty submit their grades by tomorrow.</p>
+                                    <small class="text-muted">Due: Tomorrow at 5:00 PM • Sent: 2 hours ago</small>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-sm btn-outline-success me-2" onclick="respondToNotification(1)">
+                                        <i class="fas fa-reply"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="markNotificationAsRead(1)">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-1 text-warning">
+                                            <i class="fas fa-user-check me-2"></i>
+                                            Student Requests Awaiting Approval
+                                        </h6>
+                                        <span class="badge bg-warning">5 pending</span>
+                                    </div>
+                                    <p class="mb-1">5 students have submitted requests for course enrollment, grade review, and academic appeals.</p>
+                                    <small class="text-muted">Received: 4 hours ago</small>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-sm btn-outline-primary me-2" onclick="reviewRequests()">
+                                        <i class="fas fa-eye"></i> Review
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="markNotificationAsRead(2)">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-1 text-info">
+                                            <i class="fas fa-chart-bar me-2"></i>
+                                            Performance Report Generated
+                                        </h6>
+                                        <span class="badge bg-info">Available</span>
+                                    </div>
+                                    <p class="mb-1">Monthly performance report for Computer Science department has been generated and is ready for download.</p>
+                                    <small class="text-muted">Generated: 1 day ago</small>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-sm btn-outline-success me-2" onclick="downloadPerformanceReport()">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="markNotificationAsRead(3)">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-1 text-primary">
+                                            <i class="fas fa-calendar-alt me-2"></i>
+                                            Faculty Meeting Scheduled
+                                        </h6>
+                                        <span class="badge bg-primary">Scheduled</span>
+                                    </div>
+                                    <p class="mb-1">Monthly faculty meeting is scheduled for next Tuesday at 2:00 PM in Conference Room A.</p>
+                                    <small class="text-muted">Scheduled: 2 days ago</small>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-sm btn-outline-info me-2" onclick="viewMeetingDetails()">
+                                        <i class="fas fa-info-circle"></i> Details
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="markNotificationAsRead(4)">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profile-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Profile Management</h2>
+                <button class="btn btn-primary" onclick="editProfile()">
+                    <i class="fas fa-edit me-2"></i>Edit Profile
+                </button>
+            </div>
+
+            <div class="row">
+                <!-- Profile Information -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-user me-2"></i>Chairman Profile Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="profileForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" value="Prof. Dr. Ali Raza" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Designation</label>
+                                        <input type="text" class="form-control" value="Chairman" readonly>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" value="chairman@quest.edu.pk" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" value="+92-42-xxxxxxx" readonly>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Department</label>
+                                        <input type="text" class="form-control" value="Computer Science" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Qualification</label>
+                                        <input type="text" class="form-control" value="PhD Computer Science" readonly>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Specialization</label>
+                                        <input type="text" class="form-control" value="Software Engineering, Distributed Systems" readonly>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Office Address</label>
+                                        <textarea class="form-control" rows="2" readonly>Department of Computer Science, QUEST University, Nawabshah, Sindh, Pakistan</textarea>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Security & Activity -->
+                <div class="col-lg-4 mb-4">
+                    <!-- Security Settings -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Security</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary" onclick="changePassword()">
+                                    <i class="fas fa-key me-2"></i>Change Password
+                                </button>
+                                <button class="btn btn-outline-success" onclick="enableTwoFactor()">
+                                    <i class="fas fa-mobile-alt me-2"></i>Setup 2FA
+                                </button>
+                                <button class="btn btn-outline-info" onclick="manageSessions()">
+                                    <i class="fas fa-desktop me-2"></i>Active Sessions
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Log -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-1">Last Login</h6>
+                                            <small class="text-muted">Today, 2:30 PM</small>
+                                        </div>
+                                        <i class="fas fa-sign-in-alt text-success"></i>
+                                    </div>
+                                </div>
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-1">Profile Updated</h6>
+                                            <small class="text-muted">Yesterday, 1:15 PM</small>
+                                        </div>
+                                        <i class="fas fa-user-edit text-primary"></i>
+                                    </div>
+                                </div>
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-1">New Faculty Added</h6>
+                                            <small class="text-muted">3 days ago, 11:45 AM</small>
+                                        </div>
+                                        <i class="fas fa-user-plus text-success"></i>
+                                    </div>
+                                </div>
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-1">Report Generated</h6>
+                                            <small class="text-muted">1 week ago, 4:20 PM</small>
+                                        </div>
+                                        <i class="fas fa-file-alt text-info"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Navigation functionality
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('[id$="-section"]');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').style.display = 'block';
+            
+            // Update active nav link
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Load section-specific data
+            loadSectionData(sectionName);
+        }
+
+        function loadSectionData(sectionName) {
+            switch(sectionName) {
+                case 'overview':
+                    loadOverviewCharts();
+                    break;
+                case 'performance':
+                    loadPerformanceCharts();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function loadOverviewCharts() {
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Average GPA',
+                        data: [3.2, 3.4, 3.3, 3.5, 3.6, 3.5],
+                        borderColor: '#1e3a8a',
+                        backgroundColor: 'rgba(30, 58, 138, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 2.5,
+                            max: 4.0
+                        }
+                    }
+                }
+            });
+
+            // Course Chart
+            const courseCtx = document.getElementById('courseChart').getContext('2d');
+            new Chart(courseCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Core Courses', 'Electives', 'Labs'],
+                    datasets: [{
+                        data: [60, 25, 15],
+                        backgroundColor: ['#1e3a8a', '#0ea5e9', '#06b6d4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadPerformanceCharts() {
+            // Course Performance Chart
+            const coursePerfCtx = document.getElementById('coursePerformanceChart').getContext('2d');
+            new Chart(coursePerfCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['CS-301', 'CS-302', 'CS-401', 'CS-402'],
+                    datasets: [{
+                        label: 'Average Score',
+                        data: [78, 82, 75, 85],
+                        backgroundColor: '#1e3a8a'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Faculty Performance Chart
+            const facultyPerfCtx = document.getElementById('facultyPerformanceChart').getContext('2d');
+            new Chart(facultyPerfCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Teaching', 'Research', 'Service', 'Assessment'],
+                    datasets: [{
+                        label: 'Dr. Sarah Ahmed',
+                        data: [85, 70, 80, 90],
+                        borderColor: '#1e3a8a',
+                        backgroundColor: 'rgba(30, 58, 138, 0.2)'
+                    }, {
+                        label: 'Prof. Muhammad Ali',
+                        data: [90, 85, 75, 85],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.2)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Faculty Management Functions
+        function showAddFacultyModal() {
+            const modalHtml = `
+                <div class="modal fade" id="addFacultyModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Add Faculty Member</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="addFacultyForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Full Name *</label>
+                                            <input type="text" class="form-control" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Designation *</label>
+                                            <select class="form-select" required>
+                                                <option value="">Select Designation</option>
+                                                <option value="Professor">Professor</option>
+                                                <option value="Associate Professor">Associate Professor</option>
+                                                <option value="Assistant Professor">Assistant Professor</option>
+                                                <option value="Lecturer">Lecturer</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Email *</label>
+                                            <input type="email" class="form-control" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Phone</label>
+                                            <input type="tel" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Qualification *</label>
+                                            <input type="text" class="form-control" placeholder="e.g., PhD Computer Science" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Specialization</label>
+                                            <input type="text" class="form-control" placeholder="e.g., Machine Learning">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Assigned Courses</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="CS-301" id="course301">
+                                            <label class="form-check-label" for="course301">CS-301 Data Structures</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="CS-302" id="course302">
+                                            <label class="form-check-label" for="course302">CS-302 Algorithms</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="CS-401" id="course401">
+                                            <label class="form-check-label" for="course401">CS-401 Database Systems</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="CS-402" id="course402">
+                                            <label class="form-check-label" for="course402">CS-402 Software Engineering</label>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" onclick="addFaculty()">Add Faculty Member</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            const existingModal = document.getElementById('addFacultyModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('addFacultyModal'));
+            modal.show();
+        }
+
+        function addFaculty() {
+            const form = document.getElementById('addFacultyForm');
+            const formData = new FormData(form);
+            
+            // Get selected courses
+            const selectedCourses = [];
+            const courseCheckboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+            courseCheckboxes.forEach(checkbox => {
+                selectedCourses.push(checkbox.value);
+            });
+            
+            showAlert('Faculty member added successfully!', 'success');
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addFacultyModal'));
+            modal.hide();
+            
+            // Reset form
+            form.reset();
+        }
+
+        function viewFaculty(id) {
+            showAlert(`Viewing faculty member: ${id}`, 'info');
+        }
+
+        function editFaculty(id) {
+            showAlert(`Editing faculty member: ${id}`, 'info');
+        }
+
+        function deleteFaculty(id) {
+            if (confirm('Are you sure you want to delete this faculty member?')) {
+                showAlert(`Faculty member ${id} deleted successfully.`, 'success');
+            }
+        }
+
+        // Focal Person Management Functions
+        function showAssignFocalModal() {
+            const modalHtml = `
+                <div class="modal fade" id="assignFocalModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Assign Department Focal Person</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="assignFocalForm">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        The focal person will manage all courses and activities within the Computer Science department.
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Department *</label>
+                                        <select class="form-select" required disabled>
+                                            <option value="CS">Computer Science Department</option>
+                                        </select>
+                                        <small class="text-muted">Department is automatically set based on chairman's department.</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Select Faculty Member *</label>
+                                        <select class="form-select" required id="focalFacultySelect">
+                                            <option value="">Choose Faculty Member</option>
+                                            <option value="FAC001">Dr. Sarah Ahmed - Assistant Professor</option>
+                                            <option value="FAC002">Prof. Muhammad Ali - Professor</option>
+                                            <option value="FAC003">Dr. Fatima Khan - Assistant Professor</option>
+                                            <option value="FAC004">Dr. Ahmed Hassan - Associate Professor</option>
+                                            <option value="FAC005">Dr. Zainab Malik - Assistant Professor</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Assignment Date</label>
+                                        <input type="date" class="form-control" value="${new Date().toISOString().split('T')[0]}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Responsibility Description</label>
+                                        <textarea class="form-control" rows="3" placeholder="Brief description of focal person responsibilities...">Manage all department activities including course coordination, faculty oversight, student management, and quality assurance initiatives across the Computer Science department.</textarea>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" onclick="assignFocalPerson()">Assign Department Focal Person</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            const existingModal = document.getElementById('assignFocalModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('assignFocalModal'));
+            modal.show();
+        }
+
+        function assignFocalPerson() {
+            const form = document.getElementById('assignFocalForm');
+            const facultySelect = document.getElementById('focalFacultySelect');
+            
+            if (!facultySelect.value) {
+                showAlert('Please select a faculty member to assign as focal person.', 'warning');
+                return;
+            }
+            
+            const selectedFaculty = facultySelect.options[facultySelect.selectedIndex].text;
+            
+            // Update the table with new focal person
+            const focalPersonTable = document.getElementById('focalPersonTable');
+            focalPersonTable.innerHTML = `
+                <tr>
+                    <td><span class="badge bg-primary">Computer Science</span></td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">${selectedFaculty.split(' - ')[0]}</h6>
+                                <small class="text-muted">${selectedFaculty.split(' - ')[1] || ''}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${selectedFaculty.split(' - ')[1] || 'Assistant Professor'}</td>
+                    <td>${new Date().toLocaleDateString()}</td>
+                    <td><span class="badge bg-success">Active</span></td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-warning" onclick="editFocalAssignment()">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="removeFocalAssignment()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            showAlert(`Department focal person assigned successfully! ${selectedFaculty.split(' - ')[0]} is now the department focal person.`, 'success');
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('assignFocalModal'));
+            modal.hide();
+            
+            // Reset form
+            form.reset();
+        }
+
+        function assignFocalToFaculty(facultyId, facultyName) {
+            if (confirm(`Assign ${facultyName} as the department focal person?`)) {
+                // Pre-select the faculty member in the modal
+                showAssignFocalModal();
+                
+                setTimeout(() => {
+                    const facultySelect = document.getElementById('focalFacultySelect');
+                    for (let option of facultySelect.options) {
+                        if (option.text.includes(facultyName)) {
+                            option.selected = true;
+                            break;
+                        }
+                    }
+                }, 100);
+            }
+        }
+
+        function editFocalAssignment() {
+            showAlert('Edit focal person assignment functionality will be implemented.', 'info');
+        }
+
+        function removeFocalAssignment() {
+            if (confirm('Remove the current department focal person assignment? This will leave the department without a focal person.')) {
+                const focalPersonTable = document.getElementById('focalPersonTable');
+                focalPersonTable.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="fas fa-info-circle me-2"></i>No focal person assigned to the department
+                        </td>
+                    </tr>
+                `;
+                showAlert('Department focal person assignment removed successfully.', 'success');
+            }
+        }
+
+        // Course Management Functions
+        function showAddCourseModal() {
+            showAlert('Add Course functionality will be implemented.', 'info');
+        }
+
+        function viewCourse(code) {
+            showAlert(`Viewing course: ${code}`, 'info');
+        }
+
+        function editCourse(code) {
+            showAlert(`Editing course: ${code}`, 'info');
+        }
+
+        // Student Management Functions
+        function showAddStudentModal() {
+            showAlert('Add Student functionality will be implemented.', 'info');
+        }
+
+        function exportStudentData() {
+            showAlert('Student data exported successfully.', 'success');
+        }
+
+        function viewStudent(id) {
+            showAlert(`Viewing student: ${id}`, 'info');
+        }
+
+        function editStudent(id) {
+            showAlert(`Editing student: ${id}`, 'info');
+        }
+
+        // Assessment Functions
+        function generateAssessmentReport() {
+            showAlert('Assessment report generated successfully.', 'success');
+        }
+
+        function viewAssessment(id) {
+            showAlert(`Viewing assessment: ${id}`, 'info');
+        }
+
+        function downloadResults(id) {
+            showAlert(`Results for ${id} downloaded successfully.`, 'success');
+        }
+
+        // Performance Functions
+        function exportPerformanceReport() {
+            showAlert('Performance report exported successfully.', 'success');
+        }
+
+        // Report Functions
+        function generateComprehensiveReport() {
+            showAlert('Comprehensive report generated successfully.', 'success');
+        }
+
+        function generateAcademicReport() {
+            showAlert('Academic performance report generated successfully.', 'success');
+        }
+
+        function generateFacultyReport() {
+            showAlert('Faculty report generated successfully.', 'success');
+        }
+
+        function generateGraduationReport() {
+            showAlert('Graduation report generated successfully.', 'success');
+        }
+
+        // Enhanced Faculty Management Functions
+        function exportFacultyData() {
+            showAlert('Faculty data exported successfully as Excel file.', 'success');
+        }
+
+        function viewFacultyWorkload(facultyId = null) {
+            showAlert('Faculty workload analysis will be displayed here.', 'info');
+        }
+
+        function viewPublications(facultyId = null) {
+            showAlert('Publications list will be displayed here.', 'info');
+        }
+
+        function viewFacultyProfile(facultyId) {
+            showAlert(`Viewing detailed profile for faculty: ${facultyId}`, 'info');
+        }
+
+        function viewFacultyPublications(facultyId) {
+            showAlert(`Viewing publications for faculty: ${facultyId}`, 'info');
+        }
+
+        function assignCourses(facultyId) {
+            showAlert(`Course assignment interface for faculty: ${facultyId}`, 'info');
+        }
+
+        // Enhanced Student Management Functions
+        function exportStudentData() {
+            showAlert('Student data exported successfully with batch/semester categorization.', 'success');
+        }
+
+        function viewStudentById(batch, id = null) {
+            showAlert(`Viewing students from batch: ${batch}`, 'info');
+        }
+
+        function resolveAcademicIssue(issueId) {
+            showAlert(`Academic issue ${issueId} resolved successfully.`, 'success');
+        }
+
+        // Enhanced Assessment Review Functions
+        function approveAssessmentResults(assessmentId) {
+            if (confirm('Approve these assessment results?')) {
+                showAlert(`Assessment ${assessmentId} results approved successfully.`, 'success');
+            }
+        }
+
+        function trackSubmissionStatus(courseId) {
+            showAlert(`Submission status tracking for course ${courseId} displayed.`, 'info');
+        }
+
+        // Enhanced Performance Analysis Functions
+        function generateGPAReport() {
+            showAlert('GPA distribution report generated successfully.', 'success');
+        }
+
+        function compareSemesterPerformance() {
+            showAlert('Semester-wise comparative analysis displayed.', 'info');
+        }
+
+        function analyzeInstructorPerformance() {
+            showAlert('Instructor-wise performance comparison displayed.', 'info');
+        }
+
+        // Enhanced Reports Functions
+        function generateAttendanceReport() {
+            showAlert('Attendance report generated and downloaded successfully.', 'success');
+        }
+
+        function generateOBEComplianceReport() {
+            showAlert('OBE compliance report generated successfully.', 'success');
+        }
+
+        function exportQualityAssuranceData() {
+            showAlert('Quality assurance data exported successfully.', 'success');
+        }
+
+        // Notification Management Functions
+        function markAllAsRead() {
+            showAlert('All notifications marked as read successfully.', 'success');
+        }
+
+        function configureNotifications() {
+            showAlert('Notification preferences configuration will be available here.', 'info');
+        }
+
+        function filterNotifications(type) {
+            showAlert(`Filtering notifications by: ${type}`, 'info');
+        }
+
+        function respondToNotification(notificationId) {
+            showAlert(`Response interface opened for notification: ${notificationId}`, 'info');
+        }
+
+        function markNotificationAsRead(notificationId) {
+            showAlert(`Notification ${notificationId} marked as read.`, 'success');
+        }
+
+        function reviewRequests() {
+            showAlert('Student requests review interface opened.', 'info');
+        }
+
+        function downloadPerformanceReport() {
+            showAlert('Performance report downloaded successfully.', 'success');
+        }
+
+        function viewMeetingDetails() {
+            showAlert('Meeting details interface opened.', 'info');
+        }
+
+        // Profile Management Functions
+        function editProfile() {
+            showAlert('Profile editing interface will be available here.', 'info');
+        }
+
+        function changePassword() {
+            showAlert('Password change interface opened.', 'info');
+        }
+
+        function enableTwoFactor() {
+            showAlert('Two-factor authentication setup interface opened.', 'info');
+        }
+
+        function manageSessions() {
+            showAlert('Active sessions management interface opened.', 'info');
+        }
+
+        // Utility Functions
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        // Sidebar toggle for mobile
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('show');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.sidebar');
+            const toggleBtn = document.querySelector('[onclick="toggleSidebar()"]');
+            
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
+                    sidebar.classList.remove('show');
+                }
+            }
+        });
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOverviewCharts();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,2950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal Person Dashboard - CQI Integration - QUEST University</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .sidebar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            max-height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            margin: 2px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .stat-card-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        .stat-card-3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        .stat-card-4 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+        .btn-focal {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-focal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+            color: white;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+        }
+        
+        /* Custom scrollbar for sidebar */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Firefox scrollbar */
+        .sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar position-fixed top-0 start-0" style="width: 250px; z-index: 1000;">
+        <div class="p-3">
+            <div class="d-flex align-items-center mb-4">
+                <img src="quest_logo.png" alt="QUEST Logo" class="me-2" style="height: 40px; width: 40px; border-radius: 50%;">
+                <div>
+                    <div class="fw-bold text-white">QUEST</div>
+                    <small class="text-light">Focal Portal</small>
+                </div>
+            </div>
+            
+            <ul class="nav flex-column" style="padding-bottom: 20px;">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#dashboard" onclick="showSection('dashboard')">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#courses" onclick="showSection('courses')">
+                        <i class="fas fa-book me-2"></i>Course Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#classrooms" onclick="showSection('classrooms')">
+                        <i class="fas fa-door-open me-2"></i>Classroom & Sections
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#students" onclick="showSection('students')">
+                        <i class="fas fa-graduation-cap me-2"></i>Student Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#teachers" onclick="showSection('teachers')">
+                        <i class="fas fa-chalkboard-teacher me-2"></i>Teacher Assignment
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#clos" onclick="showSection('clos')">
+                        <i class="fas fa-target me-2"></i>CLO Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#mapping" onclick="showSection('mapping')">
+                        <i class="fas fa-sitemap me-2"></i>CLO/PLO Mapping
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#results" onclick="showSection('results')">
+                        <i class="fas fa-upload me-2"></i>Results Upload
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#assessment-design" onclick="showSection('assessment-design')">
+                        <i class="fas fa-clipboard-list me-2"></i>Assessment Design
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#clo-attainment" onclick="showSection('clo-attainment')">
+                        <i class="fas fa-target me-2"></i>CLO Attainment
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#cqi-actions" onclick="showSection('cqi-actions')">
+                        <i class="fas fa-tools me-2"></i>CQI Actions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#attendance-fallback" onclick="showSection('attendance-fallback')">
+                        <i class="fas fa-calendar-check me-2"></i>Attendance Fallback
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#reports" onclick="showSection('reports')">
+                        <i class="fas fa-chart-bar me-2"></i>Reports & Analytics
+                    </a>
+                </li>
+                <li class="nav-item mt-3">
+                    <a class="nav-link" href="/login" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Dashboard Section -->
+        <div id="dashboard-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Focal Person Dashboard</h2>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-focal" onclick="addStudent()">
+                        <i class="fas fa-user-plus me-2"></i>Add Student
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="refreshData()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Managed Subjects</h6>
+                                    <h2 class="mb-0" id="managedSubjects">2</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-book fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card-2">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Students</h6>
+                                    <h2 class="mb-0" id="totalStudents">45</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-graduation-cap fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Teachers</h6>
+                                    <h2 class="mb-0" id="totalTeachers">8</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Results Uploaded</h6>
+                                    <h2 class="mb-0" id="totalResults">89</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-chart-line fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="row mb-4">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Student Performance by Subject</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="performanceChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">CLO Achievement Rates</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="cloChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Recent Activity</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Activity</th>
+                                            <th>Subject</th>
+                                            <th>User</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentActivity">
+                                        <!-- Recent activity will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" onclick="showAddStudentModal()">
+                                    <i class="fas fa-user-plus me-2"></i>Add Student
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="showAddTeacherModal()">
+                                    <i class="fas fa-chalkboard-teacher me-2"></i>Add Teacher
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="assignSubject()">
+                                    <i class="fas fa-book me-2"></i>Assign Subject
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="uploadResults()">
+                                    <i class="fas fa-upload me-2"></i>Upload Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Management Section -->
+        <div id="courses-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Course Management</h2>
+                <button class="btn btn-primary" onclick="showAddCourseModal()">
+                    <i class="fas fa-plus me-2"></i>Create New Course
+                </button>
+            </div>
+
+            <!-- Course Creation Form -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Course Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Course Code</label>
+                            <input type="text" class="form-control" id="courseCode" placeholder="e.g., CS-301">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Course Name</label>
+                            <input type="text" class="form-control" id="courseName" placeholder="e.g., Data Structures">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Credit Hours</label>
+                            <input type="number" class="form-control" id="creditHours" placeholder="3" min="1" max="6">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Department</label>
+                            <select class="form-select" id="courseDepartment">
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Electrical Engineering">Electrical Engineering</option>
+                                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Semester</label>
+                            <select class="form-select" id="courseSemester">
+                                <option value="1st">1st Semester</option>
+                                <option value="2nd">2nd Semester</option>
+                                <option value="3rd">3rd Semester</option>
+                                <option value="4th">4th Semester</option>
+                                <option value="5th">5th Semester</option>
+                                <option value="6th">6th Semester</option>
+                                <option value="7th">7th Semester</option>
+                                <option value="8th">8th Semester</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <label class="form-label">Course Description</label>
+                            <textarea class="form-control" id="courseDescription" rows="3" placeholder="Enter course description..."></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-success" onclick="createCourse()">
+                            <i class="fas fa-save me-2"></i>Create Course
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Courses List -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Active Courses</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Course Name</th>
+                                    <th>Credits</th>
+                                    <th>Semester</th>
+                                    <th>Sections</th>
+                                    <th>Students</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coursesTable">
+                                <!-- Courses will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Classroom & Sections Section -->
+        <div id="classrooms-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Classroom & Sections Management</h2>
+                <button class="btn btn-primary" onclick="showCreateSectionModal()">
+                    <i class="fas fa-plus me-2"></i>Create New Section
+                </button>
+            </div>
+
+            <!-- Section Creation Form -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Create New Section</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Select Course</label>
+                            <select class="form-select" id="sectionCourse">
+                                <option value="">Choose Course...</option>
+                                <!-- Courses will be populated here -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Section Name</label>
+                            <select class="form-select" id="sectionName">
+                                <option value="A">Section A</option>
+                                <option value="B">Section B</option>
+                                <option value="C">Section C</option>
+                                <option value="D">Section D</option>
+                                <option value="E">Section E</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Classroom</label>
+                            <input type="text" class="form-control" id="classroom" placeholder="e.g., CS-101">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Max Students</label>
+                            <input type="number" class="form-control" id="maxStudents" placeholder="30" min="1" max="50">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Schedule</label>
+                            <input type="text" class="form-control" id="schedule" placeholder="e.g., Mon-Wed-Fri 10:00-11:30">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Academic Year</label>
+                            <input type="text" class="form-control" id="academicYear" placeholder="2024-2025" readonly>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-success" onclick="createSection()">
+                            <i class="fas fa-plus me-2"></i>Create Section
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sections List -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Active Sections</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Section</th>
+                                    <th>Classroom</th>
+                                    <th>Schedule</th>
+                                    <th>Students</th>
+                                    <th>Assigned Teacher</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sectionsTable">
+                                <!-- Sections will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subjects Section -->
+        <div id="subjects-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Manage Subjects</h2>
+                <button class="btn btn-primary" onclick="showAddSubjectModal()">
+                    <i class="fas fa-plus me-2"></i>Add Subject
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Subject Name</th>
+                                    <th>Code</th>
+                                    <th>Credits</th>
+                                    <th>Assigned Teacher</th>
+                                    <th>Students</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subjectsTable">
+                                <!-- Subjects will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Section -->
+        <div id="students-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Student Management</h2>
+                <div>
+                    <button class="btn btn-success me-2" onclick="showBulkUploadModal()">
+                        <i class="fas fa-upload me-2"></i>Bulk Upload
+                    </button>
+                    <button class="btn btn-primary" onclick="showAddStudentModal()">
+                        <i class="fas fa-user-plus me-2"></i>Add Student
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bulk Upload Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-cloud-upload-alt me-2"></i>Bulk Student Upload</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">Upload Students from Excel/CSV</h6>
+                            <p class="text-muted mb-3">Upload multiple students at once using our template format.</p>
+                            
+                            <div class="mb-3">
+                                <label for="studentBulkFile" class="form-label">Select File (Excel/CSV)</label>
+                                <input type="file" class="form-control" id="studentBulkFile" accept=".xlsx,.xls,.csv" onchange="handleBulkFile(this)">
+                                <div class="form-text">Supported formats: .xlsx, .xls, .csv (Max: 10MB)</div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-success" onclick="uploadBulkStudents()" id="uploadBulkBtn" disabled>
+                                    <i class="fas fa-upload me-2"></i>Upload Students
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="clearBulkUpload()">
+                                    <i class="fas fa-times me-2"></i>Clear
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">Download Template</h6>
+                            <p class="text-muted mb-3">Download the template file to see the required format.</p>
+                            
+                            <div class="bg-light p-3 rounded mb-3">
+                                <small class="text-muted">
+                                    <strong>Required Columns:</strong><br>
+                                    • Student ID<br>
+                                    • Full Name<br>
+                                    • Email Address<br>
+                                    • Department<br>
+                                    • Semester<br>
+                                    • Batch Year<br>
+                                    • Phone (Optional)
+                                </small>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-primary" onclick="downloadTemplate('excel')">
+                                    <i class="fas fa-file-excel me-2"></i>Excel Template
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="downloadTemplate('csv')">
+                                    <i class="fas fa-file-csv me-2"></i>CSV Template
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upload Progress -->
+                    <div id="uploadProgress" class="mt-3" style="display: none;">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <small class="text-muted mt-1 d-block">Processing students...</small>
+                    </div>
+                    
+                    <!-- Upload Results -->
+                    <div id="uploadResults" class="mt-3" style="display: none;">
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-check-circle me-2"></i>Upload Complete!</h6>
+                            <div id="uploadSummary"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Semester</th>
+                                    <th>Subjects</th>
+                                    <th>Performance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTable">
+                                <!-- Students will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teachers Section -->
+        <div id="teachers-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Teacher Management</h2>
+                <div>
+                    <button class="btn btn-success me-2" onclick="showBulkTeacherUploadModal()">
+                        <i class="fas fa-upload me-2"></i>Bulk Upload
+                    </button>
+                    <button class="btn btn-primary" onclick="showAddTeacherModal()">
+                        <i class="fas fa-chalkboard-teacher me-2"></i>Add Teacher
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bulk Teacher Upload Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-cloud-upload-alt me-2"></i>Bulk Teacher Upload</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">Upload Teachers from Excel/CSV</h6>
+                            <p class="text-muted mb-3">Upload multiple teachers at once using our template format.</p>
+                            
+                            <div class="mb-3">
+                                <label for="teacherBulkFile" class="form-label">Select File (Excel/CSV)</label>
+                                <input type="file" class="form-control" id="teacherBulkFile" accept=".xlsx,.xls,.csv" onchange="handleTeacherBulkFile(this)">
+                                <div class="form-text">Supported formats: .xlsx, .xls, .csv (Max: 10MB)</div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-info" onclick="uploadBulkTeachers()" id="uploadTeacherBulkBtn" disabled>
+                                    <i class="fas fa-upload me-2"></i>Upload Teachers
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="clearTeacherBulkUpload()">
+                                    <i class="fas fa-times me-2"></i>Clear
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">Download Template</h6>
+                            <p class="text-muted mb-3">Download the template file to see the required format.</p>
+                            
+                            <div class="bg-light p-3 rounded mb-3">
+                                <small class="text-muted">
+                                    <strong>Required Columns:</strong><br>
+                                    • Employee ID<br>
+                                    • Full Name<br>
+                                    • Email Address<br>
+                                    • Department<br>
+                                    • Designation<br>
+                                    • Subjects (comma-separated)<br>
+                                    • Phone (Optional)<br>
+                                    • Qualification (Optional)
+                                </small>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-info" onclick="downloadTeacherTemplate('excel')">
+                                    <i class="fas fa-file-excel me-2"></i>Excel Template
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="downloadTeacherTemplate('csv')">
+                                    <i class="fas fa-file-csv me-2"></i>CSV Template
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upload Progress -->
+                    <div id="teacherUploadProgress" class="mt-3" style="display: none;">
+                        <div class="progress">
+                            <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <small class="text-muted mt-1 d-block">Processing teachers...</small>
+                    </div>
+                    
+                    <!-- Upload Results -->
+                    <div id="teacherUploadResults" class="mt-3" style="display: none;">
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-check-circle me-2"></i>Upload Complete!</h6>
+                            <div id="teacherUploadSummary"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Subjects</th>
+                                    <th>Students</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teachersTable">
+                                <!-- Teachers will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CLO Management Section -->
+        <div id="clos-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Course Learning Outcomes (CLO) Management</h2>
+                <button class="btn btn-primary" onclick="showAddCLOModal()">
+                    <i class="fas fa-plus me-2"></i>Add CLO
+                </button>
+            </div>
+
+            <!-- CLO Creation Form -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Create New CLO</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Select Course</label>
+                            <select class="form-select" id="cloCourse">
+                                <option value="">Choose Course...</option>
+                                <!-- Courses will be populated here -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">CLO Code</label>
+                            <input type="text" class="form-control" id="cloCode" placeholder="e.g., CLO1" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">CLO Title</label>
+                            <input type="text" class="form-control" id="cloTitle" placeholder="e.g., Analyze Data Structures">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Bloom's Taxonomy Level</label>
+                            <select class="form-select" id="bloomLevel">
+                                <option value="Remember">Remember</option>
+                                <option value="Understand">Understand</option>
+                                <option value="Apply">Apply</option>
+                                <option value="Analyze">Analyze</option>
+                                <option value="Evaluate">Evaluate</option>
+                                <option value="Create">Create</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Assessment Method</label>
+                            <select class="form-select" id="assessmentMethod">
+                                <option value="Assignment">Assignment</option>
+                                <option value="Quiz">Quiz</option>
+                                <option value="Midterm">Midterm Exam</option>
+                                <option value="Final">Final Exam</option>
+                                <option value="Project">Project</option>
+                                <option value="Presentation">Presentation</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <label class="form-label">CLO Description</label>
+                            <textarea class="form-control" id="cloDescription" rows="3" placeholder="Describe what students will be able to do after completing this learning outcome..."></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-success" onclick="createCLO()">
+                            <i class="fas fa-save me-2"></i>Create CLO
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLOs List -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Course Learning Outcomes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Course</th>
+                                    <th>CLO Code</th>
+                                    <th>Title</th>
+                                    <th>Bloom's Level</th>
+                                    <th>Assessment</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="closTable">
+                                <!-- CLOs will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CLO/PLO Mapping Section -->
+        <div id="mapping-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">CLO/PLO Mapping</h2>
+                <button class="btn btn-primary" onclick="showMappingModal()">
+                    <i class="fas fa-plus me-2"></i>Add Mapping
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>CLO1</th>
+                                    <th>CLO2</th>
+                                    <th>CLO3</th>
+                                    <th>CLO4</th>
+                                    <th>Mapped PLOs</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mappingTable">
+                                <!-- Mappings will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" style="display: none;">
+            <h2 class="fw-bold mb-4">Results Management</h2>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Subject</th>
+                                    <th>Teacher</th>
+                                    <th>Marks</th>
+                                    <th>Grade</th>
+                                    <th>CLO/PLO</th>
+                                    <th>Uploaded</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTable">
+                                <!-- Results will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reports-section" style="display: none;">
+            <h2 class="fw-bold mb-4">Reports & Analytics</h2>
+            
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Subject Performance</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="subjectPerformanceChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Grade Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="gradeDistributionChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Design Section -->
+        <div id="assessment-design-section" style="display: none;">
+            <h2 class="fw-bold mb-4">Assessment Design with CLO Linking</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Create New Assessment</h5>
+                </div>
+                <div class="card-body">
+                    <form id="assessmentForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Assessment Name</label>
+                                <input type="text" class="form-control" name="name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Course</label>
+                                <select class="form-select" name="courseId" required>
+                                    <option value="">Select Course</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Assessment Type</label>
+                                <select class="form-select" name="type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="Midterm">Midterm</option>
+                                    <option value="Final">Final</option>
+                                    <option value="Assignment">Assignment</option>
+                                    <option value="Quiz">Quiz</option>
+                                    <option value="Project">Project</option>
+                                    <option value="Lab">Lab</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Total Marks</label>
+                                <input type="number" class="form-control" name="totalMarks" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Due Date</label>
+                                <input type="date" class="form-control" name="dueDate">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Create Assessment
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Assessment Questions & CLO Linking</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Question #</th>
+                                    <th>Question Text</th>
+                                    <th>Max Marks</th>
+                                    <th>Linked CLO</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assessmentQuestionsTable">
+                                <!-- Assessment questions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CLO Attainment Section -->
+        <div id="clo-attainment-section" style="display: none;">
+            <h2 class="fw-bold mb-4">CLO Attainment Analysis</h2>
+            
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Filter Options</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Course</label>
+                                <select class="form-select" id="courseFilter">
+                                    <option value="">All Courses</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Semester</label>
+                                <select class="form-select" id="semesterFilter">
+                                    <option value="">All Semesters</option>
+                                    <option value="1st">1st Semester</option>
+                                    <option value="2nd">2nd Semester</option>
+                                    <option value="3rd">3rd Semester</option>
+                                    <option value="4th">4th Semester</option>
+                                    <option value="5th">5th Semester</option>
+                                    <option value="6th">6th Semester</option>
+                                    <option value="7th">7th Semester</option>
+                                    <option value="8th">8th Semester</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" onclick="calculateCLOAttainment()">
+                                <i class="fas fa-calculator me-2"></i>Calculate Attainment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">CLO Attainment Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>CLO Code</th>
+                                            <th>CLO Title</th>
+                                            <th>Total Students</th>
+                                            <th>Attained</th>
+                                            <th>Attainment %</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cloAttainmentTable">
+                                        <!-- CLO attainment data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CQI Actions Section -->
+        <div id="cqi-actions-section" style="display: none;">
+            <h2 class="fw-bold mb-4">CQI Actions Management</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Create CQI Action</h5>
+                </div>
+                <div class="card-body">
+                    <form id="cqiActionForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">CLO</label>
+                                <select class="form-select" name="cloId" required>
+                                    <option value="">Select CLO</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Course</label>
+                                <select class="form-select" name="courseId" required>
+                                    <option value="">Select Course</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Action Type</label>
+                                <select class="form-select" name="actionType" required>
+                                    <option value="">Select Type</option>
+                                    <option value="Corrective">Corrective</option>
+                                    <option value="Preventive">Preventive</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Priority</label>
+                                <select class="form-select" name="priority" required>
+                                    <option value="">Select Priority</option>
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Target Date</label>
+                                <input type="date" class="form-control" name="targetDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Reason</label>
+                            <textarea class="form-control" name="reason" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Responsible Person</label>
+                            <input type="text" class="form-control" name="responsiblePerson" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Create CQI Action
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">CQI Actions Log</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>CLO</th>
+                                    <th>Course</th>
+                                    <th>Action Type</th>
+                                    <th>Description</th>
+                                    <th>Responsible Person</th>
+                                    <th>Target Date</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cqiActionsTable">
+                                <!-- CQI actions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Fallback Section -->
+        <div id="attendance-fallback-section" style="display: none;">
+            <h2 class="fw-bold mb-4">Attendance Management (Fallback)</h2>
+            
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Fallback Option:</strong> Use this feature when teachers fail to upload attendance or are unavailable. 
+                This allows focal persons to maintain attendance records for the department.
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Upload Attendance</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="attendanceUploadForm" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label class="form-label">Select Course</label>
+                                    <select class="form-select" name="courseId" required>
+                                        <option value="">Choose Course</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Upload File</label>
+                                    <input type="file" class="form-control" name="attendanceFile" accept=".xlsx,.xls,.csv" required>
+                                    <div class="form-text">Supported formats: Excel (.xlsx, .xls) or CSV</div>
+                                </div>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-upload me-2"></i>Upload Attendance
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Attendance Template</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Download the attendance template:</p>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary" onclick="downloadAttendanceTemplate()">
+                                    <i class="fas fa-download me-2"></i>Download Template
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Attendance Records</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Student ID</th>
+                                    <th>Student Name</th>
+                                    <th>Total Classes</th>
+                                    <th>Attended</th>
+                                    <th>Percentage</th>
+                                    <th>Status</th>
+                                    <th>Upload Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceTable">
+                                <!-- Attendance records will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports & Analytics Section -->
+        <div id="reports-analytics-section" style="display: none;">
+            <h2 class="fw-bold mb-4">Reports & Analytics</h2>
+            
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-primary">78%</h3>
+                            <p class="text-muted">Average CLO Attainment</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-success">12</h3>
+                            <p class="text-muted">Active Courses</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-warning">8</h3>
+                            <p class="text-muted">Open CQI Actions</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-info">156</h3>
+                            <p class="text-muted">Total Students</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">CLO Attainment Overview</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="cloAttainmentChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">CQI Actions Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="cqiStatusChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Report Generation</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-primary" onclick="generateReport('summary')">
+                                    <i class="fas fa-file-alt me-2"></i>Summary Report
+                                </button>
+                                <button class="btn btn-success" onclick="generateReport('detailed')">
+                                    <i class="fas fa-file-pdf me-2"></i>Detailed Report
+                                </button>
+                                <button class="btn btn-info" onclick="generateReport('cqi')">
+                                    <i class="fas fa-chart-line me-2"></i>CQI Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div class="modal fade" id="addStudentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Student</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addStudentForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" name="name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Student ID</label>
+                                <input type="text" class="form-control" name="studentId" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Semester</label>
+                                <select class="form-select" name="semester" required>
+                                    <option value="">Select Semester</option>
+                                    <option value="1st">1st Semester</option>
+                                    <option value="2nd">2nd Semester</option>
+                                    <option value="3rd">3rd Semester</option>
+                                    <option value="4th">4th Semester</option>
+                                    <option value="5th">5th Semester</option>
+                                    <option value="6th">6th Semester</option>
+                                    <option value="7th">7th Semester</option>
+                                    <option value="8th">8th Semester</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Batch</label>
+                                <input type="text" class="form-control" name="batch" placeholder="e.g., 2021">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control" name="phone">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addStudent()">Add Student</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentUser = null;
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (!token || !user) {
+                window.location.href = '/login';
+                return;
+            }
+            
+            try {
+                const userData = JSON.parse(user);
+                if (userData.role !== 'focal') {
+                    // Redirect to appropriate dashboard
+                    const dashboardMap = {
+                        'superadmin': '/admin',
+                        'student': '/student-dashboard-enhanced.html',
+                        'teacher': '/teacher-dashboard.html',
+                        'chairman': '/chairman-dashboard.html',
+                        'dean': '/dean-dashboard.html',
+                        'controller': '/controller-dashboard-enhanced.html'
+                    };
+                    
+                    const dashboardFile = dashboardMap[userData.role] || '/student-dashboard-enhanced.html';
+                    window.location.href = dashboardFile;
+                    return;
+                }
+                
+                currentUser = userData;
+                loadDashboardData();
+                
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+            }
+        });
+
+        // Navigation functions
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('[id$="-section"]').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').style.display = 'block';
+            
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Load section-specific data
+            if (sectionName === 'courses') {
+                loadCourses();
+            } else if (sectionName === 'classrooms') {
+                loadClassrooms();
+            } else if (sectionName === 'subjects') {
+                loadSubjects();
+            } else if (sectionName === 'students') {
+                loadStudents();
+            } else if (sectionName === 'teachers') {
+                loadTeachers();
+            } else if (sectionName === 'clos') {
+                loadCLOs();
+            } else if (sectionName === 'mapping') {
+                loadMappings();
+            } else if (sectionName === 'results') {
+                loadResults();
+            } else if (sectionName === 'reports') {
+                loadReports();
+            } else if (sectionName === 'assessment-design') {
+                loadAssessmentDesign();
+            } else if (sectionName === 'clo-attainment') {
+                loadCLOAttainment();
+            } else if (sectionName === 'cqi-actions') {
+                loadCQIActions();
+            } else if (sectionName === 'attendance-fallback') {
+                loadAttendanceFallback();
+            } else if (sectionName === 'reports-analytics') {
+                loadReportsAnalytics();
+            }
+        }
+
+        // Load dashboard data
+        function loadDashboardData() {
+            loadRecentActivity();
+            createDashboardCharts();
+        }
+
+        // Load recent activity
+        function loadRecentActivity() {
+            const activities = [
+                { activity: 'Result Uploaded', subject: 'Programming Fundamentals', user: 'Dr. Sarah Khan', date: '2024-01-15', status: 'Completed' },
+                { activity: 'Student Added', subject: 'Software Engineering', user: 'You', date: '2024-01-14', status: 'Completed' },
+                { activity: 'Subject Assigned', subject: 'Data Structures', user: 'You', date: '2024-01-13', status: 'Pending' },
+                { activity: 'Teacher Added', subject: 'Algorithms', user: 'You', date: '2024-01-12', status: 'Completed' }
+            ];
+            
+            const tbody = document.getElementById('recentActivity');
+            tbody.innerHTML = activities.map(activity => `
+                <tr>
+                    <td>${activity.activity}</td>
+                    <td>${activity.subject}</td>
+                    <td>${activity.user}</td>
+                    <td>${activity.date}</td>
+                    <td><span class="badge bg-${getStatusColor(activity.status)}">${activity.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Create dashboard charts
+        function createDashboardCharts() {
+            // Performance Chart
+            const perfCtx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(perfCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Programming Fundamentals', 'Software Engineering'],
+                    datasets: [{
+                        label: 'Average Marks',
+                        data: [85, 78],
+                        backgroundColor: ['#3b82f6', '#10b981']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+
+            // CLO Chart
+            const cloCtx = document.getElementById('cloChart').getContext('2d');
+            new Chart(cloCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['CLO1', 'CLO2', 'CLO3', 'CLO4'],
+                    datasets: [{
+                        data: [85, 78, 92, 88],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Load subjects
+        function loadSubjects() {
+            const subjects = [
+                { name: 'Programming Fundamentals', code: 'PF-101', credits: 3, teacher: 'Dr. Sarah Khan', students: 25, status: 'Active' },
+                { name: 'Software Engineering', code: 'SE-201', credits: 3, teacher: 'Prof. Muhammad Hassan', students: 20, status: 'Active' }
+            ];
+            
+            const tbody = document.getElementById('subjectsTable');
+            tbody.innerHTML = subjects.map(subject => `
+                <tr>
+                    <td>${subject.name}</td>
+                    <td>${subject.code}</td>
+                    <td>${subject.credits}</td>
+                    <td>${subject.teacher}</td>
+                    <td>${subject.students}</td>
+                    <td><span class="badge bg-success">${subject.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editSubject('${subject.code}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="assignTeacher('${subject.code}')">
+                            <i class="fas fa-user-plus"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Load students
+        function loadStudents() {
+            const students = [
+                { id: 'QUEST-2024-001', name: 'Ahmad Ali', email: 'ahmad@quest.edu.pk', semester: '7th', subjects: 2, performance: 'Good' },
+                { id: 'QUEST-2024-002', name: 'Sara Khan', email: 'sara@quest.edu.pk', semester: '6th', subjects: 2, performance: 'Excellent' },
+                { id: 'QUEST-2024-003', name: 'Muhammad Hassan', email: 'mhassan@quest.edu.pk', semester: '7th', subjects: 2, performance: 'Average' }
+            ];
+            
+            const tbody = document.getElementById('studentsTable');
+            tbody.innerHTML = students.map(student => `
+                <tr>
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.email}</td>
+                    <td>${student.semester}</td>
+                    <td>${student.subjects}</td>
+                    <td><span class="badge bg-${getPerformanceColor(student.performance)}">${student.performance}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewStudent('${student.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="editStudent('${student.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Load teachers
+        function loadTeachers() {
+            const teachers = [
+                { id: 'EMP-001', name: 'Dr. Sarah Khan', email: 'sarah@quest.edu.pk', subjects: 2, students: 45, status: 'Active' },
+                { id: 'EMP-002', name: 'Prof. Muhammad Hassan', email: 'mhassan@quest.edu.pk', subjects: 1, students: 20, status: 'Active' }
+            ];
+            
+            const tbody = document.getElementById('teachersTable');
+            tbody.innerHTML = teachers.map(teacher => `
+                <tr>
+                    <td>${teacher.id}</td>
+                    <td>${teacher.name}</td>
+                    <td>${teacher.email}</td>
+                    <td>${teacher.subjects}</td>
+                    <td>${teacher.students}</td>
+                    <td><span class="badge bg-success">${teacher.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewTeacher('${teacher.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="assignSubjectToTeacher('${teacher.id}')">
+                            <i class="fas fa-book"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Load mappings
+        function loadMappings() {
+            const mappings = [
+                { subject: 'Programming Fundamentals', clo1: '85%', clo2: '78%', clo3: '92%', clo4: '88%', plos: 'PLO1,PLO3,PLO5' },
+                { subject: 'Software Engineering', clo1: '76%', clo2: '82%', clo3: '79%', clo4: '85%', plos: 'PLO1,PLO2,PLO4' }
+            ];
+            
+            const tbody = document.getElementById('mappingTable');
+            tbody.innerHTML = mappings.map(mapping => `
+                <tr>
+                    <td>${mapping.subject}</td>
+                    <td><span class="badge bg-success">${mapping.clo1}</span></td>
+                    <td><span class="badge bg-success">${mapping.clo2}</span></td>
+                    <td><span class="badge bg-success">${mapping.clo3}</span></td>
+                    <td><span class="badge bg-success">${mapping.clo4}</span></td>
+                    <td><small>${mapping.plos}</small></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editMapping('${mapping.subject}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Load results
+        function loadResults() {
+            const results = [
+                { student: 'Ahmad Ali', subject: 'Programming Fundamentals', teacher: 'Dr. Sarah Khan', marks: 86, grade: 'A', clos: 'CLO1,CLO2,CLO3', uploaded: '2024-01-15' },
+                { student: 'Sara Khan', subject: 'Software Engineering', teacher: 'Prof. Muhammad Hassan', marks: 81, grade: 'B+', clos: 'CLO1,CLO2', uploaded: '2024-01-14' }
+            ];
+            
+            const tbody = document.getElementById('resultsTable');
+            tbody.innerHTML = results.map(result => `
+                <tr>
+                    <td>${result.student}</td>
+                    <td>${result.subject}</td>
+                    <td>${result.teacher}</td>
+                    <td>${result.marks}/100</td>
+                    <td><span class="badge bg-${getGradeColor(result.grade)}">${result.grade}</span></td>
+                    <td><small>${result.clos}</small></td>
+                    <td>${result.uploaded}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewResult('${result.student}', '${result.subject}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="editResult('${result.student}', '${result.subject}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Load reports
+        function loadReports() {
+            // Subject Performance Chart
+            const subjPerfCtx = document.getElementById('subjectPerformanceChart').getContext('2d');
+            new Chart(subjPerfCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                    datasets: [{
+                        label: 'Programming Fundamentals',
+                        data: [85, 87, 84, 89, 86],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Software Engineering',
+                        data: [78, 80, 79, 82, 81],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+
+            // Grade Distribution Chart
+            const gradeCtx = document.getElementById('gradeDistributionChart').getContext('2d');
+            new Chart(gradeCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['A+', 'A', 'A-', 'B+', 'B', 'Others'],
+                    datasets: [{
+                        data: [15, 25, 20, 18, 12, 10],
+                        backgroundColor: ['#10b981', '#3b82f6', '#06b6d4', '#f59e0b', '#ef4444', '#6b7280']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Utility functions
+        function getStatusColor(status) {
+            switch(status) {
+                case 'Completed': return 'success';
+                case 'Pending': return 'warning';
+                case 'In Progress': return 'primary';
+                default: return 'secondary';
+            }
+        }
+
+        function getPerformanceColor(performance) {
+            switch(performance) {
+                case 'Excellent': return 'success';
+                case 'Good': return 'primary';
+                case 'Average': return 'warning';
+                default: return 'secondary';
+            }
+        }
+
+        function getGradeColor(grade) {
+            switch(grade) {
+                case 'A+': return 'success';
+                case 'A': return 'success';
+                case 'A-': return 'primary';
+                case 'B+': return 'info';
+                case 'B': return 'warning';
+                default: return 'secondary';
+            }
+        }
+
+        // New Course Management Functions
+        function loadCourses() {
+            const courses = [
+                { code: 'CS-301', name: 'Data Structures', credits: 3, semester: '3rd', sections: 2, students: 60, status: 'Active' },
+                { code: 'CS-302', name: 'Algorithms', credits: 3, semester: '4th', sections: 2, students: 58, status: 'Active' },
+                { code: 'CS-401', name: 'Database Systems', credits: 3, semester: '5th', sections: 1, students: 45, status: 'Active' },
+                { code: 'CS-402', name: 'Software Engineering', credits: 3, semester: '6th', sections: 1, students: 42, status: 'Active' }
+            ];
+            
+            const tbody = document.getElementById('coursesTable');
+            tbody.innerHTML = courses.map(course => `
+                <tr>
+                    <td><strong>${course.code}</strong></td>
+                    <td>${course.name}</td>
+                    <td>${course.credits}</td>
+                    <td>${course.semester}</td>
+                    <td><span class="badge bg-primary">${course.sections}</span></td>
+                    <td>${course.students}</td>
+                    <td><span class="badge bg-success">${course.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editCourse('${course.code}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="manageSections('${course.code}')">
+                            <i class="fas fa-door-open"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" onclick="viewCourseDetails('${course.code}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function createCourse() {
+            const courseCode = document.getElementById('courseCode').value;
+            const courseName = document.getElementById('courseName').value;
+            const creditHours = document.getElementById('creditHours').value;
+            const department = document.getElementById('courseDepartment').value;
+            const semester = document.getElementById('courseSemester').value;
+            const description = document.getElementById('courseDescription').value;
+            
+            if (!courseCode || !courseName || !creditHours) {
+                showAlert('Please fill in all required fields', 'warning');
+                return;
+            }
+            
+            showAlert(`Course "${courseName}" (${courseCode}) created successfully!`, 'success');
+            
+            // Clear form
+            document.getElementById('courseCode').value = '';
+            document.getElementById('courseName').value = '';
+            document.getElementById('creditHours').value = '';
+            document.getElementById('courseDescription').value = '';
+            
+            // Refresh courses list
+            loadCourses();
+        }
+
+        function loadClassrooms() {
+            const sections = [
+                { course: 'CS-301 Data Structures', section: 'A', classroom: 'CS-101', schedule: 'Mon-Wed-Fri 10:00-11:30', students: 30, teacher: 'Dr. Sarah Khan', status: 'Active' },
+                { course: 'CS-301 Data Structures', section: 'B', classroom: 'CS-102', schedule: 'Mon-Wed-Fri 14:00-15:30', students: 30, teacher: 'Dr. Ahmed Ali', status: 'Active' },
+                { course: 'CS-302 Algorithms', section: 'A', classroom: 'CS-201', schedule: 'Tue-Thu 10:00-11:30', students: 28, teacher: 'Dr. Fatima Sheikh', status: 'Active' },
+                { course: 'CS-401 Database Systems', section: 'A', classroom: 'CS-301', schedule: 'Mon-Wed-Fri 16:00-17:30', students: 45, teacher: 'Dr. Muhammad Hassan', status: 'Active' }
+            ];
+            
+            const tbody = document.getElementById('sectionsTable');
+            tbody.innerHTML = sections.map(section => `
+                <tr>
+                    <td><strong>${section.course}</strong></td>
+                    <td><span class="badge bg-primary">Section ${section.section}</span></td>
+                    <td>${section.classroom}</td>
+                    <td>${section.schedule}</td>
+                    <td>${section.students}</td>
+                    <td>${section.teacher}</td>
+                    <td><span class="badge bg-success">${section.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editSection('${section.course}', '${section.section}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="manageStudents('${section.course}', '${section.section}')">
+                            <i class="fas fa-users"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" onclick="assignTeacher('${section.course}', '${section.section}')">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function createSection() {
+            const course = document.getElementById('sectionCourse').value;
+            const sectionName = document.getElementById('sectionName').value;
+            const classroom = document.getElementById('classroom').value;
+            const maxStudents = document.getElementById('maxStudents').value;
+            const schedule = document.getElementById('schedule').value;
+            const academicYear = document.getElementById('academicYear').value;
+            
+            if (!course || !sectionName || !classroom || !maxStudents) {
+                showAlert('Please fill in all required fields', 'warning');
+                return;
+            }
+            
+            showAlert(`Section ${sectionName} for ${course} created successfully!`, 'success');
+            
+            // Clear form
+            document.getElementById('sectionCourse').value = '';
+            document.getElementById('sectionName').value = '';
+            document.getElementById('classroom').value = '';
+            document.getElementById('maxStudents').value = '';
+            document.getElementById('schedule').value = '';
+            
+            // Refresh sections list
+            loadClassrooms();
+        }
+
+        function loadCLOs() {
+            const clos = [
+                { course: 'CS-301 Data Structures', code: 'CLO1', title: 'Analyze Data Structures', bloom: 'Analyze', assessment: 'Assignment', status: 'Active' },
+                { course: 'CS-301 Data Structures', code: 'CLO2', title: 'Implement Data Structures', bloom: 'Create', assessment: 'Project', status: 'Active' },
+                { course: 'CS-301 Data Structures', code: 'CLO3', title: 'Evaluate Algorithm Complexity', bloom: 'Evaluate', assessment: 'Final Exam', status: 'Active' },
+                { course: 'CS-302 Algorithms', code: 'CLO1', title: 'Design Efficient Algorithms', bloom: 'Create', assessment: 'Project', status: 'Active' },
+                { course: 'CS-302 Algorithms', code: 'CLO2', title: 'Analyze Algorithm Performance', bloom: 'Analyze', assessment: 'Midterm', status: 'Active' }
+            ];
+            
+            const tbody = document.getElementById('closTable');
+            tbody.innerHTML = clos.map(clo => `
+                <tr>
+                    <td><strong>${clo.course}</strong></td>
+                    <td><span class="badge bg-info">${clo.code}</span></td>
+                    <td>${clo.title}</td>
+                    <td><span class="badge bg-primary">${clo.bloom}</span></td>
+                    <td>${clo.assessment}</td>
+                    <td><span class="badge bg-success">${clo.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editCLO('${clo.code}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="mapCLO('${clo.code}')">
+                            <i class="fas fa-sitemap"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" onclick="viewCLODetails('${clo.code}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function createCLO() {
+            const course = document.getElementById('cloCourse').value;
+            const cloCode = document.getElementById('cloCode').value;
+            const cloTitle = document.getElementById('cloTitle').value;
+            const bloomLevel = document.getElementById('bloomLevel').value;
+            const assessmentMethod = document.getElementById('assessmentMethod').value;
+            const description = document.getElementById('cloDescription').value;
+            
+            if (!course || !cloCode || !cloTitle) {
+                showAlert('Please fill in all required fields', 'warning');
+                return;
+            }
+            
+            showAlert(`CLO "${cloTitle}" (${cloCode}) created successfully for ${course}!`, 'success');
+            
+            // Clear form
+            document.getElementById('cloCourse').value = '';
+            document.getElementById('cloCode').value = '';
+            document.getElementById('cloTitle').value = '';
+            document.getElementById('cloDescription').value = '';
+            
+            // Refresh CLOs list
+            loadCLOs();
+        }
+
+        // New Interactive Functions
+        function editCourse(code) {
+            showAlert(`Editing course: ${code}`, 'info');
+        }
+
+        function manageSections(code) {
+            showAlert(`Managing sections for course: ${code}`, 'info');
+        }
+
+        function viewCourseDetails(code) {
+            showAlert(`Viewing details for course: ${code}`, 'info');
+        }
+
+        function editSection(course, section) {
+            showAlert(`Editing section ${section} for ${course}`, 'info');
+        }
+
+        function manageStudents(course, section) {
+            showAlert(`Managing students for ${course} - Section ${section}`, 'info');
+        }
+
+        function editCLO(code) {
+            showAlert(`Editing CLO: ${code}`, 'info');
+        }
+
+        function mapCLO(code) {
+            showAlert(`Mapping CLO: ${code} to PLOs`, 'info');
+        }
+
+        function viewCLODetails(code) {
+            showAlert(`Viewing details for CLO: ${code}`, 'info');
+        }
+
+        function showAddCLOModal() {
+            showAlert('Add CLO modal functionality will be implemented', 'info');
+        }
+
+        function showCreateSectionModal() {
+            showAlert('Create section modal functionality will be implemented', 'info');
+        }
+
+        // Interactive functions
+        function showAddStudentModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addStudentModal'));
+            modal.show();
+        }
+
+        // Bulk Upload Functions
+        function showBulkUploadModal() {
+            // Scroll to bulk upload section
+            document.getElementById('students-section').scrollIntoView({ behavior: 'smooth' });
+            showAlert('Ready for bulk upload. Please select a file or download template first.', 'info');
+        }
+
+        function handleBulkFile(input) {
+            const file = input.files[0];
+            const uploadBtn = document.getElementById('uploadBulkBtn');
+            
+            if (file) {
+                // Validate file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    showAlert('File size exceeds 10MB limit. Please choose a smaller file.', 'danger');
+                    input.value = '';
+                    uploadBtn.disabled = true;
+                    return;
+                }
+                
+                // Validate file type
+                const validTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'];
+                const validExtensions = ['.xlsx', '.xls', '.csv'];
+                const fileExtension = file.name.toLowerCase().substr(file.name.lastIndexOf('.'));
+                
+                if (!validExtensions.includes(fileExtension)) {
+                    showAlert('Invalid file type. Please select an Excel (.xlsx, .xls) or CSV (.csv) file.', 'danger');
+                    input.value = '';
+                    uploadBtn.disabled = true;
+                    return;
+                }
+                
+                uploadBtn.disabled = false;
+                showAlert(`File "${file.name}" selected successfully. Ready to upload.`, 'success');
+            } else {
+                uploadBtn.disabled = true;
+            }
+        }
+
+        function uploadBulkStudents() {
+            const fileInput = document.getElementById('studentBulkFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showAlert('Please select a file first.', 'warning');
+                return;
+            }
+            
+            // Show progress
+            const progressDiv = document.getElementById('uploadProgress');
+            const resultsDiv = document.getElementById('uploadResults');
+            const progressBar = progressDiv.querySelector('.progress-bar');
+            
+            progressDiv.style.display = 'block';
+            resultsDiv.style.display = 'none';
+            
+            // Simulate file processing
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 100) progress = 100;
+                
+                progressBar.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    
+                    // Simulate processing completion
+                    setTimeout(() => {
+                        progressDiv.style.display = 'none';
+                        showUploadResults();
+                    }, 1000);
+                }
+            }, 200);
+        }
+
+        function showUploadResults() {
+            const resultsDiv = document.getElementById('uploadResults');
+            const summaryDiv = document.getElementById('uploadSummary');
+            
+            // Simulate upload results
+            const totalStudents = Math.floor(Math.random() * 50) + 20;
+            const successCount = Math.floor(totalStudents * 0.9);
+            const errorCount = totalStudents - successCount;
+            
+            summaryDiv.innerHTML = `
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="fw-bold text-success fs-4">${successCount}</div>
+                        <small class="text-muted">Students Added</small>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="fw-bold text-danger fs-4">${errorCount}</div>
+                        <small class="text-muted">Errors/Duplicates</small>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="fw-bold text-primary fs-4">${totalStudents}</div>
+                        <small class="text-muted">Total Processed</small>
+                    </div>
+                </div>
+                ${errorCount > 0 ? '<div class="mt-2"><small class="text-muted">Some students were skipped due to duplicate IDs or invalid data.</small></div>' : ''}
+            `;
+            
+            resultsDiv.style.display = 'block';
+            
+            // Clear the file input
+            document.getElementById('studentBulkFile').value = '';
+            document.getElementById('uploadBulkBtn').disabled = true;
+            
+            showAlert(`Bulk upload completed! ${successCount} students added successfully.`, 'success');
+        }
+
+        function clearBulkUpload() {
+            document.getElementById('studentBulkFile').value = '';
+            document.getElementById('uploadBulkBtn').disabled = true;
+            document.getElementById('uploadProgress').style.display = 'none';
+            document.getElementById('uploadResults').style.display = 'none';
+            showAlert('Upload cleared. You can select a new file.', 'info');
+        }
+
+        function downloadTemplate(format) {
+            // Template data
+            const templateData = [
+                ['Student ID', 'Full Name', 'Email Address', 'Department', 'Semester', 'Batch Year', 'Phone'],
+                ['QUEST-2024-001', 'Ahmad Ali Khan', 'ahmad.ali@quest.edu.pk', 'Computer Science', '7th', '2021', '+92-300-1234567'],
+                ['QUEST-2024-002', 'Fatima Sheikh', 'fatima.sheikh@quest.edu.pk', 'Electrical Engineering', '5th', '2022', '+92-301-2345678'],
+                ['QUEST-2024-003', 'Muhammad Hassan', 'hassan.muhammad@quest.edu.pk', 'Mechanical Engineering', '3rd', '2023', '+92-302-3456789']
+            ];
+            
+            if (format === 'excel') {
+                downloadExcelTemplate(templateData);
+            } else if (format === 'csv') {
+                downloadCSVTemplate(templateData);
+            }
+        }
+
+        function downloadCSVTemplate(data) {
+            let csvContent = '';
+            data.forEach(row => {
+                csvContent += row.map(field => `"${field}"`).join(',') + '\n';
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'student_upload_template.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showAlert('CSV template downloaded successfully!', 'success');
+        }
+
+        function downloadExcelTemplate(data) {
+            // Create a simple HTML table for Excel download
+            let htmlContent = `
+                <table>
+                    <thead>
+                        <tr>
+                            ${data[0].map(header => `<th style="background-color: #4472C4; color: white; font-weight: bold; padding: 8px; border: 1px solid #ccc;">${header}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.slice(1).map(row => `
+                            <tr>
+                                ${row.map(cell => `<td style="padding: 6px; border: 1px solid #ccc;">${cell}</td>`).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'student_upload_template.xlsx');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showAlert('Excel template downloaded successfully!', 'success');
+        }
+
+        // Bulk Teacher Upload Functions
+        function showBulkTeacherUploadModal() {
+            // Scroll to bulk upload section
+            document.getElementById('teachers-section').scrollIntoView({ behavior: 'smooth' });
+            showAlert('Ready for bulk teacher upload. Please select a file or download template first.', 'info');
+        }
+
+        function handleTeacherBulkFile(input) {
+            const file = input.files[0];
+            const uploadBtn = document.getElementById('uploadTeacherBulkBtn');
+            
+            if (file) {
+                // Validate file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    showAlert('File size exceeds 10MB limit. Please choose a smaller file.', 'danger');
+                    input.value = '';
+                    uploadBtn.disabled = true;
+                    return;
+                }
+                
+                // Validate file type
+                const validExtensions = ['.xlsx', '.xls', '.csv'];
+                const fileExtension = file.name.toLowerCase().substr(file.name.lastIndexOf('.'));
+                
+                if (!validExtensions.includes(fileExtension)) {
+                    showAlert('Invalid file type. Please select an Excel (.xlsx, .xls) or CSV (.csv) file.', 'danger');
+                    input.value = '';
+                    uploadBtn.disabled = true;
+                    return;
+                }
+                
+                uploadBtn.disabled = false;
+                showAlert(`File "${file.name}" selected successfully. Ready to upload teachers.`, 'success');
+            } else {
+                uploadBtn.disabled = true;
+            }
+        }
+
+        function uploadBulkTeachers() {
+            const fileInput = document.getElementById('teacherBulkFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showAlert('Please select a file first.', 'warning');
+                return;
+            }
+            
+            // Show progress
+            const progressDiv = document.getElementById('teacherUploadProgress');
+            const resultsDiv = document.getElementById('teacherUploadResults');
+            const progressBar = progressDiv.querySelector('.progress-bar');
+            
+            progressDiv.style.display = 'block';
+            resultsDiv.style.display = 'none';
+            
+            // Simulate file processing
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 25;
+                if (progress > 100) progress = 100;
+                
+                progressBar.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    
+                    // Simulate processing completion
+                    setTimeout(() => {
+                        progressDiv.style.display = 'none';
+                        showTeacherUploadResults();
+                    }, 1200);
+                }
+            }, 250);
+        }
+
+        function showTeacherUploadResults() {
+            const resultsDiv = document.getElementById('teacherUploadResults');
+            const summaryDiv = document.getElementById('teacherUploadSummary');
+            
+            // Simulate upload results
+            const totalTeachers = Math.floor(Math.random() * 25) + 10;
+            const successCount = Math.floor(totalTeachers * 0.95);
+            const errorCount = totalTeachers - successCount;
+            
+            summaryDiv.innerHTML = `
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="fw-bold text-success fs-4">${successCount}</div>
+                        <small class="text-muted">Teachers Added</small>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="fw-bold text-danger fs-4">${errorCount}</div>
+                        <small class="text-muted">Errors/Duplicates</small>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="fw-bold text-info fs-4">${totalTeachers}</div>
+                        <small class="text-muted">Total Processed</small>
+                    </div>
+                </div>
+                ${errorCount > 0 ? '<div class="mt-2"><small class="text-muted">Some teachers were skipped due to duplicate Employee IDs or invalid data.</small></div>' : ''}
+            `;
+            
+            resultsDiv.style.display = 'block';
+            
+            // Clear the file input
+            document.getElementById('teacherBulkFile').value = '';
+            document.getElementById('uploadTeacherBulkBtn').disabled = true;
+            
+            showAlert(`Bulk teacher upload completed! ${successCount} teachers added successfully.`, 'success');
+        }
+
+        function clearTeacherBulkUpload() {
+            document.getElementById('teacherBulkFile').value = '';
+            document.getElementById('uploadTeacherBulkBtn').disabled = true;
+            document.getElementById('teacherUploadProgress').style.display = 'none';
+            document.getElementById('teacherUploadResults').style.display = 'none';
+            showAlert('Teacher upload cleared. You can select a new file.', 'info');
+        }
+
+        function downloadTeacherTemplate(format) {
+            // Template data for teachers
+            const templateData = [
+                ['Employee ID', 'Full Name', 'Email Address', 'Department', 'Designation', 'Subjects', 'Phone', 'Qualification'],
+                ['EMP-001', 'Dr. Muhammad Hassan', 'hassan.muhammad@quest.edu.pk', 'Computer Science', 'Assistant Professor', 'Data Structures, Algorithms, Programming', '+92-300-1111111', 'PhD Computer Science'],
+                ['EMP-002', 'Prof. Dr. Ahmad Sheikh', 'ahmad.sheikh@quest.edu.pk', 'Mechanical Engineering', 'Professor', 'Thermodynamics, Fluid Mechanics', '+92-301-2222222', 'PhD Mechanical Engineering'],
+                ['EMP-003', 'Dr. Fatima Khan', 'fatima.khan@quest.edu.pk', 'Electrical Engineering', 'Associate Professor', 'Power Systems, Control Systems', '+92-302-3333333', 'PhD Electrical Engineering'],
+                ['EMP-004', 'Engr. Ali Raza', 'ali.raza@quest.edu.pk', 'Civil Engineering', 'Lecturer', 'Structural Engineering, Construction', '+92-303-4444444', 'MS Civil Engineering']
+            ];
+            
+            if (format === 'excel') {
+                downloadTeacherExcelTemplate(templateData);
+            } else if (format === 'csv') {
+                downloadTeacherCSVTemplate(templateData);
+            }
+        }
+
+        function downloadTeacherCSVTemplate(data) {
+            let csvContent = '';
+            data.forEach(row => {
+                csvContent += row.map(field => `"${field}"`).join(',') + '\n';
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'teacher_upload_template.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showAlert('Teacher CSV template downloaded successfully!', 'success');
+        }
+
+        function downloadTeacherExcelTemplate(data) {
+            // Create a simple HTML table for Excel download
+            let htmlContent = `
+                <table>
+                    <thead>
+                        <tr>
+                            ${data[0].map(header => `<th style="background-color: #17a2b8; color: white; font-weight: bold; padding: 8px; border: 1px solid #ccc;">${header}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.slice(1).map(row => `
+                            <tr>
+                                ${row.map(cell => `<td style="padding: 6px; border: 1px solid #ccc;">${cell}</td>`).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'teacher_upload_template.xlsx');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showAlert('Teacher Excel template downloaded successfully!', 'success');
+        }
+
+        function addStudent() {
+            const form = document.getElementById('addStudentForm');
+            const formData = new FormData(form);
+            const studentData = Object.fromEntries(formData);
+            
+            showAlert(`Student ${studentData.name} added successfully!`, 'success');
+            bootstrap.Modal.getInstance(document.getElementById('addStudentModal')).hide();
+            form.reset();
+        }
+
+        function showAddTeacherModal() {
+            showAlert('Add teacher modal functionality will be implemented', 'info');
+        }
+
+        function assignSubject() {
+            showAlert('Subject assignment functionality will be implemented', 'info');
+        }
+
+        function uploadResults() {
+            showAlert('Results upload functionality will be implemented', 'info');
+        }
+
+        function editSubject(code) {
+            showAlert(`Editing subject: ${code}`, 'info');
+        }
+
+        function assignTeacher(code) {
+            showAlert(`Assigning teacher to subject: ${code}`, 'info');
+        }
+
+        function viewStudent(id) {
+            showAlert(`Viewing student: ${id}`, 'info');
+        }
+
+        function editStudent(id) {
+            showAlert(`Editing student: ${id}`, 'info');
+        }
+
+        function viewTeacher(id) {
+            showAlert(`Viewing teacher: ${id}`, 'info');
+        }
+
+        function assignSubjectToTeacher(id) {
+            showAlert(`Assigning subject to teacher: ${id}`, 'info');
+        }
+
+        function editMapping(subject) {
+            showAlert(`Editing mapping for subject: ${subject}`, 'info');
+        }
+
+        function viewResult(student, subject) {
+            showAlert(`Viewing result for ${student} in ${subject}`, 'info');
+        }
+
+        function editResult(student, subject) {
+            showAlert(`Editing result for ${student} in ${subject}`, 'info');
+        }
+
+        function showAddSubjectModal() {
+            showAlert('Add subject modal functionality will be implemented', 'info');
+        }
+
+        function showMappingModal() {
+            showAlert('Add mapping modal functionality will be implemented', 'info');
+        }
+
+        function refreshData() {
+            loadDashboardData();
+            showAlert('Data refreshed successfully!', 'success');
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+
+        // CQI Functions
+        function loadAssessmentDesign() {
+            // Load courses for assessment creation
+            fetch('/api/courses')
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.querySelector('#assessmentForm select[name="courseId"]');
+                    if (select) {
+                        select.innerHTML = '<option value="">Select Course</option>';
+                        data.forEach(course => {
+                            const option = document.createElement('option');
+                            option.value = course.id;
+                            option.textContent = `${course.code} - ${course.name}`;
+                            select.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error loading courses:', error));
+            
+            // Load assessment questions
+            loadAssessmentQuestions();
+        }
+
+        function loadAssessmentQuestions() {
+            // Load assessment questions with CLO linking
+            const tbody = document.getElementById('assessmentQuestionsTable');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td>1</td>
+                        <td>Implement a stack data structure using arrays</td>
+                        <td>10</td>
+                        <td>CLO1 - Data Structure Analysis</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Design an algorithm for binary search</td>
+                        <td>15</td>
+                        <td>CLO2 - Algorithm Design</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function loadCLOAttainment() {
+            // Load courses for filtering
+            fetch('/api/courses')
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById('courseFilter');
+                    if (select) {
+                        select.innerHTML = '<option value="">All Courses</option>';
+                        data.forEach(course => {
+                            const option = document.createElement('option');
+                            option.value = course.id;
+                            option.textContent = `${course.code} - ${course.name}`;
+                            select.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error loading courses:', error));
+            
+            // Load CLO attainment data
+            loadCLOAttainmentData();
+        }
+
+        function loadCLOAttainmentData() {
+            const tbody = document.getElementById('cloAttainmentTable');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td>CLO1</td>
+                        <td>Data Structure Analysis</td>
+                        <td>45</td>
+                        <td>38</td>
+                        <td class="attainment-high">84%</td>
+                        <td><span class="badge bg-success">Attained</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Details</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>CLO2</td>
+                        <td>Algorithm Design</td>
+                        <td>45</td>
+                        <td>25</td>
+                        <td class="attainment-low">56%</td>
+                        <td><span class="badge bg-danger">Not Attained</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Details</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function loadCQIActions() {
+            // Load CLOs and courses for CQI action creation
+            Promise.all([
+                fetch('/api/clos').then(response => response.json()),
+                fetch('/api/courses').then(response => response.json())
+            ])
+            .then(([clos, courses]) => {
+                // Load CLOs
+                const cloSelect = document.querySelector('#cqiActionForm select[name="cloId"]');
+                if (cloSelect) {
+                    cloSelect.innerHTML = '<option value="">Select CLO</option>';
+                    clos.forEach(clo => {
+                        const option = document.createElement('option');
+                        option.value = clo.id;
+                        option.textContent = `${clo.code} - ${clo.title}`;
+                        cloSelect.appendChild(option);
+                    });
+                }
+                
+                // Load courses
+                const courseSelect = document.querySelector('#cqiActionForm select[name="courseId"]');
+                if (courseSelect) {
+                    courseSelect.innerHTML = '<option value="">Select Course</option>';
+                    courses.forEach(course => {
+                        const option = document.createElement('option');
+                        option.value = course.id;
+                        option.textContent = `${course.code} - ${course.name}`;
+                        courseSelect.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => console.error('Error loading CQI data:', error));
+            
+            // Load CQI actions
+            loadCQIActionsData();
+        }
+
+        function loadCQIActionsData() {
+            const tbody = document.getElementById('cqiActionsTable');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td>CLO2</td>
+                        <td>Data Structures</td>
+                        <td><span class="badge bg-danger">Corrective</span></td>
+                        <td>Improve teaching methodology for algorithm design</td>
+                        <td>Dr. Muhammad Hassan</td>
+                        <td>2024-02-15</td>
+                        <td><span class="badge bg-warning">In Progress</span></td>
+                        <td><span class="badge bg-danger">High</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function loadAttendanceFallback() {
+            // Load courses for attendance upload
+            fetch('/api/courses')
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.querySelector('#attendanceUploadForm select[name="courseId"]');
+                    if (select) {
+                        select.innerHTML = '<option value="">Choose Course</option>';
+                        data.forEach(course => {
+                            const option = document.createElement('option');
+                            option.value = course.id;
+                            option.textContent = `${course.code} - ${course.name}`;
+                            select.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error loading courses:', error));
+            
+            // Load attendance data
+            loadAttendanceData();
+        }
+
+        function loadAttendanceData() {
+            const tbody = document.getElementById('attendanceTable');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td>CS-301 - Data Structures</td>
+                        <td>QUEST-2024-001</td>
+                        <td>Ahmad Ali</td>
+                        <td>30</td>
+                        <td>28</td>
+                        <td>93.33%</td>
+                        <td><span class="badge bg-success">Good</span></td>
+                        <td>2024-01-15</td>
+                    </tr>
+                    <tr>
+                        <td>CS-301 - Data Structures</td>
+                        <td>QUEST-2024-002</td>
+                        <td>Sara Khan</td>
+                        <td>30</td>
+                        <td>25</td>
+                        <td>83.33%</td>
+                        <td><span class="badge bg-warning">Fair</span></td>
+                        <td>2024-01-15</td>
+                    </tr>
+                `;
+            }
+        }
+
+        function loadReportsAnalytics() {
+            // Initialize CQI charts
+            createCQICharts();
+        }
+
+        function createCQICharts() {
+            // CLO Attainment Chart
+            const ctx1 = document.getElementById('cloAttainmentChart');
+            if (ctx1) {
+                new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: ['CLO1', 'CLO2', 'CLO3', 'CLO4', 'CLO5'],
+                        datasets: [{
+                            label: 'Attainment %',
+                            data: [85, 56, 92, 78, 88],
+                            backgroundColor: [
+                                'rgba(40, 167, 69, 0.8)',
+                                'rgba(220, 53, 69, 0.8)',
+                                'rgba(40, 167, 69, 0.8)',
+                                'rgba(255, 193, 7, 0.8)',
+                                'rgba(40, 167, 69, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(40, 167, 69, 1)',
+                                'rgba(220, 53, 69, 1)',
+                                'rgba(40, 167, 69, 1)',
+                                'rgba(255, 193, 7, 1)',
+                                'rgba(40, 167, 69, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+
+            // CQI Status Chart
+            const ctx2 = document.getElementById('cqiStatusChart');
+            if (ctx2) {
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Open', 'In Progress', 'Closed'],
+                        datasets: [{
+                            data: [3, 2, 3],
+                            backgroundColor: [
+                                'rgba(220, 53, 69, 0.8)',
+                                'rgba(255, 193, 7, 0.8)',
+                                'rgba(40, 167, 69, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(220, 53, 69, 1)',
+                                'rgba(255, 193, 7, 1)',
+                                'rgba(40, 167, 69, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        }
+
+        // CQI Functions
+        function loadAssessmentDesign() {
+            // Load assessment design data
+            console.log('Loading assessment design...');
+        }
+
+        function loadCLOAttainment() {
+            // Load CLO attainment data
+            console.log('Loading CLO attainment...');
+        }
+
+        function loadCQIActions() {
+            // Load CQI actions
+            console.log('Loading CQI actions...');
+        }
+
+        function loadAttendanceFallback() {
+            // Load attendance fallback data
+            console.log('Loading attendance fallback...');
+        }
+
+        function loadReportsAnalytics() {
+            // Load reports and analytics
+            console.log('Loading reports and analytics...');
+        }
+
+        function createAssessment() {
+            showAlert('Create Assessment functionality will be implemented', 'info');
+        }
+
+        function uploadResults() {
+            showAlert('Upload Results functionality will be implemented', 'info');
+        }
+
+        function calculateCLOAttainment() {
+            const courseId = document.getElementById('courseFilter').value;
+            const semester = document.getElementById('semesterFilter').value;
+            
+            if (!courseId || !semester) {
+                showAlert('Please select course and semester', 'warning');
+                return;
+            }
+            
+            showAlert('CLO attainment calculation started...', 'info');
+            
+            // Simulate calculation
+            setTimeout(() => {
+                loadCLOAttainmentData();
+                showAlert('CLO attainment calculated successfully!', 'success');
+            }, 2000);
+        }
+
+        function downloadAttendanceTemplate() {
+            const templateData = [
+                ['Student ID', 'Student Name', 'Total Classes', 'Attended Classes'],
+                ['QUEST-2024-001', 'Ahmad Ali', '30', '28'],
+                ['QUEST-2024-002', 'Sara Khan', '30', '25']
+            ];
+            
+            const csvContent = templateData.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'attendance_template.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            showAlert('Attendance template downloaded successfully!', 'success');
+        }
+
+        function generateReport(type) {
+            showAlert(`Generating ${type} report...`, 'info');
+            
+            // Simulate report generation
+            setTimeout(() => {
+                showAlert(`${type} report generated successfully!`, 'success');
+            }, 2000);
+        }
+
+        // Form submission handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Assessment form submission
+            const assessmentForm = document.getElementById('assessmentForm');
+            if (assessmentForm) {
+                assessmentForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    const data = Object.fromEntries(formData);
+                    
+                    showAlert('Assessment created successfully!', 'success');
+                    loadAssessmentQuestions();
+                    this.reset();
+                });
+            }
+
+            // CQI Action form submission
+            const cqiActionForm = document.getElementById('cqiActionForm');
+            if (cqiActionForm) {
+                cqiActionForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    const data = Object.fromEntries(formData);
+                    
+                    showAlert('CQI action created successfully!', 'success');
+                    loadCQIActionsData();
+                    this.reset();
+                });
+            }
+
+            // Attendance upload form submission
+            const attendanceUploadForm = document.getElementById('attendanceUploadForm');
+            if (attendanceUploadForm) {
+                attendanceUploadForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    
+                    showAlert('Attendance uploaded successfully!', 'success');
+                    loadAttendanceData();
+                    this.reset();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
