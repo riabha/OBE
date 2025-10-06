@@ -1,0 +1,15 @@
+# Netlify redirects file
+# This ensures all routes work properly
+
+# Main pages
+/login /login.html 200
+/student-dashboard /student-dashboard-enhanced.html 200
+/teacher-dashboard /teacher-dashboard-enhanced.html 200
+/focal-dashboard /focal-dashboard-enhanced.html 200
+/chairman-dashboard /chairman-dashboard-enhanced.html 200
+/dean-dashboard /dean-dashboard-enhanced.html 200
+/controller-dashboard /controller-dashboard-enhanced.html 200
+/super-admin-dashboard /super-admin-dashboard.html 200
+
+# Fallback for SPA
+/* /index.html 200
