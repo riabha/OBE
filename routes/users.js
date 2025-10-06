@@ -45,16 +45,15 @@ router.get('/', async (req, res) => {
                 email,
                 role,
                 department,
-                employee_id as employeeId,
-                student_id as studentId,
+                employeeId,
+                studentId,
                 designation,
                 semester,
                 batch,
-                created_at as createdAt,
-                updated_at as updatedAt,
-                is_active as isActive
+                createdAt,
+                updatedAt
             FROM users 
-            ORDER BY created_at DESC
+            ORDER BY createdAt DESC
         `;
         
         const users = await executeQuery(query);
@@ -85,14 +84,13 @@ router.get('/:id', async (req, res) => {
                 email,
                 role,
                 department,
-                employee_id as employeeId,
-                student_id as studentId,
+                employeeId,
+                studentId,
                 designation,
                 semester,
                 batch,
-                created_at as createdAt,
-                updated_at as updatedAt,
-                is_active as isActive
+                createdAt,
+                updatedAt
             FROM users 
             WHERE id = ?
         `;
@@ -162,9 +160,9 @@ router.post('/', async (req, res) => {
         const insertQuery = `
             INSERT INTO users (
                 name, email, password, role, department, 
-                employee_id, student_id, designation, semester, batch,
-                created_at, updated_at, is_active
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 1)
+                employeeId, studentId, designation, semester, batch,
+                createdAt, updatedAt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
         `;
         
         const result = await executeQuery(insertQuery, [
