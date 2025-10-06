@@ -18,6 +18,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+// Include routes
+const reportsRouter = require('./routes/reports');
+app.use('/api/reports', reportsRouter);
+
 // CORS configuration for production
 if (isProduction) {
     const cors = require('cors');
