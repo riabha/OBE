@@ -4,6 +4,16 @@
   publish = "public"
   command = "echo 'No build step required'"
 
+# Functions configuration
+[functions]
+  directory = "netlify/functions"
+
+# Redirect rules for API functions
+[[redirects]]
+  from = "/api/auth/login"
+  to = "/.netlify/functions/auth-login"
+  status = 200
+
 # Redirect rules for SPA - serve index.html for all routes
 [[redirects]]
   from = "/*"
@@ -61,6 +71,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
 
 # Environment variables (set in Netlify dashboard)
+# Add these in Netlify → Site settings → Environment variables:
 # DB_HOST=mysql.gb.stackcp.com
 # DB_PORT=39558
 # DB_NAME=questobe-35313139c836
