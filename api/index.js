@@ -240,6 +240,46 @@ app.get('/api/test', (req, res) => {
     });
 });
 
+// Database connection test endpoint
+app.get('/api/db-test', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        await connection.ping();
+        
+        // Try to query users table
+        const [users] = await connection.execute('SELECT COUNT(*) as count FROM users');
+        
+        connection.release();
+        
+        res.json({ 
+            status: 'success',
+            message: 'Database connection successful',
+            database: {
+                host: dbConfig.host,
+                port: dbConfig.port,
+                database: dbConfig.database,
+                userCount: users[0].count
+            },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Database connection error:', error);
+        res.status(500).json({ 
+            status: 'error',
+            message: 'Database connection failed',
+            error: error.message,
+            config: {
+                host: dbConfig.host,
+                port: dbConfig.port,
+                database: dbConfig.database,
+                user: dbConfig.user
+            },
+            fallbackMode: 'Using fallback authentication',
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
