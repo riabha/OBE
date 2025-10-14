@@ -66,7 +66,7 @@ All demo users have been successfully created in your MySQL database. You can no
 
 ## 🚀 **How to Login:**
 
-1. **Go to your QUEST OBE Portal** (your Netlify website)
+1. **Go to your QUEST OBE Portal** (https://www.obe.org.pk)
 2. **Enter any of the demo credentials** above
 3. **Click "Sign In"**
 4. **Access the appropriate dashboard** based on role
@@ -109,7 +109,7 @@ All demo users have been successfully created in your MySQL database. You can no
 - **Authentication**: JWT + bcrypt
 - **Frontend**: Bootstrap 5 + Chart.js
 - **Backend**: Node.js + Express
-- **Deployment**: Netlify + GitHub
+- **Deployment**: Vercel + GitHub
 
 ## 📱 **Live System:**
 

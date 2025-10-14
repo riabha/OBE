@@ -144,7 +144,7 @@ The user management system is fully integrated with your MySQL database:
 
 ## 🚀 **Live System:**
 
-Your user management system is now live on Netlify and ready to use!
+Your user management system is now live on Vercel and ready to use!
 
 ---
 **Need Help?** Contact system administrator or check the comprehensive reports system in teacher dashboard.

@@ -111,12 +111,18 @@ NODE_ENV=development
 
 ## 🌐 **Deployment**
 
-This project can be deployed to:
-- **Netlify** (recommended for static + functions)
-- **Vercel** (full-stack deployment)
-- **Railway** (with database)
-- **Render** (reliable hosting)
-- **Heroku** (classic platform)
+This project is deployed on **Vercel**.
+
+For detailed deployment instructions, see [VERCEL_DEPLOYMENT_GUIDE.md](VERCEL_DEPLOYMENT_GUIDE.md)
+
+### Quick Vercel Deployment
+
+1. Push your code to GitHub
+2. Import the project in Vercel
+3. Add environment variables (see guide)
+4. Deploy!
+
+**Live Site**: https://www.obe.org.pk
 
 ## 📝 **Contributing**
 
