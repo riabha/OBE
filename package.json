@@ -1,6 +1,6 @@
 {
   "name": "quest-obe-portal",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "QUEST OBE Portal - Outcome-Based Education Management System",
   "main": "api/index.js",
   "scripts": {
