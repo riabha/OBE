@@ -35,12 +35,12 @@ A comprehensive **Outcome-Based Education (OBE) Portal** for managing Course Lea
 1. **Clone the repository**
    ```bash
    git clone https://github.com/yourusername/quest-obe-portal.git
-   cd quest-obe-portal
+cd quest-obe-portal
    ```
 
 2. **Install dependencies**
    ```bash
-   npm install
+npm install
    ```
 
 3. **Configure environment variables**
@@ -62,8 +62,8 @@ A comprehensive **Outcome-Based Education (OBE) Portal** for managing Course Lea
    ```bash
    npm start
    # or
-   node server.js
-   ```
+node server.js
+```
 
 5. **Access the application**
    - Open browser: `http://localhost:30005`
@@ -107,41 +107,30 @@ node scripts/create-demo-users-simple.js
 - **attendance**: Attendance records
 - **department_performance**: Department metrics
 
-## 🌐 Deployment
+## 🌐 Production Deployment
 
-### Deploy to Vercel
+### Environment Variables Required
 
-1. **Install Vercel CLI**
-   ```bash
-   npm install -g vercel
-   ```
+For production deployment, ensure these environment variables are set:
 
-2. **Set environment variables in Vercel**
-   ```bash
-   vercel env add DB_HOST
-   vercel env add DB_PORT
-   vercel env add DB_NAME
-   vercel env add DB_USER
-   vercel env add DB_PASSWORD
-   vercel env add JWT_SECRET
-   vercel env add NODE_ENV
-   ```
+```env
+DB_HOST=your_database_host
+DB_PORT=your_database_port
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
+JWT_SECRET=your_jwt_secret_key
+NODE_ENV=production
+```
 
-3. **Deploy**
-   ```bash
-   vercel --prod
-   ```
+### Deployment Checklist
 
-### Environment Variables for Production
-
-Required environment variables:
-- `DB_HOST`: Database hostname
-- `DB_PORT`: Database port
-- `DB_NAME`: Database name
-- `DB_USER`: Database username
-- `DB_PASSWORD`: Database password
-- `JWT_SECRET`: Secret key for JWT tokens
-- `NODE_ENV`: Set to `production`
+1. ✅ Configure environment variables on your hosting platform
+2. ✅ Ensure database is accessible from production server
+3. ✅ Run `npm install --production` to install dependencies
+4. ✅ Test database connection before going live
+5. ✅ Set up SSL/HTTPS for secure connections
+6. ✅ Configure CORS for your production domain
 
 ## 📚 API Documentation
 
@@ -193,14 +182,13 @@ POST /api/cqi-actions      - Create CQI action
 - **Authentication**: JWT, bcrypt
 - **File Upload**: Multer
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Deployment**: Vercel-ready
 
 ## 📁 Project Structure
 
 ```
 quest-obe-portal/
 ├── api/
-│   └── index.js           # API routes for serverless
+│   └── index.js           # API routes
 ├── middleware/
 │   └── auth.js            # Authentication middleware
 ├── models/
@@ -235,7 +223,6 @@ quest-obe-portal/
 │   └── test-db-connection.js
 ├── config.env.example     # Example environment config
 ├── server.js              # Main server file
-├── vercel.json            # Vercel deployment config
 └── package.json
 ```
 
