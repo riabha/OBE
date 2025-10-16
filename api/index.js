@@ -23,10 +23,10 @@ app.use(cors({
 // Database Configuration
 const dbConfig = {
     host: process.env.DB_HOST || 'mysql.gb.stackcp.com',
-    port: process.env.DB_PORT || 39558,
-    user: process.env.DB_USER || 'questobe',
-    password: process.env.DB_PASSWORD || 'Quest123@',
-    database: process.env.DB_NAME || 'questobe-35313139c836',
+    port: process.env.DB_PORT || 40063,
+    user: process.env.DB_USER || 'obe',
+    password: process.env.DB_PASSWORD || 'quest-db',
+    database: process.env.DB_NAME || 'vercel_db-31383355e3',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,

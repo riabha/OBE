@@ -1,25 +1,77 @@
 # Dependencies
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
 
 # Environment variables
-.env
 config.env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Database
-*.db
-*.sqlite
+# Build files
+dist/
+build/
+.next/
+out/
 
 # Logs
+logs/
 *.log
+*.log.*
 
-# OS generated files
+# OS files
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # IDE files
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Uploaded files
+public/uploads/*
+!public/uploads/.gitkeep
 
 # Temporary files
 *.tmp
 *.temp
+.cache/
+
+# Backup files
+*.backup
+*.bak
+*_backup/
+QUEST_OBE_Portal_Complete_Backup/
+*.zip
+
+# Database
+*.sql
+*.sqlite
+*.db
+
+# Vercel
+.vercel
+
+# Testing
+coverage/
+.nyc_output/
+
+# Documentation (optional - remove if you want to include these)
+# DEMO_USERS_CREATED.md
+# DEPLOYMENT_CHECKLIST.md
+# FIXES_APPLIED.md
+# NETLIFY_CLEANUP_SUMMARY.md
+# USER_MANAGEMENT_GUIDE.md
+# VERCEL_DEPLOYMENT_GUIDE.md
+# DATABASE_UPDATE_SUMMARY.md
