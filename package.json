@@ -11,7 +11,7 @@
     "test-db": "node scripts/test-db-connection.js"
   },
   "engines": {
-    "node": "18.x"
+    "node": "22.x"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
