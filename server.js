@@ -18,20 +18,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+// CORS configuration for all environments
+const cors = require('cors');
+app.use(cors({
+    origin: '*',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Include routes
 const reportsRouter = require('./routes/reports');
 const usersRouter = require('./routes/users');
 app.use('/api/reports', reportsRouter);
 app.use('/api/users', usersRouter);
-
-// CORS configuration for production
-if (isProduction) {
-    const cors = require('cors');
-    app.use(cors({
-        origin: process.env.CORS_ORIGIN || baseUrl,
-        credentials: true
-    }));
-}
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({

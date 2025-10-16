@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #1e3a8a;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #3b82f6;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h2>🔐 Login API Test</h2>
+        <p>Click the button below to test the login with demo credentials</p>
+        
+        <button onclick="testLogin()">Test Login (student@quest.edu.pk)</button>
+        
+        <div id="result" class="result"></div>
+        
+        <h3 style="margin-top: 30px;">All Demo Accounts:</h3>
+        <ul>
+            <li><strong>Student:</strong> student@quest.edu.pk / pass</li>
+            <li><strong>Teacher:</strong> teacher@quest.edu.pk / pass</li>
+            <li><strong>Focal:</strong> focal@quest.edu.pk / pass</li>
+            <li><strong>Chairman:</strong> chairman@quest.edu.pk / pass</li>
+            <li><strong>Dean:</strong> dean@quest.edu.pk / pass</li>
+            <li><strong>Controller:</strong> controller@quest.edu.pk / pass</li>
+            <li><strong>Super Admin:</strong> superadmin@quest.edu.pk / pass</li>
+        </ul>
+        
+        <p><a href="/login.html">Go to Login Page</a></p>
+    </div>
+
+    <script>
+        async function testLogin() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('http://localhost:30005/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'student@quest.edu.pk',
+                        password: 'pass'
+                    })
+                });
+
+                const data = await response.json();
+                
+                resultDiv.style.display = 'block';
+                
+                if (response.ok && data.user) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h4>✅ Login Successful!</h4>
+                        <p><strong>User:</strong> ${data.user.name}</p>
+                        <p><strong>Email:</strong> ${data.user.email}</p>
+                        <p><strong>Role:</strong> ${data.user.role}</p>
+                        <p><strong>Token:</strong> ${data.token.substring(0, 50)}...</p>
+                        <p style="margin-top: 15px;">The API is working correctly! You can now use the <a href="/login.html">login page</a>.</p>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <h4>❌ Login Failed</h4>
+                        <p>${data.message || 'Unknown error'}</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h4>❌ Network Error</h4>
+                    <p>Error: ${error.message}</p>
+                    <p>Make sure the server is running on port 30005</p>
+                    <p style="margin-top: 10px;"><strong>Troubleshooting:</strong></p>
+                    <ul style="text-align: left;">
+                        <li>Check if server is running: <code>node server.js</code></li>
+                        <li>Verify database connection</li>
+                        <li>Check browser console for detailed errors</li>
+                    </ul>
+                `;
+                console.error('Login test error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
+
