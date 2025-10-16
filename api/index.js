@@ -240,6 +240,27 @@ app.get('/api/test', (req, res) => {
     });
 });
 
+// Config check endpoint (for debugging)
+app.get('/api/config-check', (req, res) => {
+    res.json({
+        status: 'ok',
+        environment: process.env.NODE_ENV || 'development',
+        hasDbHost: !!process.env.DB_HOST,
+        hasDbPort: !!process.env.DB_PORT,
+        hasDbName: !!process.env.DB_NAME,
+        hasDbUser: !!process.env.DB_USER,
+        hasDbPassword: !!process.env.DB_PASSWORD,
+        hasJwtSecret: !!process.env.JWT_SECRET,
+        dbConfig: {
+            host: process.env.DB_HOST ? 'SET' : 'NOT SET',
+            port: process.env.DB_PORT ? 'SET' : 'NOT SET',
+            database: process.env.DB_NAME ? 'SET' : 'NOT SET',
+            user: process.env.DB_USER ? 'SET' : 'NOT SET'
+        },
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Database connection test endpoint
 app.get('/api/db-test', async (req, res) => {
     try {

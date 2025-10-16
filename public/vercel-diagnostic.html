@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vercel Diagnostic Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        button {
+            background: #1e3a8a;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #3b82f6;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #1e3a8a;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+        .info {
+            background: #dbeafe;
+            color: #1e3a8a;
+            border: 1px solid #3b82f6;
+        }
+        .loading {
+            display: none;
+            color: #666;
+            font-style: italic;
+        }
+        .check-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .check-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Vercel Deployment Diagnostic</h1>
+        <p class="subtitle">Run these tests to diagnose why login isn't working on Vercel</p>
+
+        <div class="test-section">
+            <h3>Test 1: API Connectivity</h3>
+            <p>Check if the API is responding</p>
+            <button onclick="testAPI()">Run API Test</button>
+            <div id="apiLoading" class="loading">Testing...</div>
+            <div id="apiResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 2: Environment Variables Check</h3>
+            <p>Verify all required environment variables are set</p>
+            <button onclick="testConfig()">Check Environment Variables</button>
+            <div id="configLoading" class="loading">Checking...</div>
+            <div id="configResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 3: Database Connection</h3>
+            <p>Test connection to MySQL database</p>
+            <button onclick="testDatabase()">Test Database</button>
+            <div id="dbLoading" class="loading">Testing...</div>
+            <div id="dbResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 4: Login API</h3>
+            <p>Test the login endpoint with demo credentials</p>
+            <button onclick="testLogin()">Test Login</button>
+            <div id="loginLoading" class="loading">Testing...</div>
+            <div id="loginResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Quick Links</h3>
+            <button onclick="window.location.href='/login.html'">Go to Login Page</button>
+            <button onclick="window.open('https://vercel.com/dashboard', '_blank')">Open Vercel Dashboard</button>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #f0f9ff; border-radius: 8px;">
+            <h4>💡 Expected Results:</h4>
+            <ul>
+                <li>All tests should show ✅ success</li>
+                <li>All environment variables should be "SET"</li>
+                <li>Database should show 7 users</li>
+                <li>Login should return a token and user object</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        async function testAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            const loadingDiv = document.getElementById('apiLoading');
+            resultDiv.innerHTML = '';
+            loadingDiv.style.display = 'block';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/test`);
+                const data = await response.json();
+                
+                loadingDiv.style.display = 'none';
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `✅ API is working!\n\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ API test failed!\n\nError: ${error.message}\n\nThis means the API endpoint is not responding.`;
+            }
+        }
+
+        async function testConfig() {
+            const resultDiv = document.getElementById('configResult');
+            const loadingDiv = document.getElementById('configLoading');
+            resultDiv.innerHTML = '';
+            loadingDiv.style.display = 'block';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/config-check`);
+                const data = await response.json();
+                
+                loadingDiv.style.display = 'none';
+                
+                // Check if all required vars are set
+                const allSet = data.hasDbHost && data.hasDbPort && data.hasDbName && 
+                               data.hasDbUser && data.hasDbPassword && data.hasJwtSecret;
+                
+                if (allSet) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ All environment variables are set!\n\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ Missing environment variables!\n\n${JSON.stringify(data, null, 2)}\n\n⚠️ ACTION REQUIRED:\n1. Go to Vercel Dashboard → Your Project\n2. Go to Settings → Environment Variables\n3. Add the missing variables\n4. Redeploy the project`;
+                }
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Config check failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function testDatabase() {
+            const resultDiv = document.getElementById('dbResult');
+            const loadingDiv = document.getElementById('dbLoading');
+            resultDiv.innerHTML = '';
+            loadingDiv.style.display = 'block';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/db-test`);
+                const data = await response.json();
+                
+                loadingDiv.style.display = 'none';
+                
+                if (data.status === 'success') {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ Database connection successful!\n\n${JSON.stringify(data, null, 2)}\n\nUsers in database: ${data.database.userCount}`;
+                } else {
+                    resultDiv.className = 'result warning';
+                    resultDiv.innerHTML = `⚠️ Database connection issue\n\n${JSON.stringify(data, null, 2)}\n\nThe API will use fallback authentication for demo accounts.`;
+                }
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Database test failed!\n\nError: ${error.message}`;
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            const loadingDiv = document.getElementById('loginLoading');
+            resultDiv.innerHTML = '';
+            loadingDiv.style.display = 'block';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'student@quest.edu.pk',
+                        password: 'pass'
+                    })
+                });
+
+                const data = await response.json();
+                
+                loadingDiv.style.display = 'none';
+                
+                if (response.ok && data.user) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ Login successful!\n\nUser: ${data.user.name}\nEmail: ${data.user.email}\nRole: ${data.user.role}\n\nToken received: ${data.token.substring(0, 50)}...\n\n🎉 Login is working! You can now use the login page.`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ Login failed!\n\n${JSON.stringify(data, null, 2)}\n\nReason: ${data.message || 'Unknown error'}`;
+                }
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Login test failed!\n\nError: ${error.message}\n\nThis is likely a CORS or network issue.`;
+            }
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', function() {
+            console.log('Vercel Diagnostic Tool loaded');
+            console.log('Run tests manually by clicking the buttons above');
+        });
+    </script>
+</body>
+</html>
+
