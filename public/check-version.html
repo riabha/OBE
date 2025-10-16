@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Version Check</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #1e3a8a; }
+        .version-box {
+            background: #f0f9ff;
+            border-left: 4px solid #1e3a8a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d1fae5;
+            border-left-color: #10b981;
+        }
+        .error {
+            background: #fee2e2;
+            border-left-color: #ef4444;
+        }
+        .info { color: #666; font-size: 14px; }
+        button {
+            background: #1e3a8a;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #3b82f6; }
+        pre {
+            background: #1e1e1e;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Version Checker</h1>
+        <p class="info">Check which version is currently deployed</p>
+        
+        <button onclick="checkVersion()">Check Version</button>
+        <button onclick="location.href='/login.html'">Go to Login</button>
+        
+        <div id="result"></div>
+        
+        <div style="margin-top: 30px; padding: 20px; background: #f9fafb; border-radius: 8px;">
+            <h3>Expected Latest Version:</h3>
+            <ul>
+                <li><strong>Commit:</strong> 25cfe7b</li>
+                <li><strong>Message:</strong> CRITICAL FIX - Vercel env vars</li>
+                <li><strong>Features:</strong> Fixed vercel.json, diagnostic tools, CORS fix</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function checkVersion() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Checking...</p>';
+            
+            try {
+                const response = await fetch('/version.json');
+                const data = await response.json();
+                
+                const isLatest = data.commit === '25cfe7b';
+                const className = isLatest ? 'version-box success' : 'version-box error';
+                
+                resultDiv.innerHTML = `
+                    <div class="${className}">
+                        <h3>${isLatest ? '✅ Latest Version Deployed!' : '❌ OLD Version Deployed'}</h3>
+                        <p><strong>Current Commit:</strong> ${data.commit}</p>
+                        <p><strong>Version:</strong> ${data.version}</p>
+                        <p><strong>Date:</strong> ${data.date}</p>
+                        <p><strong>Message:</strong> ${data.message}</p>
+                        <h4>Features in this version:</h4>
+                        <ul>
+                            ${data.features.map(f => `<li>${f}</li>`).join('')}
+                        </ul>
+                        ${!isLatest ? '<p><strong style="color: red;">⚠️ This is NOT the latest version! Vercel needs to be redeployed.</strong></p>' : ''}
+                    </div>
+                `;
+                
+                if (isLatest) {
+                    resultDiv.innerHTML += `
+                        <div style="margin-top: 20px; padding: 15px; background: #d1fae5; border-radius: 5px;">
+                            <p><strong>🎉 You have the latest version!</strong></p>
+                            <p>Login should work now. <a href="/login.html">Go to Login Page</a></p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML += `
+                        <div style="margin-top: 20px; padding: 15px; background: #fee2e2; border-radius: 5px;">
+                            <p><strong>⚠️ You need to redeploy on Vercel!</strong></p>
+                            <p>Current commit: ${data.commit}</p>
+                            <p>Expected commit: 25cfe7b</p>
+                            <p>See instructions below...</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="version-box error">
+                        <h3>❌ Cannot Check Version</h3>
+                        <p>Error: ${error.message}</p>
+                        <p>This might mean:</p>
+                        <ul>
+                            <li>You're running an old version that doesn't have version.json</li>
+                            <li>The file is not deployed yet</li>
+                            <li>Network error</li>
+                        </ul>
+                        <p><strong>Solution: You need to redeploy on Vercel!</strong></p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Auto-check on load
+        window.addEventListener('load', checkVersion);
+    </script>
+</body>
+</html>
+
