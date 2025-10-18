@@ -151,12 +151,12 @@
 
                 const data = await response.json();
 
-                if (response.ok && data.success && data.data) {
+                if (response.ok && data.token && data.user) {
                     showAlert('Login successful! Redirecting...', 'success');
                     
                     // Store user data and token
-                    localStorage.setItem('token', data.data.token);
-                    localStorage.setItem('user', JSON.stringify(data.data.user));
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
                     
                     // Redirect to appropriate dashboard
                     setTimeout(() => {
@@ -170,7 +170,7 @@
                             'controller': '/controller-dashboard-enhanced.html'
                         };
                         
-                        const dashboardFile = dashboardMap[data.data.user.role] || '/student-dashboard-enhanced.html';
+                        const dashboardFile = dashboardMap[data.user.role] || '/student-dashboard-enhanced.html';
                         window.location.href = dashboardFile;
                     }, 1000);
                 } else {
