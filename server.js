@@ -1,5 +1,5 @@
 const express = require('express');
-const mysql = require('mysql2/promise');
+const mongoose = require('mongoose');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -45,197 +45,78 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// Platform Database Configuration (for metadata only)
-const platformDbConfig = {
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 3306,
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'quest_obe', // Platform DB
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    ssl: false
-};
+// MongoDB Configuration (for platform and all universities)
+const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/obe_platform';
 
-// Initialize platform database connection
-const pool = dbManager.initPlatformDatabase(platformDbConfig);
+// Platform database connection will be initialized in startServer()
+let platformDB = null;
 
-// Database initialization with CQI tables and multi-university support
+// Database initialization with MongoDB and multi-university support
 async function initializeDatabase() {
     try {
-        const connection = await pool.getConnection();
+        console.log('🔌 Connecting to MongoDB Platform Database...');
         
-        // Create universities table for multi-tenancy (PLATFORM DB - Metadata Only)
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS universities (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                universityName VARCHAR(255) UNIQUE NOT NULL,
-                universityCode VARCHAR(50) UNIQUE NOT NULL,
-                databaseName VARCHAR(100) UNIQUE NOT NULL,
-                logo VARCHAR(500),
-                primaryColor VARCHAR(20) DEFAULT '#2563eb',
-                secondaryColor VARCHAR(20) DEFAULT '#7c3aed',
-                address TEXT,
-                city VARCHAR(100),
-                country VARCHAR(100) DEFAULT 'Pakistan',
-                contactEmail VARCHAR(255),
-                contactPhone VARCHAR(50),
-                website VARCHAR(255),
-                superAdminEmail VARCHAR(255),
-                subscriptionPlan VARCHAR(50) DEFAULT 'Basic',
-                subscriptionStatus VARCHAR(50) DEFAULT 'Active',
-                maxUsers INT DEFAULT 1000,
-                maxCourses INT DEFAULT 100,
-                isActive BOOLEAN DEFAULT TRUE,
-                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_university_code (universityCode),
-                INDEX idx_super_admin (superAdminEmail),
-                INDEX idx_database_name (databaseName)
-            )
-        `);
+        // Initialize MongoDB platform database connection
+        platformDB = await dbManager.initPlatformDatabase(mongoUri);
         
-        // Add databaseName column if it doesn't exist (for existing installations)
-        try {
-            await connection.execute(`
-                ALTER TABLE universities ADD COLUMN databaseName VARCHAR(100) UNIQUE AFTER universityCode
-            `);
-            console.log('  ✅ Added databaseName column to universities table');
-        } catch (err) {
-            if (!err.message.includes('Duplicate column')) {
-                console.log('  Note: databaseName column may already exist');
-            }
-        }
+        console.log('✅ MongoDB Platform Database connected successfully!');
+        console.log('  📦 Collections: universities, platformusers');
+        console.log('  🏛️  Architecture: Automatic database per university');
         
-        // Platform database only stores PRO Super Admin users
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS platform_users (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                email VARCHAR(255) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL,
-                role VARCHAR(50) NOT NULL,
-                name VARCHAR(255) NOT NULL,
-                department VARCHAR(100),
-                permissions TEXT,
-                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_email (email),
-                INDEX idx_role (role)
-            )
-        `);
-        console.log('  ✅ platform_users table created (metadata only)');
-        
-        // Platform settings table
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS platform_settings (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                settingKey VARCHAR(100) UNIQUE NOT NULL,
-                settingValue TEXT,
-                updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            )
-        `);
-        console.log('  ✅ platform_settings table created');
-        
-        // Database connections table (for manually created databases)
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS database_connections (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                databaseName VARCHAR(100) UNIQUE NOT NULL,
-                host VARCHAR(255) NOT NULL,
-                port INT NOT NULL,
-                username VARCHAR(100) NOT NULL,
-                password VARCHAR(255) NOT NULL,
-                databaseType ENUM('Platform', 'University') DEFAULT 'University',
-                description TEXT,
-                status ENUM('Active', 'Inactive', 'Testing') DEFAULT 'Active',
-                isAvailable BOOLEAN DEFAULT TRUE,
-                assignedUniversityId INT DEFAULT NULL,
-                isPlatformDB BOOLEAN DEFAULT FALSE,
-                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_database_name (databaseName),
-                INDEX idx_status (status),
-                INDEX idx_type (databaseType),
-                UNIQUE KEY idx_assigned_university (assignedUniversityId)
-            )
-        `);
-        console.log('  ✅ database_connections table created (for manual DB management)');
-        
-        // Add databaseType column if it doesn't exist (for existing installations)
-        try {
-            await connection.execute(`
-                ALTER TABLE database_connections ADD COLUMN databaseType ENUM('Platform', 'University') DEFAULT 'University' AFTER password
-            `);
-        } catch (err) {
-            // Column may already exist
-        }
-        
-        try {
-            await connection.execute(`
-                ALTER TABLE database_connections ADD COLUMN isPlatformDB BOOLEAN DEFAULT FALSE AFTER assignedUniversityId
-            `);
-        } catch (err) {
-            // Column may already exist
-        }
-
-        connection.release();
-        console.log('✅ Enhanced database tables created successfully!');
-        
-        // Create only PRO Super Admin (no demo universities or users)
+        // Create PRO Super Admin
         await createProSuperAdmin();
+        
+        // Log existing universities
+        await logExistingUniversities();
         
     } catch (error) {
         console.error('❌ Database initialization failed:', error.message);
-        console.log('🔄 Running in demo mode without database...');
+        console.log('  💡 Make sure MongoDB is running');
+        console.log('  💡 Check MONGODB_URI in config.env');
+        throw error;
     }
 }
 
-// Create only PRO Super Admin in PLATFORM database
+// Log existing universities
+async function logExistingUniversities() {
+    try {
+        const universities = await dbManager.getAllUniversityDatabases();
+        
+        if (universities.length > 0) {
+            console.log(`\n📚 Existing Universities (${universities.length}):`);
+            universities.forEach((uni, index) => {
+                console.log(`  ${index + 1}. ${uni.name} (${uni.code}) - DB: ${uni.database}`);
+            });
+            console.log('');
+        } else {
+            console.log('\n📚 No universities registered yet');
+            console.log('  💡 Create universities via Pro Super Admin dashboard\n');
+        }
+    } catch (error) {
+        console.error('Error logging universities:', error.message);
+    }
+}
+
+// Create only PRO Super Admin in PLATFORM database (MongoDB)
 async function createProSuperAdmin() {
     try {
-        // First, remove any old PRO admin accounts
-        const oldEmails = ['pro@obeportal.com', 'admin@obeportal.com'];
-        for (const oldEmail of oldEmails) {
-            const [oldAccount] = await pool.execute(
-                'SELECT id FROM platform_users WHERE email = ?',
-                [oldEmail]
-            );
-            
-            if (oldAccount.length > 0) {
-                await pool.execute(
-                    'DELETE FROM platform_users WHERE email = ?',
-                    [oldEmail]
-                );
-                console.log(`🗑️  Removed old account: ${oldEmail}`);
-            }
-        }
+        const proAdminEmail = 'pro@obe.org.pk';
+        const proAdminPassword = 'proadmin123';
+        const proAdminName = 'OBE Portal Administrator';
         
-        // Now check if new PRO admin exists
-        const [existingProAdmin] = await pool.execute(
-            'SELECT id FROM platform_users WHERE email = ?',
-            ['pro@obe.org.pk']
+        // Create PRO admin using database manager
+        const admin = await dbManager.createPlatformAdmin(
+            proAdminEmail,
+            proAdminPassword,
+            proAdminName
         );
         
-        if (existingProAdmin.length === 0) {
-            // Create new PRO admin
-            await pool.execute(
-                `INSERT INTO platform_users (email, password, role, name, department, permissions) 
-                 VALUES (?, ?, ?, ?, ?, ?)`,
-                [
-                    'pro@obe.org.pk',
-                    await bcrypt.hash('proadmin123', 10),
-                    'pro_superadmin',
-                    'OBE Portal Administrator',
-                    'Platform Management',
-                    JSON.stringify(['platform_all', 'manage_universities', 'view_all_data'])
-                ]
-            );
-            console.log(`✅ Created PRO Super Admin: pro@obe.org.pk`);
-            console.log(`   Password: proadmin123`);
-            console.log(`   Stored in: platform_users table (platform database)`);
-        } else {
-            console.log(`✅ PRO Super Admin already exists: pro@obe.org.pk`);
+        if (admin) {
+            console.log(`\n🔐 PRO Super Admin Credentials:`);
+            console.log(`   Email: ${proAdminEmail}`);
+            console.log(`   Password: ${proAdminPassword}`);
+            console.log(`   Database: Platform (MongoDB)`);
+            console.log(`   Role: pro-superadmin\n`);
         }
     } catch (error) {
         console.error(`❌ Error managing PRO Super Admin:`, error.message);
@@ -2842,8 +2723,9 @@ app.post('/api/run-migrations', async (req, res) => {
 async function startServer() {
     try {
         console.log('🚀 Starting OBE Portal - Multi-University SaaS Platform...');
-        console.log(`📊 Platform Database: ${platformDbConfig.host}:${platformDbConfig.port}/${platformDbConfig.database}`);
-        console.log(`🏛️  Architecture: Separate database per university`);
+        console.log(`📊 Platform Database: MongoDB`);
+        console.log(`📍 MongoDB URI: ${mongoUri.replace(/\/\/.*@/, '//***:***@')}`);
+        console.log(`🏛️  Architecture: Auto-create database per university`);
         
         await initializeDatabase();
         

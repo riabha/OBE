@@ -28,7 +28,7 @@ A comprehensive **Outcome-Based Education (OBE) Portal** for managing Course Lea
 
 ### Prerequisites
 - Node.js (v22.x recommended)
-- MySQL Database (v5.7 or higher)
+- MongoDB Database (v5.0 or higher)
 - npm package manager
 
 ### Installation
@@ -54,12 +54,10 @@ A comprehensive **Outcome-Based Education (OBE) Portal** for managing Course Lea
    PORT=3000
    NODE_ENV=production
    
-   # MySQL Database Connection
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_USER=your_database_user
-   DB_PASSWORD=your_database_password
-   DB_NAME=quest_obe
+   # MongoDB Connection (Platform Database)
+   MONGODB_URI=mongodb://localhost:27017/obe_platform
+   # For production with authentication:
+   # MONGODB_URI=mongodb://username:password@localhost:27017/obe_platform
    
    # JWT Secret (change to a strong random string)
    JWT_SECRET=your_jwt_secret_key_change_this
@@ -80,15 +78,34 @@ A comprehensive **Outcome-Based Education (OBE) Portal** for managing Course Lea
 
 ## 🗄️ Database Setup
 
-The application uses MySQL for data storage. Database tables will be created automatically on first run.
+The application uses **MongoDB** for data storage with **automatic database creation** per university.
 
-### Manual Database Creation (Optional)
+### Architecture:
+- **Platform Database** (`obe_platform`): Stores all university metadata
+- **University Databases** (`obe_university_*`): Auto-created for each university
+- Each university gets its own isolated MongoDB database
 
-```sql
-CREATE DATABASE quest_obe CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'obeuser'@'localhost' IDENTIFIED BY 'your_secure_password';
-GRANT ALL PRIVILEGES ON quest_obe.* TO 'obeuser'@'localhost';
-FLUSH PRIVILEGES;
+### MongoDB Installation:
+```bash
+# For Ubuntu/Debian
+sudo apt install mongodb-org
+
+# For macOS
+brew install mongodb-community
+
+# Start MongoDB service
+sudo systemctl start mongod   # Linux
+brew services start mongodb-community  # macOS
+```
+
+### Manual Database Creation (Optional):
+MongoDB databases are created automatically, but you can pre-create if needed:
+```bash
+mongo
+use obe_platform
+db.createCollection("universities")
+db.createCollection("platformusers")
+exit
 ```
 
 ## 🌐 VPS/Production Deployment
@@ -96,7 +113,7 @@ FLUSH PRIVILEGES;
 ### Deployment Steps
 
 1. **Install Node.js 22.x** on your VPS
-2. **Install MySQL** and ensure it's running
+2. **Install MongoDB** and ensure it's running
 3. **Clone your repository**
    ```bash
    git clone https://github.com/riabha/OBE.git
@@ -110,7 +127,7 @@ FLUSH PRIVILEGES;
 
 5. **Configure environment variables**
    - Copy `config.env.example` to `config.env`
-   - Update with your production MySQL credentials
+   - Update with your production MongoDB connection string
    - Set strong JWT and Session secrets
 
 6. **Start the application**
@@ -133,11 +150,7 @@ For production deployment:
 ```env
 PORT=3000
 NODE_ENV=production
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=obeuser
-DB_PASSWORD=your_secure_password
-DB_NAME=quest_obe
+MONGODB_URI=mongodb://localhost:27017/obe_platform
 JWT_SECRET=your_strong_random_secret
 JWT_EXPIRE=7d
 SESSION_SECRET=your_strong_random_session_secret
@@ -146,11 +159,11 @@ SESSION_SECRET=your_strong_random_session_secret
 ### Deployment Checklist
 
 1. ✅ Install Node.js 22.x on VPS
-2. ✅ Install and configure MySQL
-3. ✅ Create database and user
+2. ✅ Install and configure MongoDB
+3. ✅ Start MongoDB service
 4. ✅ Clone repository
 5. ✅ Install dependencies
-6. ✅ Configure environment variables
+6. ✅ Configure environment variables (MongoDB URI)
 7. ✅ Set up reverse proxy (Nginx/Apache or via aaPanel)
 8. ✅ Configure SSL/HTTPS
 9. ✅ Set up PM2 for process management
@@ -217,10 +230,11 @@ GET /api/reports/department        - Department reports
 ## 🛠️ Technology Stack
 
 - **Backend**: Node.js 22.x, Express.js
-- **Database**: MySQL 5.7+
+- **Database**: MongoDB 5.0+ with Mongoose ODM
 - **Authentication**: JWT, bcrypt, Passport.js
 - **File Upload**: Multer
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
+- **Architecture**: Multi-tenancy with automatic database creation
 
 ## 📁 Project Structure
 
@@ -269,9 +283,10 @@ OBE/
 - Passwords hashed with bcrypt (12 rounds)
 - JWT-based authentication
 - Session management with express-session
-- SQL injection protection with parameterized queries
+- MongoDB injection protection with Mongoose schema validation
 - CORS configuration for production
 - Environment variables for sensitive data
+- Isolated database per university for data security
 
 ## 📝 Contributing
 
@@ -306,8 +321,9 @@ For support, email support@quest.edu.pk or create an issue in the GitHub reposit
   - Assessment and result tracking
   - CQI action monitoring
   - Department performance analytics
-  - MySQL integration
-  - Multi-university support
+  - MongoDB integration with Mongoose ODM
+  - Multi-university SaaS architecture
+  - Automatic database creation per university
   - VPS deployment ready
 
 ---
