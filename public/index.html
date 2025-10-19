@@ -3,21 +3,451 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OBE Portal - Quaid-e-Awam University of Engineering, Science & Technology</title>
+    <title>OBE Portal | Outcome-Based Education Management System</title>
+    <meta name="description" content="Empowering universities to seamlessly manage, measure, and improve outcomes in line with Washington Accord and global accreditation standards.">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="styles.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #7c3aed;
+            --accent-color: #10b981;
+            --dark-color: #1e293b;
+            --light-gray: #f8fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark-color);
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        .navbar {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: var(--dark-color) !important;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .btn-primary-gradient {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 32px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-outline-primary-custom {
+            border: 2px solid white;
+            color: white;
+            font-weight: 600;
+            padding: 12px 32px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-outline-primary-custom:hover {
+            background: white;
+            color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding-top: 80px;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+            background-size: cover;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .hero-image {
+            position: relative;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: white;
+            padding: 4rem 0;
+            margin-top: -50px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* OBE Process Diagram */
+        .obe-process {
+            background: var(--light-gray);
+            padding: 5rem 0;
+        }
+
+        .process-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            height: 100%;
+        }
+
+        .process-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-color);
+            box-shadow: 0 20px 60px rgba(37, 99, 235, 0.15);
+        }
+
+        .process-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+
+        .process-arrow {
+            font-size: 2rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 5rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Universities Section */
+        .universities-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 5rem 0;
+            color: white;
+        }
+
+        .university-logo {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .university-logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 5rem 0;
+            background: var(--light-gray);
+        }
+
+        .step-card {
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            height: 100%;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -20px;
+            left: 30px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
+        }
+
+        /* Testimonials */
+        .testimonials-section {
+            padding: 5rem 0;
+        }
+
+        .testimonial-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            height: 100%;
+        }
+
+        .testimonial-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .rating {
+            color: #fbbf24;
+        }
+
+        /* Compliance Badge */
+        .compliance-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .compliance-badge:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(16, 185, 129, 0.6);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 4rem 0 2rem;
+        }
+
+        footer a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: white;
+        }
+
+        .social-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .process-arrow {
+                transform: rotate(90deg);
+                margin: 1rem 0;
+            }
+            
+            .compliance-badge {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Animations */
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="quest_logo.png" alt="QUEST Logo" class="me-2" style="height: 50px; width: 50px; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <div>
-                    <div class="fw-bold">QUEST</div>
-                    <small class="text-light">OBE Portal</small>
-                </div>
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-graduation-cap me-2"></i>OBE Portal
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -25,28 +455,15 @@
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#home">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#about">About OBE</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#programs">Programs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/login" onclick="redirectToPortal('student')">Student Portal</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/login" onclick="redirectToPortal('teacher')">Teacher Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#contact">Contact</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/login" class="btn btn-outline-light ms-2">
-                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about-obe">About OBE</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#universities">Universities</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <a href="/login" class="btn btn-primary-gradient">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
                         </a>
                     </li>
                 </ul>
@@ -57,26 +474,66 @@
     <!-- Hero Section -->
     <section id="home" class="hero-section">
         <div class="container">
-            <div class="row align-items-center min-vh-100">
-                <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold text-white mb-4">
-                        Outcome-Based Education Portal
+            <div class="row align-items-center">
+                <div class="col-lg-6 hero-content" data-aos="fade-right">
+                    <h1 class="hero-title">
+                        Transform Education with Outcome-Based Excellence
                     </h1>
-                    <p class="lead text-white-50 mb-4">
-                        Empowering students through structured learning outcomes and continuous assessment at Quaid-e-Awam University of Engineering, Science & Technology
+                    <p class="hero-subtitle">
+                        Empowering universities to seamlessly manage, measure, and improve outcomes in line with Washington Accord and global accreditation standards.
                     </p>
-                    <div class="d-flex gap-3">
-                        <a href="student-dashboard.html" class="btn btn-light btn-lg">
-                            <i class="fas fa-user-graduate me-2"></i>Student Portal
-                        </a>
-                        <button class="btn btn-outline-light btn-lg" onclick="scrollToSection('about')">
-                            <i class="fas fa-info-circle me-2"></i>Learn More
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button class="btn btn-primary-gradient btn-lg" onclick="scrollToContact()">
+                            <i class="fas fa-rocket me-2"></i>Request Demo
                         </button>
+                        <a href="/login" class="btn btn-outline-primary-custom btn-lg">
+                            <i class="fas fa-university me-2"></i>University Login
+                        </a>
+                    </div>
+                    
+                    <div class="mt-5">
+                        <div class="compliance-badge">
+                            <i class="fas fa-check-circle fa-lg"></i>
+                            <span>Washington Accord & PEC Compliant</span>
+                </div>
                     </div>
                 </div>
-                <div class="col-lg-6 text-center">
+                
+                <div class="col-lg-6 text-center mt-5 mt-lg-0" data-aos="fade-left">
                     <div class="hero-image">
-                        <i class="fas fa-graduation-cap text-white" style="font-size: 15rem; opacity: 0.3;"></i>
+                        <i class="fas fa-graduation-cap" style="font-size: 15rem; color: rgba(255, 255, 255, 0.3);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="stat-card">
+                        <div class="stat-number" id="statUniversities">0</div>
+                        <div class="stat-label">Universities</div>
+                </div>
+            </div>
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="stat-card">
+                        <div class="stat-number" id="statUsers">0</div>
+                        <div class="stat-label">Total Users</div>
+                            </div>
+                        </div>
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="stat-card">
+                        <div class="stat-number" id="statCourses">0</div>
+                        <div class="stat-label">Total Courses</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="stat-card">
+                        <div class="stat-number">99.9%</div>
+                        <div class="stat-label">Uptime</div>
                     </div>
                 </div>
             </div>
@@ -84,305 +541,318 @@
     </section>
 
     <!-- About OBE Section -->
-    <section id="about" class="py-5">
+    <section id="about-obe" class="obe-process">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto text-center">
-                    <h2 class="display-5 fw-bold mb-4">What is Outcome-Based Education?</h2>
-                    <p class="lead text-muted">
-                        Outcome-Based Education (OBE) is an educational approach that focuses on what students should know and be able to do by the end of their educational experience.
-                    </p>
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-4 fw-bold mb-3">The OBE Process</h2>
+                <p class="lead text-muted">A comprehensive framework aligned with Washington Accord standards</p>
+                            </div>
+
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-2 col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="process-card">
+                        <div class="process-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <h5 class="fw-bold">CLO</h5>
+                        <p class="text-muted mb-0">Course Learning Outcomes</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-1 col-md-1 d-none d-md-block">
+                    <div class="process-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </div>
+
+                <div class="col-lg-2 col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="process-card">
+                        <div class="process-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                            <i class="fas fa-project-diagram"></i>
+                    </div>
+                        <h5 class="fw-bold">PLO</h5>
+                        <p class="text-muted mb-0">Program Learning Outcomes</p>
+                </div>
+            </div>
+
+                <div class="col-lg-1 col-md-1 d-none d-md-block">
+                    <div class="process-arrow">
+                        <i class="fas fa-arrow-right"></i>
+        </div>
+                </div>
+
+                <div class="col-lg-2 col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="process-card">
+                        <div class="process-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <i class="fas fa-flag-checkered"></i>
+                        </div>
+                        <h5 class="fw-bold">PEO</h5>
+                        <p class="text-muted mb-0">Program Educational Objectives</p>
                 </div>
             </div>
             
-            <div class="row mt-5">
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="fas fa-bullseye"></i>
+                <div class="col-lg-1 col-md-1 d-none d-md-block">
+                    <div class="process-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                                </div>
                             </div>
-                            <h5 class="card-title">Clear Learning Outcomes</h5>
-                            <p class="card-text text-muted">
-                                Define specific, measurable learning outcomes that students must achieve to graduate successfully.
-                            </p>
+
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="process-card">
+                        <div class="process-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <h5 class="fw-bold">Accreditation</h5>
+                        <p class="text-muted mb-0">Washington Accord Compliance</p>
                         </div>
                     </div>
                 </div>
                 
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="fas fa-chart-line"></i>
+            <div class="text-center mt-5" data-aos="fade-up">
+                <div class="alert alert-info d-inline-flex align-items-center" style="border-radius: 15px;">
+                    <i class="fas fa-info-circle me-2 fa-lg"></i>
+                    <span>Seamless mapping from course-level outcomes to graduate attributes and accreditation requirements</span>
+                                </div>
                             </div>
-                            <h5 class="card-title">Continuous Assessment</h5>
-                            <p class="card-text text-muted">
-                                Regular evaluation and feedback to ensure students are meeting the defined learning outcomes.
-                            </p>
                         </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-4 fw-bold mb-3">Powerful Features</h2>
+                <p class="lead text-muted">Everything you need for comprehensive OBE management</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                            <i class="fas fa-sitemap"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Outcome Mapping</h4>
+                        <p class="text-muted">Comprehensive CLO/PLO/PEO mapping with visual representations and real-time tracking of achievement levels.</p>
                     </div>
                 </div>
                 
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="fas fa-sync-alt"></i>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                            <i class="fas fa-chart-line"></i>
+                                </div>
+                        <h4 class="fw-bold mb-3">Automated Analytics</h4>
+                        <p class="text-muted">AI-powered analytics with automated attainment calculations, trend analysis, and predictive insights.</p>
                             </div>
-                            <h5 class="card-title">Continuous Improvement</h5>
-                            <p class="card-text text-muted">
-                                Regular review and enhancement of curriculum based on assessment results and feedback.
-                            </p>
                         </div>
+
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <i class="fas fa-file-contract"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Accreditation Reports</h4>
+                        <p class="text-muted">One-click generation of accreditation-ready reports compliant with PEC and Washington Accord standards.</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                            <i class="fas fa-users-cog"></i>
+                                </div>
+                        <h4 class="fw-bold mb-3">Multi-Role Management</h4>
+                        <p class="text-muted">Granular access control for Super Admin, University Admin, Faculty, and Students with customizable permissions.</p>
+                            </div>
+                        </div>
+
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                            <i class="fas fa-university"></i>
+                    </div>
+                        <h4 class="fw-bold mb-3">Modular Architecture</h4>
+                        <p class="text-muted">Each university gets its own branded portal with complete data isolation and customizable workflows.</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">CQI Integration</h4>
+                        <p class="text-muted">Built-in Continuous Quality Improvement tools with action tracking and effectiveness monitoring.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Programs Section -->
-    <section id="programs" class="py-5 bg-light">
+    <!-- Universities Section -->
+    <section id="universities" class="universities-section">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto text-center">
-                    <h2 class="display-5 fw-bold mb-4">Academic Programs</h2>
-                    <p class="lead text-muted">
-                        Explore our comprehensive range of programs designed with outcome-based learning objectives.
-                    </p>
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-4 fw-bold mb-3 text-white">Trusted by Leading Universities</h2>
+                <p class="lead text-white-50">Join the network of institutions achieving excellence through OBE</p>
+            </div>
+            
+            <div class="row g-4 justify-content-center" id="universitiesGrid">
+                <!-- Loading State -->
+                <div class="col-12 text-center">
+                    <div class="spinner-border text-white" role="status">
+                        <span class="visually-hidden">Loading universities...</span>
+                            </div>
+                    <p class="text-white mt-3">Loading registered universities...</p>
+                        </div>
+                    </div>
+                </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-4 fw-bold mb-3">How It Works</h2>
+                <p class="lead text-muted">Simple onboarding process for universities</p>
+                            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <div class="mt-4">
+                            <i class="fas fa-clipboard-check fa-3x text-primary mb-3"></i>
+                            <h5 class="fw-bold mb-3">Request Demo</h5>
+                            <p class="text-muted">Contact us to schedule a personalized demo and discuss your institution's requirements.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <div class="mt-4">
+                            <i class="fas fa-handshake fa-3x text-success mb-3"></i>
+                            <h5 class="fw-bold mb-3">Setup Account</h5>
+                            <p class="text-muted">We create your university's dedicated portal with custom branding and assign super admin access.</p>
+                            </div>
+                        </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <div class="mt-4">
+                            <i class="fas fa-cog fa-3x text-warning mb-3"></i>
+                            <h5 class="fw-bold mb-3">Customize</h5>
+                            <p class="text-muted">Upload your logo, configure departments, programs, and customize the system to your needs.</p>
+                    </div>
                 </div>
             </div>
             
-            <div class="row mt-5">
-                <div class="col-lg-6 mb-4">
-                    <div class="card h-100 border-0 shadow">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="program-icon bg-primary text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                    <i class="fas fa-laptop-code"></i>
-                                </div>
-                                <h5 class="card-title mb-0">Computer Science & Engineering</h5>
-                            </div>
-                            <p class="card-text text-muted">
-                                Comprehensive program covering software development, algorithms, and system design with industry-relevant outcomes.
-                            </p>
-                            <ul class="list-unstyled">
-                                <li><i class="fas fa-check text-success me-2"></i>Software Engineering</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Data Structures & Algorithms</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Database Systems</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Web Development</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-6 mb-4">
-                    <div class="card h-100 border-0 shadow">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="program-icon bg-success text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                    <i class="fas fa-cogs"></i>
-                                </div>
-                                <h5 class="card-title mb-0">Mechanical Engineering</h5>
-                            </div>
-                            <p class="card-text text-muted">
-                                Hands-on program focusing on mechanical systems design, manufacturing, and innovation.
-                            </p>
-                            <ul class="list-unstyled">
-                                <li><i class="fas fa-check text-success me-2"></i>Thermodynamics</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Machine Design</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Manufacturing Processes</li>
-                                <li><i class="fas fa-check text-success me-2"></i>CAD/CAM</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-6 mb-4">
-                    <div class="card h-100 border-0 shadow">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="program-icon bg-warning text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                    <i class="fas fa-bolt"></i>
-                                </div>
-                                <h5 class="card-title mb-0">Electrical Engineering</h5>
-                            </div>
-                            <p class="card-text text-muted">
-                                Advanced program covering power systems, electronics, and control systems engineering.
-                            </p>
-                            <ul class="list-unstyled">
-                                <li><i class="fas fa-check text-success me-2"></i>Power Systems</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Digital Electronics</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Control Systems</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Renewable Energy</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-6 mb-4">
-                    <div class="card h-100 border-0 shadow">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="program-icon bg-info text-white rounded me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                    <i class="fas fa-industry"></i>
-                                </div>
-                                <h5 class="card-title mb-0">Industrial Engineering</h5>
-                            </div>
-                            <p class="card-text text-muted">
-                                Focus on optimizing complex systems and processes in manufacturing and service industries.
-                            </p>
-                            <ul class="list-unstyled">
-                                <li><i class="fas fa-check text-success me-2"></i>Operations Research</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Quality Management</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Supply Chain</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Human Factors</li>
-                            </ul>
-                        </div>
-                    </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <div class="mt-4">
+                            <i class="fas fa-rocket fa-3x text-danger mb-3"></i>
+                            <h5 class="fw-bold mb-3">Go Live</h5>
+                            <p class="text-muted">Start managing outcomes, assessments, and generate accreditation reports instantly.</p>
+            </div>
+        </div>
                 </div>
             </div>
+            
+            <div class="text-center mt-5" data-aos="fade-up">
+                <div class="alert alert-success d-inline-flex align-items-center" style="border-radius: 15px;">
+                    <i class="fas fa-clock me-2 fa-lg"></i>
+                    <span><strong>Quick Setup:</strong> Most universities are up and running within 48 hours</span>
+                            </div>
+                        </div>
+                    </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials-section">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-4 fw-bold mb-3">What Our Users Say</h2>
+                <p class="lead text-muted">Success stories from universities, faculty, and accreditation experts</p>
+                </div>
+                
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="testimonial-card">
+                        <div class="testimonial-avatar">DR</div>
+                        <div class="rating mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            </div>
+                        <p class="text-muted mb-3">"The OBE Portal has revolutionized how we manage and track learning outcomes. The automated reports saved us weeks of work during our recent accreditation process."</p>
+                        <h6 class="fw-bold mb-0">Dr. Rizwan Ahmed</h6>
+                        <small class="text-muted">Dean of Engineering, QUEST University</small>
+                        </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="testimonial-card">
+                        <div class="testimonial-avatar">FS</div>
+                        <div class="rating mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="text-muted mb-3">"As a focal person, managing CLO attainment across multiple courses was overwhelming. This platform makes it effortless with real-time analytics and intuitive dashboards."</p>
+                        <h6 class="fw-bold mb-0">Dr. Fatima Sheikh</h6>
+                        <small class="text-muted">OBE Focal Person, Computer Science</small>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="testimonial-card">
+                        <div class="testimonial-avatar">MH</div>
+                        <div class="rating mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            </div>
+                        <p class="text-muted mb-3">"The multi-university SaaS model is brilliant. We can manage multiple institutions while maintaining complete data isolation and custom branding for each."</p>
+                        <h6 class="fw-bold mb-0">Muhammad Hassan</h6>
+                        <small class="text-muted">Educational Technology Director</small>
+                        </div>
+                    </div>
+                </div>
         </div>
     </section>
 
-    <!-- Student Portal Section -->
-    <section id="student-portal" class="py-5">
+    <!-- Compliance Section -->
+    <section class="py-5" style="background: linear-gradient(135deg, #10b981, #059669);">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto text-center">
-                    <h2 class="display-5 fw-bold mb-4">Student Portal</h2>
-                    <p class="lead text-muted">
-                        Access your learning outcomes, track progress, and view assessment results.
-                    </p>
-                </div>
-            </div>
-            
-            <div class="row mt-5">
-                <div class="col-lg-4 mb-4">
-                    <div class="card h-100 border-0 shadow">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                                <i class="fas fa-chart-bar"></i>
+            <div class="row align-items-center">
+                <div class="col-lg-8 text-white" data-aos="fade-right">
+                    <h3 class="fw-bold mb-3">
+                        <i class="fas fa-shield-alt me-3"></i>
+                        Fully Compliant with Global Standards
+                    </h3>
+                    <p class="lead mb-0">Our platform is fully aligned with Pakistan Engineering Council (PEC) criteria and Washington Accord OBE models, ensuring your institution meets all international accreditation requirements.</p>
                             </div>
-                            <h5 class="card-title">Progress Tracking</h5>
-                            <p class="card-text text-muted">
-                                Monitor your progress towards achieving learning outcomes across all courses.
-                            </p>
+                <div class="col-lg-4 text-center mt-4 mt-lg-0" data-aos="fade-left">
+                    <div class="d-flex flex-column gap-3">
+                        <div class="bg-white text-success fw-bold py-3 px-4 rounded">
+                            <i class="fas fa-check-circle me-2"></i>PEC Approved
                         </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-4 mb-4">
-                    <div class="card h-100 border-0 shadow">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                                <i class="fas fa-clipboard-check"></i>
-                            </div>
-                            <h5 class="card-title">Assessment Results</h5>
-                            <p class="card-text text-muted">
-                                View detailed feedback and grades for all assessments aligned with learning outcomes.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-4 mb-4">
-                    <div class="card h-100 border-0 shadow">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                                <i class="fas fa-calendar-alt"></i>
-                            </div>
-                            <h5 class="card-title">Academic Calendar</h5>
-                            <p class="card-text text-muted">
-                                Stay updated with important dates, deadlines, and academic events.
-                            </p>
-                        </div>
+                        <div class="bg-white text-success fw-bold py-3 px-4 rounded">
+                            <i class="fas fa-check-circle me-2"></i>Washington Accord
                     </div>
                 </div>
             </div>
-            
-            <div class="text-center mt-4">
-                <a href="student-dashboard.html" class="btn btn-primary btn-lg">
-                    <i class="fas fa-sign-in-alt me-2"></i>Access Student Portal
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Teacher Dashboard Section -->
-    <section id="teacher-dashboard" class="py-5 bg-light">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto text-center">
-                    <h2 class="display-5 fw-bold mb-4">Teacher Dashboard</h2>
-                    <p class="lead text-muted">
-                        Manage courses, create assessments, and track student performance.
-                    </p>
-                </div>
-            </div>
-            
-            <div class="row mt-5">
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card h-100 border-0 shadow">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="fas fa-book"></i>
-                            </div>
-                            <h6 class="card-title">Course Management</h6>
-                            <p class="card-text text-muted small">
-                                Create and manage course content aligned with learning outcomes.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card h-100 border-0 shadow">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="fas fa-tasks"></i>
-                            </div>
-                            <h6 class="card-title">Assessment Creation</h6>
-                            <p class="card-text text-muted small">
-                                Design assessments that effectively measure learning outcomes.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card h-100 border-0 shadow">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <h6 class="card-title">Student Analytics</h6>
-                            <p class="card-text text-muted small">
-                                Track student performance and identify areas for improvement.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card h-100 border-0 shadow">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="fas fa-chart-pie"></i>
-                            </div>
-                            <h6 class="card-title">Reports</h6>
-                            <p class="card-text text-muted small">
-                                Generate comprehensive reports on course effectiveness.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="text-center mt-4">
-                <button class="btn btn-success btn-lg" onclick="openLoginModal()">
-                    <i class="fas fa-chalkboard-teacher me-2"></i>Access Teacher Dashboard
-                </button>
             </div>
         </div>
     </section>
@@ -391,45 +861,72 @@
     <section id="contact" class="py-5">
         <div class="container">
             <div class="row">
-                <div class="col-lg-8 mx-auto text-center">
-                    <h2 class="display-5 fw-bold mb-4">Contact Us</h2>
-                    <p class="lead text-muted">
-                        Get in touch with our OBE support team for assistance and inquiries.
-                    </p>
+                <div class="col-lg-6 mb-5 mb-lg-0" data-aos="fade-right">
+                    <h2 class="display-5 fw-bold mb-4">Get In Touch</h2>
+                    <p class="lead text-muted mb-4">Ready to transform your institution's OBE management? Contact us for a personalized demo.</p>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="feature-icon me-3" style="background: linear-gradient(135deg, #3b82f6, #2563eb); width: 50px; height: 50px; font-size: 1.2rem;">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Email</h6>
+                                <p class="text-muted mb-0">info@obeportal.com</p>
                 </div>
             </div>
             
-            <div class="row mt-5">
-                <div class="col-lg-8 mx-auto">
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100 border-0 shadow">
-                                <div class="card-body p-4">
-                                    <h5 class="card-title">
-                                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                                        Address
-                                    </h5>
-                                    <p class="card-text text-muted">
-                                        Quaid-e-Awam University of Engineering, Science & Technology<br>
-                                        Nawabshah, Sindh, Pakistan
-                                    </p>
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="feature-icon me-3" style="background: linear-gradient(135deg, #10b981, #059669); width: 50px; height: 50px; font-size: 1.2rem;">
+                                <i class="fas fa-phone"></i>
                                 </div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Phone</h6>
+                                <p class="text-muted mb-0">+92-300-1234567</p>
                             </div>
                         </div>
                         
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100 border-0 shadow">
-                                <div class="card-body p-4">
-                                    <h5 class="card-title">
-                                        <i class="fas fa-phone text-primary me-2"></i>
-                                        Contact
-                                    </h5>
-                                    <p class="card-text text-muted">
-                                        Phone: +92-333-7116627<br>
-                                        Email: riaz@quest.edu.pk
-                                    </p>
+                        <div class="d-flex align-items-start">
+                            <div class="feature-icon me-3" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); width: 50px; height: 50px; font-size: 1.2rem;">
+                                <i class="fas fa-clock"></i>
                                 </div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Support Hours</h6>
+                                <p class="text-muted mb-0">24/7 Support Available</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="card border-0 shadow-lg" style="border-radius: 20px;">
+                        <div class="card-body p-4 p-md-5">
+                            <h4 class="fw-bold mb-4">Request a Demo</h4>
+                            <form id="contactForm">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">University Name</label>
+                                    <input type="text" class="form-control" required style="border-radius: 10px;">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Your Name</label>
+                                    <input type="text" class="form-control" required style="border-radius: 10px;">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Email Address</label>
+                                    <input type="email" class="form-control" required style="border-radius: 10px;">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Phone Number</label>
+                                    <input type="tel" class="form-control" required style="border-radius: 10px;">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Message</label>
+                                    <textarea class="form-control" rows="4" style="border-radius: 10px;"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary-gradient w-100 py-3">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Request
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -438,111 +935,306 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-5">
+    <footer>
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <img src="quest_logo.png" alt="QUEST Logo" class="me-2" style="height: 50px; width: 50px; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
-                        <div>
-                            <div class="fw-bold">QUEST</div>
-                            <small class="text-light">OBE Portal</small>
+                    <h4 class="fw-bold mb-3">
+                        <i class="fas fa-graduation-cap me-2"></i>OBE Portal
+                    </h4>
+                    <p class="text-white-50">Empowering universities worldwide with comprehensive outcome-based education management solutions.</p>
+                    <div class="d-flex gap-2 mt-3">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
                         </div>
-                    </div>
-                    <p class="text-light">
-                        Quaid-e-Awam University of Engineering, Science & Technology
-                    </p>
                 </div>
                 
                 <div class="col-lg-2 col-md-6 mb-4">
-                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <h6 class="fw-bold mb-3">Product</h6>
                     <ul class="list-unstyled">
-                        <li><a href="#home" class="text-light text-decoration-none">Home</a></li>
-                        <li><a href="#about" class="text-light text-decoration-none">About OBE</a></li>
-                        <li><a href="#programs" class="text-light text-decoration-none">Programs</a></li>
-                        <li><a href="student-dashboard.html" class="text-light text-decoration-none">Student Portal</a></li>
+                        <li class="mb-2"><a href="#features">Features</a></li>
+                        <li class="mb-2"><a href="#how-it-works">How It Works</a></li>
+                        <li class="mb-2"><a href="#universities">Universities</a></li>
+                        <li class="mb-2"><a href="#">Pricing</a></li>
                     </ul>
                 </div>
                 
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h6 class="fw-bold mb-3">Resources</h6>
                     <ul class="list-unstyled">
-                        <li><a href="#teacher-dashboard" class="text-light text-decoration-none">Teacher Dashboard</a></li>
-                        <li><a href="#contact" class="text-light text-decoration-none">Contact</a></li>
-                        <li><a href="#" class="text-light text-decoration-none">Help Center</a></li>
-                        <li><a href="#" class="text-light text-decoration-none">Documentation</a></li>
+                        <li class="mb-2"><a href="#">Documentation</a></li>
+                        <li class="mb-2"><a href="#">Help Center</a></li>
+                        <li class="mb-2"><a href="#">API Reference</a></li>
+                        <li class="mb-2"><a href="#">Community</a></li>
                     </ul>
                 </div>
                 
-                <div class="col-lg-4 mb-4">
-                    <h6 class="fw-bold mb-3">Follow Us</h6>
-                    <div class="d-flex gap-3">
-                        <a href="#" class="text-light fs-4"><i class="fab fa-facebook"></i></a>
-                        <a href="#" class="text-light fs-4"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-light fs-4"><i class="fab fa-linkedin"></i></a>
-                        <a href="#" class="text-light fs-4"><i class="fab fa-instagram"></i></a>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3">Company</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">About Us</a></li>
+                        <li class="mb-2"><a href="#">Careers</a></li>
+                        <li class="mb-2"><a href="#">Blog</a></li>
+                        <li class="mb-2"><a href="#contact">Contact</a></li>
+                    </ul>
                     </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3">Legal</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">Privacy Policy</a></li>
+                        <li class="mb-2"><a href="#">Terms of Service</a></li>
+                        <li class="mb-2"><a href="#">Cookie Policy</a></li>
+                        <li class="mb-2"><a href="#">GDPR</a></li>
+                    </ul>
                 </div>
             </div>
             
-            <hr class="my-4">
+            <hr class="my-4" style="border-color: rgba(255, 255, 255, 0.1);">
+            
             <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p class="mb-0 text-light">
-                        &copy; 2024 Quaid-e-Awam University of Engineering, Science & Technology. All rights reserved.
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-2 mb-md-0 text-white-50">
+                        &copy; 2024 OBE Portal. All rights reserved.
                     </p>
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <a href="#" class="text-light text-decoration-none me-3">Privacy Policy</a>
-                    <a href="#" class="text-light text-decoration-none">Terms of Service</a>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="mb-0 text-white-50">
+                        <i class="fas fa-lock me-1"></i> Enterprise-grade security
+                    </p>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Login Modal -->
-    <div class="modal fade" id="loginModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Login to OBE Portal</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const targetPosition = target.offsetTop - offset;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.boxShadow = '0 5px 30px rgba(0, 0, 0, 0.1)';
+            } else {
+                navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.08)';
+            }
+        });
+
+        // Contact form scroll
+        function scrollToContact() {
+            const contactSection = document.getElementById('contact');
+            const offset = 80;
+            const targetPosition = contactSection.offsetTop - offset;
+            window.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth'
+            });
+        }
+
+        // Contact form submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your interest! We will contact you shortly to schedule a demo.');
+            this.reset();
+        });
+
+        // Load universities from database
+        async function loadUniversities() {
+            try {
+                const response = await fetch('/api/universities/public');
+                
+                if (response.ok) {
+                    const universities = await response.json();
+                    displayUniversities(universities);
+                } else {
+                    // Fallback if API fails
+                    document.getElementById('universitiesGrid').innerHTML = `
+                        <div class="col-12 text-center">
+                            <p class="text-white">No universities registered yet.</p>
                 </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="mb-3">
-                            <label for="userType" class="form-label">User Type</label>
-                            <select class="form-select" id="userType">
-                                <option value="student">Student</option>
-                                <option value="teacher">Teacher</option>
-                                <option value="admin">Administrator</option>
-                            </select>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading universities:', error);
+                // Fallback
+                document.getElementById('universitiesGrid').innerHTML = `
+                    <div class="col-12 text-center">
+                        <p class="text-white">Loading universities...</p>
                         </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" required>
+                `;
+            }
+        }
+
+        // Display universities in grid
+        function displayUniversities(universities) {
+            const grid = document.getElementById('universitiesGrid');
+            
+            if (!universities || universities.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-lg-3 col-md-4 col-6" data-aos="zoom-in">
+                        <div class="university-logo">
+                            <div class="text-center">
+                                <i class="fas fa-university fa-3x text-primary mb-2"></i>
+                                <p class="mb-0 text-primary fw-bold">Be the First!</p>
+                                <small class="text-primary">No universities yet</small>
                         </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" required>
                         </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="rememberMe">
-                            <label class="form-check-label" for="rememberMe">
-                                Remember me
-                            </label>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Login</button>
-                    </form>
+                `;
+                
+                // Update stats to 0
+                updateHomeStats(0, 0, 0);
+                return;
+            }
+
+            let html = '';
+            
+            universities.forEach((uni, index) => {
+                const delay = (index + 1) * 100;
+                
+                // Create university card
+                html += `
+                    <div class="col-lg-3 col-md-4 col-6" data-aos="zoom-in" data-aos-delay="${delay}">
+                        <div class="university-logo">
+                `;
+                
+                // Show logo if available, otherwise show name
+                if (uni.logo) {
+                    html += `
+                        <img src="${uni.logo}" alt="${uni.universityName}" 
+                             style="max-width: 100%; max-height: 120px; object-fit: contain;">
+                    `;
+                } else {
+                    html += `
+                        <h5 class="text-center mb-0 text-primary fw-bold">${uni.universityName}</h5>
+                    `;
+                }
+                
+                html += `
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-link" data-bs-dismiss="modal">Forgot Password?</button>
                 </div>
+                `;
+            });
+
+            // Add "Your University" card at the end
+            const finalDelay = (universities.length + 1) * 100;
+            html += `
+                <div class="col-lg-3 col-md-4 col-6" data-aos="zoom-in" data-aos-delay="${finalDelay}">
+                    <div class="university-logo">
+                        <div class="text-center">
+                            <i class="fas fa-plus fa-2x text-primary mb-2"></i>
+                            <p class="mb-0 text-primary fw-bold">Your University</p>
             </div>
         </div>
     </div>
+            `;
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
+            grid.innerHTML = html;
+            
+            // Re-initialize AOS for new elements
+            if (typeof AOS !== 'undefined') {
+                AOS.refresh();
+            }
+        }
+
+        // Update homepage stats with real data
+        async function updateHomeStats(universities, users, courses) {
+            document.getElementById('statUniversities').textContent = universities;
+            document.getElementById('statUsers').textContent = users.toLocaleString();
+            document.getElementById('statCourses').textContent = courses;
+        }
+
+        // Load platform stats
+        async function loadPlatformStats() {
+            try {
+                const response = await fetch('/api/platform-stats');
+                
+                if (response.ok) {
+                    const stats = await response.json();
+                    updateHomeStats(stats.totalUniversities, stats.totalUsers, stats.totalCourses);
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Add animation to stats on scroll
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const statNumber = entry.target.querySelector('.stat-number');
+                    const finalValue = statNumber.textContent;
+                    animateValue(statNumber, finalValue);
+                    statsObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.stat-card').forEach(card => {
+            statsObserver.observe(card);
+        });
+
+        // Load universities on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUniversities();
+            loadPlatformStats();
+        });
+
+        function animateValue(element, endValue) {
+            const isPercentage = endValue.includes('%');
+            const isKPlus = endValue.includes('K+');
+            const isPlusSign = endValue.includes('+');
+            
+            let numericValue = parseFloat(endValue.replace(/[^\d.]/g, ''));
+            let currentValue = 0;
+            const duration = 2000;
+            const increment = numericValue / (duration / 16);
+            
+            const timer = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= numericValue) {
+                    currentValue = numericValue;
+                    clearInterval(timer);
+                }
+                
+                let displayValue = Math.floor(currentValue);
+                if (isPercentage) {
+                    displayValue = currentValue.toFixed(1) + '%';
+                } else if (isKPlus) {
+                    displayValue = Math.floor(currentValue) + 'K+';
+                } else if (isPlusSign) {
+                    displayValue = Math.floor(currentValue) + '+';
+                }
+                
+                element.textContent = displayValue;
+            }, 16);
+        }
+    </script>
 </body>
 </html>

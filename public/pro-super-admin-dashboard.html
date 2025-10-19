@@ -1,0 +1,2833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRO Super Admin Dashboard - OBE Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #7c3aed;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1e293b;
+            --light-gray: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-gray);
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: linear-gradient(135deg, var(--dark-color) 0%, #0f172a 100%);
+            color: white;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h4 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .sidebar-menu-item {
+            padding: 1rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu-item:hover,
+        .sidebar-menu-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu-item i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            width: 24px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+
+        /* Stats Cards */
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-label {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        /* University Cards */
+        .university-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .university-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .university-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .university-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-premium {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+        }
+
+        .badge-enterprise {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+
+        /* Buttons */
+        .btn-primary-gradient {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 1.5rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            padding: 0.7rem 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-280px);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .mobile-menu-btn {
+                display: block !important;
+            }
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            box-shadow: 0 5px 20px rgba(37, 99, 235, 0.4);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h4><i class="fas fa-crown me-2"></i>PRO Admin</h4>
+            <small class="text-white-50">Platform Management</small>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="#dashboard" class="sidebar-menu-item active" onclick="showSection('dashboard')">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#universities" class="sidebar-menu-item" onclick="showSection('universities')">
+                <i class="fas fa-university"></i>
+                <span>Universities</span>
+            </a>
+            <a href="#databases" class="sidebar-menu-item" onclick="showSection('databases')">
+                <i class="fas fa-database"></i>
+                <span>Databases</span>
+            </a>
+            <a href="#analytics" class="sidebar-menu-item" onclick="showSection('analytics')">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </a>
+            <a href="#subscriptions" class="sidebar-menu-item" onclick="showSection('subscriptions')">
+                <i class="fas fa-credit-card"></i>
+                <span>Subscriptions</span>
+            </a>
+            <a href="#platform-users" class="sidebar-menu-item" onclick="showSection('platformUsers')">
+                <i class="fas fa-users-cog"></i>
+                <span>Platform Users</span>
+            </a>
+            <a href="#settings" class="sidebar-menu-item" onclick="showSection('settings')">
+                <i class="fas fa-cog"></i>
+                <span>Platform Settings</span>
+            </a>
+            <a href="#" class="sidebar-menu-item" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div>
+                <h2 class="mb-1">Welcome Back, Admin! 👋</h2>
+                <p class="mb-0 text-muted">Platform Overview & Management</p>
+            </div>
+            <div class="user-info">
+                <div>
+                    <div class="fw-bold" id="userName">OBE Portal Administrator</div>
+                    <small class="text-muted" id="userEmail">pro@obe.org.pk</small>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-crown"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="content-section">
+            <!-- Stats Overview -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-card">
+                        <div class="stats-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                            <i class="fas fa-university"></i>
+                        </div>
+                        <div class="stats-number" id="totalUniversities">2</div>
+                        <div class="stats-label">Total Universities</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-card">
+                        <div class="stats-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stats-number" id="totalUsers">1,247</div>
+                        <div class="stats-label">Total Users</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-card">
+                        <div class="stats-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="stats-number" id="totalCourses">145</div>
+                        <div class="stats-label">Total Courses</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-card">
+                        <div class="stats-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                                <div class="stats-number" id="totalRevenue">Rs. 0</div>
+                                <div class="stats-label">Monthly Revenue (PKR)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="stats-card">
+                        <h5 class="mb-3"><i class="fas fa-bolt me-2 text-primary"></i>Quick Actions</h5>
+                        <div class="d-flex gap-3 flex-wrap">
+                            <button class="btn btn-primary-gradient" onclick="showAddUniversityModal()">
+                                <i class="fas fa-plus me-2"></i>Add University
+                            </button>
+                            <button class="btn btn-outline-primary">
+                                <i class="fas fa-file-download me-2"></i>Export Report
+                            </button>
+                            <button class="btn btn-outline-success">
+                                <i class="fas fa-chart-bar me-2"></i>View Analytics
+                            </button>
+                            <button class="btn btn-outline-warning">
+                                <i class="fas fa-bell me-2"></i>Send Announcement
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Universities List -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="stats-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0"><i class="fas fa-university me-2 text-primary"></i>Registered Universities</h5>
+                            <button class="btn btn-sm btn-primary-gradient" onclick="showAddUniversityModal()">
+                                <i class="fas fa-plus me-1"></i>Add New
+                            </button>
+                        </div>
+                        
+                        <div id="universitiesList">
+                            <!-- Universities will be loaded dynamically from database -->
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3 text-muted">Loading universities...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Universities Section (Hidden by default) -->
+        <div id="universitiesSection" class="content-section" style="display: none;">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="stats-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="mb-0"><i class="fas fa-university me-2 text-primary"></i>All Universities</h5>
+                                <small class="text-muted">Complete list of registered universities</small>
+                            </div>
+                            <button class="btn btn-sm btn-primary-gradient" onclick="showAddUniversityModal()">
+                                <i class="fas fa-plus me-1"></i>Add New University
+                            </button>
+                        </div>
+                        
+                        <div id="allUniversitiesList">
+                            <!-- Universities will be loaded here -->
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3 text-muted">Loading universities...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Databases Section -->
+        <div id="databasesSection" class="content-section" style="display: none;">
+            <div class="row">
+                <div class="col-12">
+                    <div class="stats-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="mb-0"><i class="fas fa-database me-2 text-primary"></i>Database Connections</h5>
+                                <small class="text-muted">Manage manually created databases for universities</small>
+                            </div>
+                            <button class="btn btn-sm btn-primary-gradient" onclick="showAddDatabaseModal()">
+                                <i class="fas fa-plus me-1"></i>Add Database
+                            </button>
+                        </div>
+                        
+                        <div id="databasesList">
+                            <!-- Databases will be loaded here -->
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3 text-muted">Loading databases...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section (Hidden by default) -->
+        <div id="analyticsSection" class="content-section" style="display: none;">
+            <h3>Platform Analytics</h3>
+            <p>Detailed analytics and insights...</p>
+        </div>
+
+        <!-- Platform Users Section (Hidden by default) -->
+        <div id="platformUsersSection" class="content-section" style="display: none;">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="stats-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="mb-0"><i class="fas fa-users-cog me-2 text-primary"></i>Platform Users Management</h5>
+                                <small class="text-muted">Manage users who can access platform administration</small>
+                            </div>
+                            <button class="btn btn-sm btn-primary-gradient" onclick="showAddPlatformUserModal()">
+                                <i class="fas fa-plus me-1"></i>Add Platform User
+                            </button>
+                        </div>
+                        
+                        <div id="platformUsersList">
+                            <!-- Platform users will be loaded here -->
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3 text-muted">Loading platform users...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscriptions Section (Hidden by default) -->
+        <div id="subscriptionsSection" class="content-section" style="display: none;">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="stats-card">
+                        <h5 class="mb-4"><i class="fas fa-credit-card me-2 text-primary"></i>Subscription Overview</h5>
+                        
+                        <!-- Revenue Summary -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Monthly Revenue</h6>
+                                        <h3 id="monthlyRevenue">Rs. 0</h3>
+                                        <small>Based on active subscriptions</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Active Subscriptions</h6>
+                                        <h3 id="activeSubscriptions">0</h3>
+                                        <small>Paying universities</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Free/Trial Users</h6>
+                                        <h3 id="freeTrialCount">0</h3>
+                                        <small>Non-paying universities</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Total Universities</h6>
+                                        <h3 id="totalSubsUniversities">0</h3>
+                                        <small>All registered</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subscription Breakdown -->
+                        <h6 class="fw-bold mb-3">Subscription Plan Distribution</h6>
+                        <div id="subscriptionBreakdown">
+                            <!-- Will be loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section (Hidden by default) -->
+        <div id="settingsSection" class="content-section" style="display: none;">
+            <div class="row">
+                <div class="col-12">
+                    <div class="stats-card">
+                        <h5 class="mb-4"><i class="fas fa-cog me-2 text-primary"></i>Platform Settings</h5>
+                        
+                        <!-- Platform Information -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Platform Information</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Platform Name</label>
+                                    <input type="text" class="form-control" id="platformName" value="OBE Portal" placeholder="Platform Name">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Platform Email</label>
+                                    <input type="email" class="form-control" id="platformEmail" value="admin@obe.org.pk" placeholder="Contact Email">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Support Email</label>
+                                    <input type="email" class="form-control" id="supportEmail" value="support@obe.org.pk" placeholder="Support Email">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Platform URL</label>
+                                    <input type="url" class="form-control" id="platformUrl" value="https://obe.org.pk" placeholder="Platform URL">
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Email Settings -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Email Configuration (SMTP)</h6>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Configure SMTP settings for sending emails (university creation notifications, password resets, etc.)
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">SMTP Host</label>
+                                    <input type="text" class="form-control" id="smtpHost" placeholder="smtp.gmail.com">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">SMTP Port</label>
+                                    <input type="number" class="form-control" id="smtpPort" placeholder="587">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">SMTP Username</label>
+                                    <input type="text" class="form-control" id="smtpUsername" placeholder="your-email@gmail.com">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">SMTP Password</label>
+                                    <input type="password" class="form-control" id="smtpPassword" placeholder="App Password">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">From Name</label>
+                                    <input type="text" class="form-control" id="smtpFromName" value="OBE Portal">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">From Email</label>
+                                    <input type="email" class="form-control" id="smtpFromEmail" placeholder="noreply@obe.org.pk">
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Database Information (Read-only) -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Current Platform Database</h6>
+                            <div class="alert alert-secondary">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <small class="text-muted d-block">Host</small>
+                                        <strong id="platformDbHost">mysql.gb.stackcp.com:40063</strong>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted d-block">Database</small>
+                                        <strong id="platformDbName">vercel_db-31383355e3</strong>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted d-block">Status</small>
+                                        <span class="badge badge-success">Connected</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                To change the platform database connection, update the <code>config.env</code> file and restart the server.
+                            </small>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Subscription Plans -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Subscription Plans (PKR - Pakistani Rupees)</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4 col-lg-3">
+                                    <div class="card border-success">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold">Free Plan <span class="badge badge-success">FREE</span></h6>
+                                            <h3 class="text-success mb-3">Rs. 0<small class="text-muted">/month</small></h3>
+                                            <ul class="list-unstyled small">
+                                                <li><i class="fas fa-check text-success me-2"></i>Up to 50 users</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>10 courses</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Basic features</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Community support</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-lg-3">
+                                    <div class="card border-info">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold">Trial/Demo <span class="badge bg-info">7 DAYS</span></h6>
+                                            <h3 class="text-info mb-3">Free<small class="text-muted"> trial</small></h3>
+                                            <ul class="list-unstyled small">
+                                                <li><i class="fas fa-check text-success me-2"></i>7 days access</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Full features</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Test all plans</li>
+                                                <li><i class="fas fa-info-circle text-info me-2"></i>No payment required</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-lg-2">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold">Basic Plan</h6>
+                                            <h3 class="text-primary mb-3">Rs. 20K<small class="text-muted">/mo</small></h3>
+                                            <ul class="list-unstyled small">
+                                                <li><i class="fas fa-check text-success me-2"></i>Up to 250 users</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>50 courses</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Email support</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-lg-2">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold">Premium <span class="badge badge-premium">HOT</span></h6>
+                                            <h3 class="text-primary mb-3">Rs. 30K<small class="text-muted">/mo</small></h3>
+                                            <ul class="list-unstyled small">
+                                                <li><i class="fas fa-check text-success me-2"></i>Up to 500 users</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>100 courses</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Priority support</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-lg-2">
+                                    <div class="card border-secondary">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold">Enterprise</h6>
+                                            <h3 class="text-dark mb-3">Rs. 40K<small class="text-muted">/mo</small></h3>
+                                            <ul class="list-unstyled small">
+                                                <li><i class="fas fa-check text-success me-2"></i>Unlimited users</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Unlimited courses</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>24/7 support</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Security Settings -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Security Settings</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="twoFactorAuth" checked>
+                                        <label class="form-check-label fw-bold" for="twoFactorAuth">
+                                            Enable Two-Factor Authentication (2FA)
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Require 2FA for all PRO Super Admin logins</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="sessionTimeout" checked>
+                                        <label class="form-check-label fw-bold" for="sessionTimeout">
+                                            Auto Session Timeout
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Automatically logout inactive users after 30 minutes</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Password Expiry (days)</label>
+                                    <input type="number" class="form-control" value="90" min="30" max="365">
+                                    <small class="text-muted">Force password change after specified days</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Failed Login Attempts</label>
+                                    <input type="number" class="form-control" value="5" min="3" max="10">
+                                    <small class="text-muted">Lock account after failed attempts</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Save Button -->
+                        <div class="text-end mt-4">
+                            <button class="btn btn-secondary me-2">Reset to Defaults</button>
+                            <button class="btn btn-primary-gradient" onclick="savePlatformSettings()">
+                                <i class="fas fa-save me-2"></i>Save Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit University Modal -->
+    <div class="modal fade" id="editUniversityModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit University</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUniversityForm">
+                        <input type="hidden" id="editUniversityId" name="universityId">
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">University Name *</label>
+                                <input type="text" class="form-control" id="editUniversityName" name="universityName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">University Code/Slug</label>
+                                <input type="text" class="form-control" id="editUniversitySlug" name="universityCode" disabled>
+                                <small class="text-muted">Cannot be changed (used in database)</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Location (City) *</label>
+                                <input type="text" class="form-control" id="editCity" name="city" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Country *</label>
+                                <input type="text" class="form-control" id="editCountry" name="country" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Super Admin Email *</label>
+                                <input type="email" class="form-control" id="editSuperAdminEmail" name="superAdminEmail" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Contact Phone</label>
+                                <input type="tel" class="form-control" id="editContactPhone" name="contactPhone">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Contact Email</label>
+                                <input type="email" class="form-control" id="editContactEmail" name="contactEmail">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Website</label>
+                                <input type="url" class="form-control" id="editWebsite" name="website" placeholder="https://">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Subscription Plan *</label>
+                                <select class="form-select" id="editSubscriptionPlan" name="subscriptionPlan" required>
+                                    <option value="Free">Free - Rs. 0/month (50 users, 10 courses)</option>
+                                    <option value="Trial">Trial/Demo - 7 days free trial</option>
+                                    <option value="Basic">Basic - Rs. 20,000/month (250 users, 50 courses)</option>
+                                    <option value="Premium">Premium - Rs. 30,000/month (500 users, 100 courses)</option>
+                                    <option value="Enterprise">Enterprise - Rs. 40,000/month (Unlimited)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Status</label>
+                                <select class="form-select" id="editIsActive" name="isActive">
+                                    <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Assigned Database</label>
+                                <input type="text" class="form-control" id="editDatabaseName" disabled>
+                                <small class="text-muted">Database cannot be changed after university creation. Contains all university data.</small>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Current Logo</label>
+                                <div class="mb-2" id="editCurrentLogo">
+                                    <img id="editCurrentLogoImg" src="" alt="Current Logo" style="max-width: 100px; max-height: 100px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                </div>
+                                <label class="form-label fw-bold">Change Logo (Optional)</label>
+                                <input type="file" class="form-control" id="editUniversityLogo" name="universityLogo" accept=".png,.jpg,.jpeg" onchange="previewEditLogo(event)">
+                                <small class="text-muted">PNG or JPG format (Max 2MB) - Leave empty to keep current logo</small>
+                            </div>
+                            <div class="col-12" id="editLogoPreview" style="display: none;">
+                                <label class="form-label fw-bold">New Logo Preview</label>
+                                <div class="text-center p-3 bg-light rounded">
+                                    <img id="editLogoPreviewImg" src="" alt="Logo Preview" style="max-width: 150px; max-height: 150px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Full Address</label>
+                                <textarea class="form-control" id="editAddress" name="address" rows="2"></textarea>
+                            </div>
+                            
+                            <!-- Password Reset Section -->
+                            <div class="col-12">
+                                <hr class="my-3">
+                                <h6 class="fw-bold text-danger">
+                                    <i class="fas fa-key me-2"></i>Super Admin Password Reset
+                                </h6>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="editResetPassword" onchange="togglePasswordReset()">
+                                    <label class="form-check-label fw-bold" for="editResetPassword">
+                                        Reset Super Admin Password
+                                    </label>
+                                </div>
+                                <div id="editPasswordFields" style="display: none;">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">New Password *</label>
+                                            <input type="password" class="form-control" id="editNewPassword" name="newPassword" minlength="8">
+                                            <small class="text-muted">Minimum 8 characters</small>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Confirm Password *</label>
+                                            <input type="password" class="form-control" id="editConfirmPassword" name="confirmPassword" minlength="8">
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-warning mt-2">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Warning:</strong> The super admin will need to use this new password to login.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary-gradient" onclick="saveUniversityChanges()">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add University Modal -->
+    <div class="modal fade" id="addUniversityModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-university me-2"></i>Add New University</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUniversityForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">University Name *</label>
+                                <input type="text" class="form-control" id="universityName" name="universityName" required placeholder="e.g. University of Karachi" oninput="generateSlug()">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">University Slug/Shortname *</label>
+                                <input type="text" class="form-control" id="universitySlug" name="universitySlug" required placeholder="e.g. uok" pattern="[a-z0-9_]+" title="Only lowercase letters, numbers, and underscores">
+                                <small class="text-muted">Auto-generated, can be edited. Used for database naming.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Location (City) *</label>
+                                <input type="text" class="form-control" id="city" name="city" required placeholder="e.g. Karachi">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Country *</label>
+                                <input type="text" class="form-control" id="country" name="country" value="Pakistan" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Super Admin Email *</label>
+                                <input type="email" class="form-control" id="superAdminEmail" name="superAdminEmail" required placeholder="admin@university.edu.pk">
+                                <small class="text-muted">Login credentials will be sent to this email</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Contact Phone</label>
+                                <input type="tel" class="form-control" id="contactPhone" name="contactPhone" placeholder="+92-XXX-XXXXXXX">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Contact Email</label>
+                                <input type="email" class="form-control" id="contactEmail" name="contactEmail" placeholder="info@university.edu.pk">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Subscription Plan *</label>
+                                <select class="form-select" id="subscriptionPlan" name="subscriptionPlan" required>
+                                    <option value="Free">Free - Rs. 0/month (50 users, 10 courses)</option>
+                                    <option value="Trial">Trial/Demo - 7 days free trial</option>
+                                    <option value="Basic">Basic - Rs. 20,000/month (250 users, 50 courses)</option>
+                                    <option value="Premium" selected>Premium - Rs. 30,000/month (500 users, 100 courses)</option>
+                                    <option value="Enterprise">Enterprise - Rs. 40,000/month (Unlimited)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Database Connection *</label>
+                                <select class="form-select" id="databaseConnectionId" name="databaseConnectionId" required>
+                                    <option value="">Select Database...</option>
+                                </select>
+                                <small class="text-muted">Select a pre-configured database. <a href="#" onclick="event.preventDefault(); showSection('databases'); bootstrap.Modal.getInstance(document.getElementById('addUniversityModal')).hide();">Manage databases</a></small>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">University Logo *</label>
+                                <input type="file" class="form-control" id="universityLogo" name="universityLogo" accept=".png,.jpg,.jpeg" required onchange="previewLogo(event)">
+                                <small class="text-muted">PNG or JPG format (Max 2MB) - Will be displayed in university list</small>
+                            </div>
+                            <div class="col-12" id="logoPreview" style="display: none;">
+                                <label class="form-label fw-bold">Logo Preview</label>
+                                <div class="text-center p-3 bg-light rounded">
+                                    <img id="logoPreviewImg" src="" alt="Logo Preview" style="max-width: 150px; max-height: 150px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Full Address</label>
+                                <textarea class="form-control" id="address" name="address" rows="2" placeholder="Complete address of the university"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary-gradient" onclick="addUniversity()">
+                        <i class="fas fa-plus me-2"></i>Add University
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Database Connection Modal -->
+    <div class="modal fade" id="addDatabaseModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-database me-2"></i>Add Database Connection</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> Create the database manually in your hosting control panel (StackCP), then add its connection details here.
+                    </div>
+                    <form id="addDatabaseForm">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Database Type *</label>
+                                <select class="form-select" id="dbType" name="databaseType" required onchange="updateDatabaseTypeHelp()">
+                                    <option value="University">University Database (for individual university data)</option>
+                                    <option value="Platform">Platform Database (for website metadata)</option>
+                                </select>
+                                <small class="text-muted" id="dbTypeHelp">This database will be used for storing individual university data (users, courses, etc.)</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Database Name *</label>
+                                <input type="text" class="form-control" id="dbName" name="databaseName" required placeholder="e.g. obe_university_quest">
+                                <small class="text-muted">Exact database name created in StackCP</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Host *</label>
+                                <input type="text" class="form-control" id="dbHost" name="host" required value="mysql.gb.stackcp.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Port *</label>
+                                <input type="number" class="form-control" id="dbPort" name="port" required value="40063">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Username *</label>
+                                <input type="text" class="form-control" id="dbUsername" name="username" required placeholder="e.g. obe">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Password *</label>
+                                <input type="password" class="form-control" id="dbPassword" name="password" required placeholder="Database password">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Description</label>
+                                <textarea class="form-control" id="dbDescription" name="description" rows="2" placeholder="e.g. Database for QUEST University - 1GB capacity"></textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <button type="button" class="btn btn-outline-primary w-100" onclick="testDatabaseConnection()">
+                                    <i class="fas fa-plug me-2"></i>Test Connection
+                                </button>
+                                <div id="connectionTestResult" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary-gradient" onclick="saveDatabaseConnection()">
+                        <i class="fas fa-save me-2"></i>Save Database
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Database Modal -->
+    <div class="modal fade" id="editDatabaseModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-database me-2"></i>Edit Database Connection</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editDatabaseForm">
+                        <input type="hidden" id="editDbId">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Database Type *</label>
+                                <select class="form-select" id="editDbType" required onchange="updateEditDatabaseTypeHelp()">
+                                    <option value="University">University Database</option>
+                                    <option value="Platform">Platform Database</option>
+                                </select>
+                                <small class="text-muted" id="editDbTypeHelp">University database stores individual university data</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Database Name *</label>
+                                <input type="text" class="form-control" id="editDbName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Host *</label>
+                                <input type="text" class="form-control" id="editDbHost" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Port *</label>
+                                <input type="number" class="form-control" id="editDbPort" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Username *</label>
+                                <input type="text" class="form-control" id="editDbUsername" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Password *</label>
+                                <input type="password" class="form-control" id="editDbPassword" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Description</label>
+                                <textarea class="form-control" id="editDbDescription" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <button type="button" class="btn btn-outline-primary w-100" onclick="testEditDatabaseConnection()">
+                                    <i class="fas fa-plug me-2"></i>Test Connection
+                                </button>
+                                <div id="editConnectionTestResult" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary-gradient" onclick="saveEditedDatabase()">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Platform User Modal -->
+    <div class="modal fade" id="addPlatformUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Add Platform User</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addPlatformUserForm">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Full Name *</label>
+                                <input type="text" class="form-control" id="platformUserName" required placeholder="John Doe">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Email *</label>
+                                <input type="email" class="form-control" id="platformUserEmail" required placeholder="user@obe.org.pk">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Role *</label>
+                                <select class="form-select" id="platformUserRole" required>
+                                    <option value="">Select Role...</option>
+                                    <option value="platform_admin">Platform Admin (Can manage universities & settings)</option>
+                                    <option value="platform_manager">Platform Manager (Can manage universities only)</option>
+                                    <option value="platform_viewer">Platform Viewer (Read-only access)</option>
+                                </select>
+                                <small class="text-muted">Note: PRO Super Admin has full control over everything</small>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Password *</label>
+                                <input type="password" class="form-control" id="platformUserPassword" required minlength="8" placeholder="Minimum 8 characters">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Confirm Password *</label>
+                                <input type="password" class="form-control" id="platformUserConfirmPassword" required minlength="8">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary-gradient" onclick="addPlatformUser()">
+                        <i class="fas fa-plus me-2"></i>Add User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Check authentication
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const token = localStorage.getItem('token');
+
+        if (!token || !user || user.role !== 'pro_superadmin') {
+            window.location.href = '/';
+        }
+
+        // Update user info
+        if (user.name) {
+            document.getElementById('userName').textContent = user.name;
+        }
+        if (user.email) {
+            document.getElementById('userEmail').textContent = user.email;
+        }
+
+        // Show section
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+            
+            // Remove active class from all menu items
+            document.querySelectorAll('.sidebar-menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section
+            const sectionMap = {
+                'dashboard': 'dashboardSection',
+                'universities': 'universitiesSection',
+                'databases': 'databasesSection',
+                'analytics': 'analyticsSection',
+                'platformUsers': 'platformUsersSection',
+                'subscriptions': 'subscriptionsSection',
+                'settings': 'settingsSection'
+            };
+            
+            if (sectionMap[section]) {
+                document.getElementById(sectionMap[section]).style.display = 'block';
+            }
+            
+            // Load data for section
+            if (section === 'databases') {
+                loadDatabases();
+            } else if (section === 'universities') {
+                loadAllUniversities();
+            } else if (section === 'subscriptions') {
+                loadSubscriptionData();
+            } else if (section === 'platformUsers') {
+                loadPlatformUsers();
+            } else if (section === 'settings') {
+                loadPlatformSettings();
+            }
+            
+            // Add active class to clicked menu item
+            if (event && event.target) {
+                event.target.closest('.sidebar-menu-item').classList.add('active');
+            }
+        }
+
+        // Database Management Functions
+        
+        // Show add database modal
+        function showAddDatabaseModal() {
+            document.getElementById('addDatabaseForm').reset();
+            document.getElementById('connectionTestResult').innerHTML = '';
+            const modal = new bootstrap.Modal(document.getElementById('addDatabaseModal'));
+            modal.show();
+        }
+
+        // Load databases
+        async function loadDatabases() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/databases', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const databases = await response.json();
+                    displayDatabases(databases);
+                }
+            } catch (error) {
+                console.error('Error loading databases:', error);
+            }
+        }
+
+        // Update database type help text
+        function updateDatabaseTypeHelp() {
+            const type = document.getElementById('dbType').value;
+            const helpText = document.getElementById('dbTypeHelp');
+            
+            if (type === 'Platform') {
+                helpText.textContent = 'Platform database stores website metadata: universities list, PRO admins, database connections, settings';
+                helpText.className = 'text-primary';
+            } else {
+                helpText.textContent = 'This database will be used for storing individual university data (users, courses, CLOs, assessments, etc.)';
+                helpText.className = 'text-muted';
+            }
+        }
+
+        // Display databases
+        function displayDatabases(databases) {
+            const container = document.getElementById('databasesList');
+            
+            if (!databases || databases.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        No database connections configured. Click "Add Database" to add one.
+                    </div>
+                `;
+                return;
+            }
+
+            // Separate platform and university databases
+            const platformDBs = databases.filter(db => db.databaseType === 'Platform' || db.isPlatformDB);
+            const universityDBs = databases.filter(db => db.databaseType === 'University' && !db.isPlatformDB);
+
+            let html = '';
+
+            // Platform Databases Section
+            if (platformDBs.length > 0) {
+                html += '<h6 class="fw-bold mb-3 text-primary"><i class="fas fa-globe me-2"></i>Platform Database (Website)</h6>';
+                html += platformDBs.map(db => {
+                    const statusBadge = db.status === 'Active' ? 'badge-success' : 'badge-secondary';
+                    
+                    return `
+                        <div class="university-card" style="border-left: 4px solid #2563eb;">
+                            <div class="university-header">
+                                <div class="d-flex gap-3">
+                                    <div class="university-logo" style="background: linear-gradient(135deg, #2563eb, #1e40af);">
+                                        <i class="fas fa-globe"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold">${db.databaseName} <span class="badge badge-primary ms-2">PLATFORM</span></h6>
+                                        <small class="text-muted">${db.host}:${db.port}</small>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="badge ${statusBadge}">${db.status}</span>
+                                </div>
+                            </div>
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-6">
+                                    <small class="text-muted d-block">Username</small>
+                                    <strong>${db.username}</strong>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="testSavedDatabase(${db.id})" title="Test Connection">
+                                        <i class="fas fa-plug"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="editDatabaseConnection(${db.id})" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <span class="badge bg-info"><i class="fas fa-info-circle me-1"></i>Current Platform DB</span>
+                                </div>
+                            </div>
+                            ${db.description ? `<p class="text-muted small mt-2 mb-0">${db.description}</p>` : ''}
+                            <div class="alert alert-info mt-2 mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <small>This is your main website database storing: universities metadata, PRO admins, database connections, and platform settings.</small>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // University Databases Section
+            if (universityDBs.length > 0) {
+                html += '<h6 class="fw-bold mb-3 mt-4 text-success"><i class="fas fa-university me-2"></i>University Databases</h6>';
+                html += universityDBs.map(db => {
+                    const statusBadge = db.status === 'Active' ? 'badge-success' : 
+                                       db.status === 'Testing' ? 'badge-warning' : 'badge-secondary';
+                    const availableBadge = db.isAvailable ? 'text-success' : 'text-danger';
+                    const availableText = db.isAvailable ? 'Available' : 'Assigned';
+                    const assignedTo = db.assignedUniversityId ? `Assigned to University ID: ${db.assignedUniversityId}` : 'Not assigned';
+
+                    return `
+                        <div class="university-card">
+                            <div class="university-header">
+                                <div class="d-flex gap-3">
+                                    <div class="university-logo" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold">${db.databaseName}</h6>
+                                        <small class="text-muted">${db.host}:${db.port}</small>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="badge ${statusBadge}">${db.status}</span>
+                                    <span class="badge ${availableBadge} ms-1">${availableText}</span>
+                                </div>
+                            </div>
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block">Username</small>
+                                    <strong>${db.username}</strong>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block">Status</small>
+                                    <strong>${assignedTo}</strong>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="testSavedDatabase(${db.id})" title="Test Connection">
+                                        <i class="fas fa-plug"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="editDatabaseConnection(${db.id})" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm ${db.isAvailable ? 'btn-outline-danger' : 'btn-danger'}" onclick="deleteDatabase(${db.id})" title="${db.isAvailable ? 'Delete' : 'Force Delete (Assigned)'}">
+                                        <i class="fas fa-trash me-1"></i>${db.isAvailable ? '' : 'Force Delete'}
+                                    </button>
+                                </div>
+                            </div>
+                            ${db.description ? `<p class="text-muted small mt-2 mb-0">${db.description}</p>` : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Test database connection
+        async function testDatabaseConnection() {
+            const form = document.getElementById('addDatabaseForm');
+            const resultDiv = document.getElementById('connectionTestResult');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const data = {
+                host: document.getElementById('dbHost').value,
+                port: document.getElementById('dbPort').value,
+                username: document.getElementById('dbUsername').value,
+                password: document.getElementById('dbPassword').value,
+                databaseName: document.getElementById('dbName').value
+            };
+
+            resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Testing connection...</div>';
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/databases/test', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Connection successful!</strong> Database is ready to use.
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle me-2"></i>
+                            <strong>Connection failed!</strong> ${result.message || 'Check your credentials'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        <strong>Error!</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Save database connection
+        async function saveDatabaseConnection() {
+            const form = document.getElementById('addDatabaseForm');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const databaseType = document.getElementById('dbType').value;
+            const isPlatformDB = databaseType === 'Platform';
+
+            const formData = {
+                databaseName: document.getElementById('dbName').value,
+                host: document.getElementById('dbHost').value,
+                port: document.getElementById('dbPort').value,
+                username: document.getElementById('dbUsername').value,
+                password: document.getElementById('dbPassword').value,
+                databaseType: databaseType,
+                isPlatformDB: isPlatformDB,
+                description: document.getElementById('dbDescription').value
+            };
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/databases', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    const dbTypeText = isPlatformDB ? 'Platform' : 'University';
+                    alert(`✅ ${dbTypeText} database connection saved successfully!`);
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addDatabaseModal'));
+                    modal.hide();
+                    loadDatabases();
+                } else {
+                    alert(`❌ Error: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // Test saved database
+        async function testSavedDatabase(id) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/databases/${id}/test`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    alert('✅ Connection successful! Database is working.');
+                } else {
+                    alert(`❌ Connection failed! ${result.message}`);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // Edit database connection
+        async function editDatabaseConnection(id) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/databases', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const databases = await response.json();
+                    const db = databases.find(d => d.id === id);
+                    
+                    if (db) {
+                        // Populate form
+                        document.getElementById('editDbId').value = db.id;
+                        document.getElementById('editDbType').value = db.databaseType || 'University';
+                        document.getElementById('editDbName').value = db.databaseName;
+                        document.getElementById('editDbHost').value = db.host;
+                        document.getElementById('editDbPort').value = db.port;
+                        document.getElementById('editDbUsername').value = db.username;
+                        document.getElementById('editDbPassword').value = db.password;
+                        document.getElementById('editDbDescription').value = db.description || '';
+                        document.getElementById('editConnectionTestResult').innerHTML = '';
+                        
+                        updateEditDatabaseTypeHelp();
+                        
+                        // Show modal
+                        const modal = new bootstrap.Modal(document.getElementById('editDatabaseModal'));
+                        modal.show();
+                    }
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // Update edit database type help text
+        function updateEditDatabaseTypeHelp() {
+            const type = document.getElementById('editDbType').value;
+            const helpText = document.getElementById('editDbTypeHelp');
+            
+            if (type === 'Platform') {
+                helpText.textContent = 'Platform database stores website metadata: universities, admins, settings';
+                helpText.className = 'text-primary';
+            } else {
+                helpText.textContent = 'University database stores individual university data (users, courses, etc.)';
+                helpText.className = 'text-muted';
+            }
+        }
+
+        // Test edit database connection
+        async function testEditDatabaseConnection() {
+            const form = document.getElementById('editDatabaseForm');
+            const resultDiv = document.getElementById('editConnectionTestResult');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const data = {
+                host: document.getElementById('editDbHost').value,
+                port: document.getElementById('editDbPort').value,
+                username: document.getElementById('editDbUsername').value,
+                password: document.getElementById('editDbPassword').value,
+                databaseName: document.getElementById('editDbName').value
+            };
+
+            resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Testing connection...</div>';
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/databases/test', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Connection successful!</strong>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle me-2"></i>
+                            <strong>Connection failed!</strong> ${result.message || 'Check credentials'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        <strong>Error!</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Save edited database
+        async function saveEditedDatabase() {
+            const form = document.getElementById('editDatabaseForm');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const id = document.getElementById('editDbId').value;
+            const data = {
+                databaseType: document.getElementById('editDbType').value,
+                databaseName: document.getElementById('editDbName').value,
+                host: document.getElementById('editDbHost').value,
+                port: document.getElementById('editDbPort').value,
+                username: document.getElementById('editDbUsername').value,
+                password: document.getElementById('editDbPassword').value,
+                description: document.getElementById('editDbDescription').value
+            };
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/databases/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('✅ Database connection updated successfully!');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editDatabaseModal'));
+                    modal.hide();
+                    loadDatabases();
+                } else {
+                    const result = await response.json();
+                    alert(`❌ Error: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // Delete database connection
+        async function deleteDatabase(id) {
+            if (!confirm('Are you sure you want to delete this database connection?\n\nNote: The actual database won\'t be deleted, only the connection from this platform.')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/databases/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    alert('✅ Database connection deleted!');
+                    loadDatabases();
+                } else {
+                    const result = await response.json();
+                    
+                    // If database is assigned, offer force delete option
+                    if (result.canForceDelete) {
+                        if (confirm(`⚠️ ${result.message}\n\nDo you want to FORCE DELETE this database connection?\n\nWARNING: This will remove the database connection even though it's assigned to a university. The university data will become inaccessible unless you reassign a database.\n\nContinue with force delete?`)) {
+                            // Force delete
+                            const forceResponse = await fetch(`/api/databases/${id}?force=true`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            
+                            if (forceResponse.ok) {
+                                alert('✅ Database connection force deleted!');
+                                loadDatabases();
+                            } else {
+                                const forceResult = await forceResponse.json();
+                                alert(`❌ Error: ${forceResult.message}`);
+                            }
+                        }
+                    } else {
+                        alert(`❌ Error: ${result.message}`);
+                    }
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // Load available databases for university form (only University type)
+        async function loadAvailableDatabases() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/databases/available', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const databases = await response.json();
+                    const select = document.getElementById('databaseConnectionId');
+                    
+                    select.innerHTML = '<option value="">Select Database...</option>';
+                    
+                    if (databases.length === 0) {
+                        select.innerHTML += '<option value="" disabled>No databases available - Go to Databases section to add one</option>';
+                    } else {
+                        databases.forEach(db => {
+                            const label = db.isOrphaned 
+                                ? `${db.databaseName} ♻️ (Recycled - Available)`
+                                : `${db.databaseName} (${db.host}:${db.port})`;
+                            select.innerHTML += `<option value="${db.id}">${label}</option>`;
+                        });
+                    }
+                    
+                    console.log(`✅ Loaded ${databases.length} available databases`, databases);
+                } else {
+                    const select = document.getElementById('databaseConnectionId');
+                    select.innerHTML = '<option value="" disabled>Error loading databases</option>';
+                }
+            } catch (error) {
+                console.error('Error loading available databases:', error);
+                const select = document.getElementById('databaseConnectionId');
+                select.innerHTML = '<option value="" disabled>Error loading databases</option>';
+            }
+        }
+
+        // Show add university modal
+        function showAddUniversityModal() {
+            loadAvailableDatabases(); // Load database dropdown
+            const modal = new bootstrap.Modal(document.getElementById('addUniversityModal'));
+            modal.show();
+        }
+
+        // Add university
+        async function addUniversity() {
+            const form = document.getElementById('addUniversityForm');
+            
+            // Validate form
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Check database is selected
+            const databaseConnectionId = document.getElementById('databaseConnectionId').value;
+            if (!databaseConnectionId) {
+                alert('❌ Please select a database connection!\n\nGo to Databases section to add one if you haven\'t already.');
+                return;
+            }
+
+            // Get form data
+            const formData = new FormData();
+            formData.append('universityName', document.getElementById('universityName').value);
+            formData.append('universitySlug', document.getElementById('universitySlug').value);
+            formData.append('city', document.getElementById('city').value);
+            formData.append('country', document.getElementById('country').value);
+            formData.append('superAdminEmail', document.getElementById('superAdminEmail').value);
+            formData.append('contactPhone', document.getElementById('contactPhone').value);
+            formData.append('contactEmail', document.getElementById('contactEmail').value);
+            formData.append('subscriptionPlan', document.getElementById('subscriptionPlan').value);
+            formData.append('databaseConnectionId', databaseConnectionId);
+            formData.append('address', document.getElementById('address').value);
+            
+            // Add logo file
+            const logoFile = document.getElementById('universityLogo').files[0];
+            if (logoFile) {
+                formData.append('logo', logoFile);
+            }
+
+            // Show loading
+            const submitBtn = event.target;
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating University...';
+            submitBtn.disabled = true;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/universities/create', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success
+                    alert(`✅ University Created Successfully!\n\n` +
+                          `University: ${data.university.universityName}\n` +
+                          `Database: obe_university_${data.university.universityCode}\n` +
+                          `Super Admin: ${data.university.superAdminEmail}\n` +
+                          `Password: ${data.superAdminPassword}\n\n` +
+                          `Login credentials have been sent to the super admin email.`);
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addUniversityModal'));
+                    modal.hide();
+                    
+                    // Reset form
+                    form.reset();
+                    document.getElementById('logoPreview').style.display = 'none';
+                    
+                    // Reload page to show new university
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    // Error
+                    alert(`❌ Error: ${data.message || 'Failed to create university'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Network Error: ${error.message}\n\nPlease check your connection and try again.`);
+            } finally {
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // View university details
+        async function viewUniversity(id) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/universities/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const uni = await response.json();
+                    
+                    const details = `
+📊 University Details
+━━━━━━━━━━━━━━━━━━━━━
+
+🏛️ Name: ${uni.universityName}
+🔖 Code: ${uni.universityCode}
+📍 Location: ${uni.city}, ${uni.country}
+👤 Super Admin: ${uni.superAdminEmail}
+📧 Contact Email: ${uni.contactEmail || 'N/A'}
+📞 Contact Phone: ${uni.contactPhone || 'N/A'}
+🌐 Website: ${uni.website || 'N/A'}
+💼 Subscription: ${uni.subscriptionPlan}
+📊 Status: ${uni.isActive ? 'Active' : 'Inactive'}
+👥 Total Users: ${uni.totalUsers || 0}
+📚 Total Courses: ${uni.totalCourses || 0}
+📅 Created: ${new Date(uni.createdAt).toLocaleDateString()}
+                    `;
+                    
+                    alert(details);
+                } else {
+                    alert('Failed to load university details');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading university details');
+            }
+        }
+
+        // Edit university - Open modal with all fields
+        async function editUniversity(id) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/universities/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const uni = await response.json();
+                    
+                    // Populate edit form
+                    document.getElementById('editUniversityId').value = uni.id;
+                    document.getElementById('editUniversityName').value = uni.universityName;
+                    document.getElementById('editUniversitySlug').value = uni.universityCode;
+                    document.getElementById('editCity').value = uni.city || '';
+                    document.getElementById('editCountry').value = uni.country || 'Pakistan';
+                    document.getElementById('editSuperAdminEmail').value = uni.superAdminEmail || '';
+                    document.getElementById('editContactPhone').value = uni.contactPhone || '';
+                    document.getElementById('editContactEmail').value = uni.contactEmail || '';
+                    document.getElementById('editWebsite').value = uni.website || '';
+                    document.getElementById('editSubscriptionPlan').value = uni.subscriptionPlan || 'Premium';
+                    document.getElementById('editIsActive').value = uni.isActive ? '1' : '0';
+                    document.getElementById('editAddress').value = uni.address || '';
+                    document.getElementById('editDatabaseName').value = uni.databaseName || 'N/A';
+                    
+                    // Show current logo
+                    if (uni.logo) {
+                        document.getElementById('editCurrentLogoImg').src = uni.logo;
+                        document.getElementById('editCurrentLogo').style.display = 'block';
+                    } else {
+                        document.getElementById('editCurrentLogo').style.display = 'none';
+                    }
+                    
+                    // Reset password fields
+                    document.getElementById('editResetPassword').checked = false;
+                    document.getElementById('editPasswordFields').style.display = 'none';
+                    document.getElementById('editNewPassword').value = '';
+                    document.getElementById('editConfirmPassword').value = '';
+                    document.getElementById('editLogoPreview').style.display = 'none';
+                    
+                    // Show modal
+                    const modal = new bootstrap.Modal(document.getElementById('editUniversityModal'));
+                    modal.show();
+                } else {
+                    alert('Failed to load university details');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading university for editing');
+            }
+        }
+
+        // Toggle password reset fields
+        function togglePasswordReset() {
+            const checkbox = document.getElementById('editResetPassword');
+            const fields = document.getElementById('editPasswordFields');
+            const newPassword = document.getElementById('editNewPassword');
+            const confirmPassword = document.getElementById('editConfirmPassword');
+            
+            if (checkbox.checked) {
+                fields.style.display = 'block';
+                newPassword.required = true;
+                confirmPassword.required = true;
+            } else {
+                fields.style.display = 'none';
+                newPassword.required = false;
+                confirmPassword.required = false;
+                newPassword.value = '';
+                confirmPassword.value = '';
+            }
+        }
+
+        // Preview new logo in edit modal
+        function previewEditLogo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // Check file size (2MB max)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('File size should not exceed 2MB');
+                    event.target.value = '';
+                    return;
+                }
+                
+                // Check file type
+                const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Please upload a PNG or JPG image');
+                    event.target.value = '';
+                    return;
+                }
+                
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('editLogoPreviewImg').src = e.target.result;
+                    document.getElementById('editLogoPreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Save university changes
+        async function saveUniversityChanges() {
+            const form = document.getElementById('editUniversityForm');
+            
+            // Validate form
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Check password confirmation
+            const resetPassword = document.getElementById('editResetPassword').checked;
+            if (resetPassword) {
+                const newPassword = document.getElementById('editNewPassword').value;
+                const confirmPassword = document.getElementById('editConfirmPassword').value;
+                
+                if (newPassword !== confirmPassword) {
+                    alert('❌ Passwords do not match!');
+                    return;
+                }
+                
+                if (newPassword.length < 8) {
+                    alert('❌ Password must be at least 8 characters!');
+                    return;
+                }
+            }
+
+            // Get form data
+            const formData = new FormData();
+            const universityId = document.getElementById('editUniversityId').value;
+            
+            formData.append('universityName', document.getElementById('editUniversityName').value);
+            formData.append('city', document.getElementById('editCity').value);
+            formData.append('country', document.getElementById('editCountry').value);
+            formData.append('superAdminEmail', document.getElementById('editSuperAdminEmail').value);
+            formData.append('contactPhone', document.getElementById('editContactPhone').value);
+            formData.append('contactEmail', document.getElementById('editContactEmail').value);
+            formData.append('website', document.getElementById('editWebsite').value);
+            formData.append('subscriptionPlan', document.getElementById('editSubscriptionPlan').value);
+            formData.append('isActive', document.getElementById('editIsActive').value);
+            formData.append('address', document.getElementById('editAddress').value);
+            
+            // Add logo file if changed
+            const logoFile = document.getElementById('editUniversityLogo').files[0];
+            if (logoFile) {
+                formData.append('logo', logoFile);
+            }
+            
+            // Add password if reset requested
+            if (resetPassword) {
+                formData.append('resetPassword', 'true');
+                formData.append('newPassword', document.getElementById('editNewPassword').value);
+            }
+
+            // Show loading
+            const submitBtn = event.target;
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving Changes...';
+            submitBtn.disabled = true;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/universities/${universityId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    let successMessage = '✅ University Updated Successfully!\n\n';
+                    successMessage += `University: ${data.universityName}\n`;
+                    
+                    if (data.newPassword) {
+                        successMessage += `\n🔑 New Super Admin Password: ${data.newPassword}\n`;
+                        successMessage += `Email: ${data.superAdminEmail}\n\n`;
+                        successMessage += '⚠️ Please save these credentials!';
+                    }
+                    
+                    alert(successMessage);
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editUniversityModal'));
+                    modal.hide();
+                    
+                    // Reload dashboard
+                    loadDashboardData();
+                } else {
+                    alert(`❌ Error: ${data.message || 'Failed to update university'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Network Error: ${error.message}`);
+            } finally {
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Delete university
+        async function deleteUniversity(id) {
+            try {
+                const token = localStorage.getItem('token');
+                
+                // Get university details first
+                const response = await fetch(`/api/universities/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    alert('Failed to load university details');
+                    return;
+                }
+
+                const uni = await response.json();
+                
+                const confirmMessage = `⚠️ DELETE UNIVERSITY WARNING ⚠️
+
+University: ${uni.universityName}
+Code: ${uni.universityCode}
+Users: ${uni.totalUsers || 0}
+Courses: ${uni.totalCourses || 0}
+
+This will permanently delete:
+• University record
+• ${uni.totalUsers || 0} user accounts
+• ${uni.totalCourses || 0} courses
+• All associated data
+
+This action CANNOT be undone!
+
+Type "DELETE" to confirm:`;
+
+                const confirmation = prompt(confirmMessage);
+                
+                if (confirmation === 'DELETE') {
+                    const deleteResponse = await fetch(`/api/universities/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (deleteResponse.ok) {
+                        alert(`✅ University "${uni.universityName}" has been deleted successfully.`);
+                        loadDashboardData(); // Reload list
+                    } else {
+                        const errorData = await deleteResponse.json();
+                        alert(`❌ Failed to delete university: ${errorData.message}`);
+                    }
+                } else if (confirmation !== null) {
+                    alert('❌ Deletion cancelled. You must type "DELETE" exactly to confirm.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error deleting university');
+            }
+        }
+
+        // Toggle sidebar (mobile)
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        // Generate slug from university name
+        function generateSlug() {
+            const name = document.getElementById('universityName').value;
+            const slug = name
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '')
+                .substring(0, 30);
+            document.getElementById('universitySlug').value = slug;
+        }
+
+        // Preview logo
+        function previewLogo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // Check file size (2MB max)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('File size should not exceed 2MB');
+                    event.target.value = '';
+                    return;
+                }
+                
+                // Check file type
+                const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Please upload a PNG or JPG image');
+                    event.target.value = '';
+                    return;
+                }
+                
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('logoPreviewImg').src = e.target.result;
+                    document.getElementById('logoPreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Platform Users Management Functions
+        
+        // Show add platform user modal
+        function showAddPlatformUserModal() {
+            document.getElementById('addPlatformUserForm').reset();
+            const modal = new bootstrap.Modal(document.getElementById('addPlatformUserModal'));
+            modal.show();
+        }
+
+        // Load platform users
+        async function loadPlatformUsers() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/platform-users', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const users = await response.json();
+                    displayPlatformUsers(users);
+                }
+            } catch (error) {
+                console.error('Error loading platform users:', error);
+            }
+        }
+
+        // Display platform users
+        function displayPlatformUsers(users) {
+            const container = document.getElementById('platformUsersList');
+            
+            if (!users || users.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No platform users yet. Click "Add Platform User" to create one.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = users.map(user => {
+                const roleLabels = {
+                    'pro_superadmin': 'PRO Super Admin',
+                    'platform_admin': 'Platform Admin',
+                    'platform_manager': 'Platform Manager',
+                    'platform_viewer': 'Platform Viewer'
+                };
+
+                const roleBadges = {
+                    'pro_superadmin': 'badge-enterprise',
+                    'platform_admin': 'badge-premium',
+                    'platform_manager': 'badge-success',
+                    'platform_viewer': 'badge-warning'
+                };
+
+                const isPROAdmin = user.role === 'pro_superadmin';
+
+                return `
+                    <div class="university-card">
+                        <div class="university-header">
+                            <div class="d-flex gap-3 align-items-center">
+                                <div class="university-logo">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1 fw-bold">${user.name}</h6>
+                                    <small class="text-muted">${user.email}</small>
+                                </div>
+                            </div>
+                            <span class="badge ${roleBadges[user.role]}">${roleLabels[user.role]}</span>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Department</small>
+                                <strong>${user.department || 'Platform Management'}</strong>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                ${isPROAdmin ? 
+                                    '<span class="badge badge-enterprise"><i class="fas fa-crown me-1"></i>Protected</span>' :
+                                    `<button class="btn btn-sm btn-outline-danger" onclick="deletePlatformUser(${user.id}, '${user.email}')" title="Delete User">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Add platform user
+        async function addPlatformUser() {
+            const form = document.getElementById('addPlatformUserForm');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const password = document.getElementById('platformUserPassword').value;
+            const confirmPassword = document.getElementById('platformUserConfirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('❌ Passwords do not match!');
+                return;
+            }
+
+            const userData = {
+                name: document.getElementById('platformUserName').value,
+                email: document.getElementById('platformUserEmail').value,
+                role: document.getElementById('platformUserRole').value,
+                password: password
+            };
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/platform-users', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                if (response.ok) {
+                    alert('✅ Platform user created successfully!');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addPlatformUserModal'));
+                    modal.hide();
+                    loadPlatformUsers();
+                } else {
+                    const result = await response.json();
+                    alert(`❌ Error: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // Delete platform user
+        async function deletePlatformUser(id, email) {
+            if (!confirm(`⚠️ Delete Platform User?\n\nEmail: ${email}\n\nThis action cannot be undone!`)) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/platform-users/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    alert('✅ Platform user deleted!');
+                    loadPlatformUsers();
+                } else {
+                    const result = await response.json();
+                    alert(`❌ Error: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // Load platform settings
+        async function loadPlatformSettings() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/platform-settings', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const settings = await response.json();
+                    if (settings) {
+                        document.getElementById('platformName').value = settings.platformName || 'OBE Portal';
+                        document.getElementById('platformEmail').value = settings.platformEmail || 'admin@obe.org.pk';
+                        document.getElementById('supportEmail').value = settings.supportEmail || 'support@obe.org.pk';
+                        document.getElementById('platformUrl').value = settings.platformUrl || 'https://obe.org.pk';
+                        document.getElementById('smtpHost').value = settings.smtpHost || '';
+                        document.getElementById('smtpPort').value = settings.smtpPort || '';
+                        document.getElementById('smtpUsername').value = settings.smtpUsername || '';
+                        document.getElementById('smtpPassword').value = settings.smtpPassword || '';
+                        document.getElementById('smtpFromName').value = settings.smtpFromName || 'OBE Portal';
+                        document.getElementById('smtpFromEmail').value = settings.smtpFromEmail || 'noreply@obe.org.pk';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        // Save platform settings
+        async function savePlatformSettings() {
+            const settings = {
+                platformName: document.getElementById('platformName').value,
+                platformEmail: document.getElementById('platformEmail').value,
+                supportEmail: document.getElementById('supportEmail').value,
+                platformUrl: document.getElementById('platformUrl').value,
+                smtpHost: document.getElementById('smtpHost').value,
+                smtpPort: document.getElementById('smtpPort').value,
+                smtpUsername: document.getElementById('smtpUsername').value,
+                smtpPassword: document.getElementById('smtpPassword').value,
+                smtpFromName: document.getElementById('smtpFromName').value,
+                smtpFromEmail: document.getElementById('smtpFromEmail').value
+            };
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/platform-settings', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                if (response.ok) {
+                    alert('✅ Platform settings saved successfully!');
+                } else {
+                    const result = await response.json();
+                    alert(`❌ Error: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/';
+            }
+        }
+
+        // Load initial data
+        async function loadDashboardData() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/universities', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const universities = await response.json();
+                    displayUniversities(universities);
+                    updateStats(universities);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Display universities in the list
+        function displayUniversities(universities) {
+            const container = document.getElementById('universitiesList');
+            if (!universities || universities.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No universities registered yet. Click "Add New" to create one.</div>';
+                return;
+            }
+
+            container.innerHTML = universities.map(uni => {
+                // Determine plan badge color
+                let planBadge = 'badge-warning';
+                if (uni.subscriptionPlan === 'Enterprise') planBadge = 'badge-enterprise';
+                else if (uni.subscriptionPlan === 'Premium') planBadge = 'badge-premium';
+                else if (uni.subscriptionPlan === 'Free') planBadge = 'badge-success';
+                else if (uni.subscriptionPlan === 'Trial') planBadge = 'bg-info text-white';
+                
+                const statusBadge = uni.isActive ? 'badge-success' : 'badge-warning';
+                const statusText = uni.isActive ? 'Active' : 'Inactive';
+                
+                // Get first letter of university name for logo fallback
+                const firstLetter = uni.universityName.charAt(0).toUpperCase();
+                
+                // Logo display
+                const logoHtml = uni.logo ? 
+                    `<img src="${uni.logo}" alt="${uni.universityName}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px;">` :
+                    `<div class="university-logo">${firstLetter}</div>`;
+
+                return `
+                    <div class="university-card">
+                        <div class="university-header">
+                            <div class="d-flex gap-3">
+                                ${logoHtml}
+                                <div>
+                                    <h6 class="mb-1 fw-bold">${uni.universityName}</h6>
+                                    <small class="text-muted">${uni.city}, ${uni.country}</small>
+                                </div>
+                            </div>
+                            <span class="badge ${statusBadge}">${statusText}</span>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">Super Admin</small>
+                                <strong>${uni.superAdminEmail}</strong>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Users</small>
+                                <strong>${uni.totalUsers || 0}</strong>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Courses</small>
+                                <strong>${uni.totalCourses || 0}</strong>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Plan</small>
+                                <span class="badge ${planBadge}">${uni.subscriptionPlan}</span>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editUniversity(${uni.id})" title="Edit University">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="viewUniversity(${uni.id})" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUniversity(${uni.id})" title="Delete University">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update statistics with actual data including revenue
+        function updateStats(universities) {
+            const totalUniversities = universities.length;
+            const totalUsers = universities.reduce((sum, uni) => sum + (uni.totalUsers || 0), 0);
+            const totalCourses = universities.reduce((sum, uni) => sum + (uni.totalCourses || 0), 0);
+            
+            // Calculate monthly revenue based on subscription plans
+            const planPrices = {
+                'Free': 0,
+                'Trial': 0,
+                'Basic': 20000,
+                'Premium': 30000,
+                'Enterprise': 40000
+            };
+            
+            const monthlyRevenue = universities.reduce((sum, uni) => {
+                if (uni.isActive) {
+                    return sum + (planPrices[uni.subscriptionPlan] || 0);
+                }
+                return sum;
+            }, 0);
+
+            document.getElementById('totalUniversities').textContent = totalUniversities;
+            document.getElementById('totalUsers').textContent = totalUsers.toLocaleString();
+            document.getElementById('totalCourses').textContent = totalCourses;
+            document.getElementById('totalRevenue').textContent = `Rs. ${(monthlyRevenue / 1000).toFixed(0)}K`;
+        }
+
+        // Load all universities for Universities section
+        async function loadAllUniversities() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/universities', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const universities = await response.json();
+                    displayAllUniversities(universities);
+                }
+            } catch (error) {
+                console.error('Error loading universities:', error);
+            }
+        }
+
+        // Display universities in Universities section
+        function displayAllUniversities(universities) {
+            const container = document.getElementById('allUniversitiesList');
+            
+            if (!universities || universities.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No universities registered yet. Click "Add New University" to create one.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = universities.map(uni => {
+                // Determine plan badge color
+                let planBadge = 'badge-warning';
+                if (uni.subscriptionPlan === 'Enterprise') planBadge = 'badge-enterprise';
+                else if (uni.subscriptionPlan === 'Premium') planBadge = 'badge-premium';
+                else if (uni.subscriptionPlan === 'Free') planBadge = 'badge-success';
+                else if (uni.subscriptionPlan === 'Trial') planBadge = 'bg-info text-white';
+                
+                const statusBadge = uni.isActive ? 'badge-success' : 'badge-warning';
+                const statusText = uni.isActive ? 'Active' : 'Inactive';
+                
+                // Get first letter of university name for logo fallback
+                const firstLetter = uni.universityName.charAt(0).toUpperCase();
+                
+                // Logo display
+                const logoHtml = uni.logo ? 
+                    `<img src="${uni.logo}" alt="${uni.universityName}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px;">` :
+                    `<div class="university-logo">${firstLetter}</div>`;
+
+                return `
+                    <div class="university-card">
+                        <div class="university-header">
+                            <div class="d-flex gap-3">
+                                ${logoHtml}
+                                <div>
+                                    <h6 class="mb-1 fw-bold">${uni.universityName}</h6>
+                                    <small class="text-muted">${uni.city}, ${uni.country}</small>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="badge ${statusBadge}">${statusText}</span>
+                                <span class="badge ${planBadge} ms-1">${uni.subscriptionPlan}</span>
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">Super Admin</small>
+                                <strong>${uni.superAdminEmail}</strong>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Users</small>
+                                <strong>${uni.totalUsers || 0}</strong>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Courses</small>
+                                <strong>${uni.totalCourses || 0}</strong>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Contact</small>
+                                <strong>${uni.contactPhone || 'N/A'}</strong>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editUniversity(${uni.id})" title="Edit University">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="viewUniversity(${uni.id})" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUniversity(${uni.id})" title="Delete University">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load subscription data
+        async function loadSubscriptionData() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/universities', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const universities = await response.json();
+                    displaySubscriptionData(universities);
+                }
+            } catch (error) {
+                console.error('Error loading subscription data:', error);
+            }
+        }
+
+        // Display subscription data
+        function displaySubscriptionData(universities) {
+            // Calculate plan counts and revenue
+            const planPrices = {
+                'Free': 0,
+                'Trial': 0,
+                'Basic': 20000,
+                'Premium': 30000,
+                'Enterprise': 40000
+            };
+
+            const planCounts = {
+                'Free': 0,
+                'Trial': 0,
+                'Basic': 0,
+                'Premium': 0,
+                'Enterprise': 0
+            };
+
+            let totalRevenue = 0;
+            let activeCount = 0;
+            let freeTrialCount = 0;
+
+            universities.forEach(uni => {
+                if (planCounts.hasOwnProperty(uni.subscriptionPlan)) {
+                    planCounts[uni.subscriptionPlan]++;
+                }
+
+                if (uni.isActive) {
+                    const revenue = planPrices[uni.subscriptionPlan] || 0;
+                    totalRevenue += revenue;
+                    
+                    if (revenue > 0) {
+                        activeCount++;
+                    } else {
+                        freeTrialCount++;
+                    }
+                } else {
+                    freeTrialCount++;
+                }
+            });
+
+            // Update summary cards
+            document.getElementById('monthlyRevenue').textContent = `Rs. ${totalRevenue.toLocaleString()}`;
+            document.getElementById('activeSubscriptions').textContent = activeCount;
+            document.getElementById('freeTrialCount').textContent = freeTrialCount;
+            document.getElementById('totalSubsUniversities').textContent = universities.length;
+
+            // Display breakdown
+            const container = document.getElementById('subscriptionBreakdown');
+            container.innerHTML = `
+                <div class="row g-3">
+                    ${Object.entries(planCounts).map(([plan, count]) => {
+                        const revenue = planPrices[plan] * count;
+                        let badgeClass = 'bg-secondary';
+                        if (plan === 'Enterprise') badgeClass = 'bg-purple';
+                        else if (plan === 'Premium') badgeClass = 'bg-warning';
+                        else if (plan === 'Free') badgeClass = 'bg-success';
+                        else if (plan === 'Trial') badgeClass = 'bg-info';
+                        else if (plan === 'Basic') badgeClass = 'bg-primary';
+                        
+                        return `
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="mb-0">${plan} Plan</h6>
+                                            <span class="badge ${badgeClass}">${count} Unis</span>
+                                        </div>
+                                        <h4 class="text-primary mb-1">Rs. ${revenue.toLocaleString()}</h4>
+                                        <small class="text-muted">Monthly revenue from ${plan}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+        });
+    </script>
+</body>
+</html>
+

@@ -25,13 +25,21 @@
             max-width: 500px;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .quest-logo {
+        .obe-logo {
             width: 100px;
             height: 100px;
-            margin: 0 auto 2rem;
-            display: block;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border-radius: 50%;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .obe-logo i {
+            font-size: 3rem;
+            color: white;
         }
         .btn-login {
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
@@ -67,13 +75,17 @@
 </head>
 <body>
     <div class="login-container">
-        <!-- QUEST Logo -->
-        <img src="quest_logo.png" alt="QUEST Logo" class="quest-logo">
+        <!-- OBE Portal Logo -->
+        <div class="text-center mb-4">
+            <div class="obe-logo">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+        </div>
         
         <!-- Login Form -->
         <div class="text-center mb-4">
             <h2 class="fw-bold text-primary">Welcome Back</h2>
-            <p class="text-muted">Sign in to your QUEST account</p>
+            <p class="text-muted">Sign in to your OBE Portal account</p>
         </div>
 
         <!-- Alert Container -->
@@ -161,7 +173,8 @@
                     // Redirect to appropriate dashboard
                     setTimeout(() => {
                         const dashboardMap = {
-                            'superadmin': '/super-admin-dashboard.html',
+                            'pro_superadmin': '/pro-super-admin-dashboard.html',
+                            'superadmin': '/university-super-admin-dashboard.html',
                             'student': '/student-dashboard-enhanced.html',
                             'teacher': '/teacher-dashboard-enhanced.html',
                             'focal': '/focal-dashboard-enhanced.html',

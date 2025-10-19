@@ -1473,7 +1473,7 @@
             const user = localStorage.getItem('user');
             
             if (!token || !user) {
-                window.location.href = '/login';
+                window.location.href = '/';
                 return;
             }
             
@@ -1502,7 +1502,7 @@
                 console.error('Error parsing user data:', error);
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
-                window.location.href = '/login';
+                window.location.href = '/';
             }
         });
 
@@ -2513,7 +2513,7 @@
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = '/login';
+            window.location.href = '/';
         }
 
         function showAlert(message, type) {
