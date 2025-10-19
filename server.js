@@ -47,11 +47,11 @@ const upload = multer({ storage: storage });
 
 // Platform Database Configuration (for metadata only)
 const platformDbConfig = {
-    host: process.env.DB_HOST || 'mysql.gb.stackcp.com',
-    port: process.env.DB_PORT || 40063,
-    user: process.env.DB_USER || 'obe',
-    password: process.env.DB_PASSWORD || 'quest-db',
-    database: process.env.DB_NAME || 'vercel_db-31383355e3', // Platform DB
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 3306,
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'quest_obe', // Platform DB
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
