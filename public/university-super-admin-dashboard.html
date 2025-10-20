@@ -1699,35 +1699,69 @@
                 if (response.ok) {
                     const myUniversity = await response.json();
                     
+                    // Store university data globally
+                    window.currentUniversity = myUniversity;
+                    
                     // Update UI with university info
                     const universityName = myUniversity.universityName;
-                    document.getElementById('universityName').textContent = universityName;
-                    document.getElementById('settingsUniversityName').value = universityName;
-                    document.getElementById('settingsDatabaseName').value = myUniversity.databaseName || 'N/A';
+                    const universityCode = myUniversity.universityCode;
+                    
+                    // Update all university name elements
+                    document.querySelectorAll('#universityName, .university-name').forEach(el => {
+                        el.textContent = universityName;
+                    });
+                    
+                    // Update settings
+                    if (document.getElementById('settingsUniversityName')) {
+                        document.getElementById('settingsUniversityName').value = universityName;
+                    }
+                    if (document.getElementById('settingsDatabaseName')) {
+                        document.getElementById('settingsDatabaseName').value = myUniversity.databaseName || 'N/A';
+                    }
+                    if (document.getElementById('settingsUniversityCode')) {
+                        document.getElementById('settingsUniversityCode').value = universityCode;
+                    }
+                    
+                    // Update colors if provided
+                    if (myUniversity.primaryColor) {
+                        document.documentElement.style.setProperty('--primary-color', myUniversity.primaryColor);
+                    }
                     
                     // Set logo or monogram
                     const logoElement = document.getElementById('universityLogo');
                     const placeholderElement = document.getElementById('universityLogoPlaceholder');
                     
-                    if (myUniversity.logo) {
-                        // Show actual logo
-                        logoElement.src = myUniversity.logo;
+                    if (myUniversity.logoUrl) {
+                        // Show actual logo from database
+                        logoElement.src = myUniversity.logoUrl;
                         logoElement.style.display = 'block';
-                        placeholderElement.style.display = 'none';
+                        if (placeholderElement) placeholderElement.style.display = 'none';
                     } else {
                         // Show first letter as monogram
                         const firstLetter = universityName.charAt(0).toUpperCase();
-                        placeholderElement.textContent = firstLetter;
-                        placeholderElement.style.display = 'flex';
+                        if (placeholderElement) {
+                            placeholderElement.textContent = firstLetter;
+                            placeholderElement.style.display = 'flex';
+                        }
                         logoElement.style.display = 'none';
                     }
+                    
+                    console.log(`✅ University loaded: ${universityName} (${universityCode})`);
                 } else {
-                    // Fallback to default
-                    console.log('Could not load university info, using defaults');
-                    document.getElementById('universityName').textContent = 'University';
-                    document.getElementById('universityLogoPlaceholder').textContent = 'U';
-                    document.getElementById('universityLogoPlaceholder').style.display = 'flex';
-                    document.getElementById('universityLogo').style.display = 'none';
+                    // Fallback to user data if available
+                    console.log('Could not load university info from API, using user data');
+                    if (user.university) {
+                        document.getElementById('universityName').textContent = user.university;
+                    }
+                    if (user.universityCode) {
+                        const firstLetter = user.universityCode.charAt(0).toUpperCase();
+                        const placeholderElement = document.getElementById('universityLogoPlaceholder');
+                        if (placeholderElement) {
+                            placeholderElement.textContent = firstLetter;
+                            placeholderElement.style.display = 'flex';
+                        }
+                        document.getElementById('universityLogo').style.display = 'none';
+                    }
                 }
             } catch (error) {
                 console.error('Error loading university info:', error);

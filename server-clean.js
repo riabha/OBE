@@ -642,6 +642,45 @@ app.delete('/api/platform-users/:id', async (req, res) => {
     }
 });
 
+// Get my university (for university super admins)
+app.get('/api/my-university', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+        
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
+        
+        // Check if user is university super admin
+        const platformUser = await PlatformUser.findById(decoded.userId);
+        
+        if (!platformUser || platformUser.role !== 'university_superadmin') {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
+        
+        // Get their university
+        const university = await University.findById(platformUser.university);
+        
+        if (!university) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+        
+        const uniObj = university.toObject();
+        if (university.logo && university.logo.contentType) {
+            uniObj.logoUrl = `/api/universities/${university._id}/logo`;
+        }
+        delete uniObj.logo;
+        
+        res.json(uniObj);
+        
+    } catch (error) {
+        console.error('Error getting university:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
 // ============================================
 // SUBSCRIPTIONS API
 // ============================================
@@ -650,6 +689,66 @@ app.get('/api/subscriptions', async (req, res) => {
     try {
         const subscriptions = await Subscription.find({}).populate('university').sort({ createdAt: -1 });
         res.json(subscriptions);
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// ============================================
+// UNIVERSITY-SPECIFIC APIs
+// (For University Super Admins accessing their university data)
+// ============================================
+
+// Get users from university database
+app.get('/api/users', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
+        
+        // For now, return empty array (university databases don't have users yet)
+        // This will be implemented when university user management is added
+        res.json([]);
+        
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Get courses from university database
+app.get('/api/courses', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
+        
+        // For now, return empty array (university databases don't have courses yet)
+        res.json([]);
+        
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Get departments from university database
+app.get('/api/departments', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
+        
+        // For now, return empty array
+        res.json([]);
+        
     } catch (error) {
         res.status(500).json({ message: 'Error', error: error.message });
     }
