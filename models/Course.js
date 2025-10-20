@@ -361,6 +361,7 @@ courseSchema.methods.updateStudentGrade = function(studentId, totalMarks, finalG
     throw new Error('Student not found in this course');
 };
 
-module.exports = mongoose.model('Course', courseSchema);
+// Export the schema for dynamic database connections
+module.exports = courseSchema;
 
 

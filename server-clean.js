@@ -699,44 +699,31 @@ app.get('/api/subscriptions', async (req, res) => {
 // (For University Super Admins accessing their university data)
 // ============================================
 
-// Get users from university database
-app.get('/api/users', async (req, res) => {
-    try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ message: 'No token' });
-        }
-        
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
-        
-        // For now, return empty array (university databases don't have users yet)
-        // This will be implemented when university user management is added
-        res.json([]);
-        
-    } catch (error) {
-        res.status(500).json({ message: 'Error', error: error.message });
+// Helper function to get university database connection
+async function getUniversityDatabase(token) {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
+    
+    // Get user's university
+    const user = await PlatformUser.findById(decoded.userId);
+    if (!user || user.role !== 'university_superadmin') {
+        throw new Error('Not authorized');
     }
-});
-
-// Get courses from university database
-app.get('/api/courses', async (req, res) => {
-    try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ message: 'No token' });
-        }
-        
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
-        
-        // For now, return empty array (university databases don't have courses yet)
-        res.json([]);
-        
-    } catch (error) {
-        res.status(500).json({ message: 'Error', error: error.message });
+    
+    const university = await University.findById(user.university);
+    if (!university) {
+        throw new Error('University not found');
     }
-});
+    
+    // Return connection to university database
+    const uniDb = mongoose.connection.useDb(university.databaseName);
+    return { uniDb, university };
+}
 
-// Get departments from university database
+// ============================================
+// DEPARTMENTS API
+// ============================================
+
+// Get all departments
 app.get('/api/departments', async (req, res) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
@@ -744,10 +731,308 @@ app.get('/api/departments', async (req, res) => {
             return res.status(401).json({ message: 'No token' });
         }
         
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
+        const { uniDb } = await getUniversityDatabase(token);
+        const DepartmentSchema = require('./models/Department');
+        const Department = uniDb.model('Department', DepartmentSchema);
         
-        // For now, return empty array
-        res.json([]);
+        const departments = await Department.find({}).sort({ createdAt: -1 });
+        res.json(departments);
+        
+    } catch (error) {
+        console.error('Error getting departments:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Create department
+app.post('/api/departments', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const DepartmentSchema = require('./models/Department');
+        const Department = uniDb.model('Department', DepartmentSchema);
+        
+        const department = new Department(req.body);
+        await department.save();
+        
+        console.log(`✅ Department created: ${department.name}`);
+        res.status(201).json({ message: 'Department created', department });
+        
+    } catch (error) {
+        console.error('Error creating department:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Update department
+app.put('/api/departments/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const DepartmentSchema = require('./models/Department');
+        const Department = uniDb.model('Department', DepartmentSchema);
+        
+        const department = await Department.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true }
+        );
+        
+        if (!department) {
+            return res.status(404).json({ message: 'Department not found' });
+        }
+        
+        res.json({ message: 'Department updated', department });
+        
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Delete department
+app.delete('/api/departments/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const DepartmentSchema = require('./models/Department');
+        const Department = uniDb.model('Department', DepartmentSchema);
+        
+        const department = await Department.findByIdAndDelete(req.params.id);
+        
+        if (!department) {
+            return res.status(404).json({ message: 'Department not found' });
+        }
+        
+        res.json({ message: 'Department deleted' });
+        
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// ============================================
+// USERS API (University-specific)
+// ============================================
+
+// Get all users from university database
+app.get('/api/users', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const UserSchema = require('./models/User');
+        const User = uniDb.model('User', UserSchema);
+        
+        const users = await User.find({}, '-password').populate('department').sort({ createdAt: -1 });
+        res.json(users);
+        
+    } catch (error) {
+        console.error('Error getting users:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Create user
+app.post('/api/users', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const UserSchema = require('./models/User');
+        const User = uniDb.model('User', UserSchema);
+        
+        // Hash password
+        const hashedPassword = await bcrypt.hash(req.body.password, 12);
+        req.body.password = hashedPassword;
+        
+        const user = new User(req.body);
+        await user.save();
+        
+        console.log(`✅ User created: ${user.email}`);
+        
+        const userObj = user.toObject();
+        delete userObj.password;
+        
+        res.status(201).json({ message: 'User created', user: userObj });
+        
+    } catch (error) {
+        console.error('Error creating user:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Update user
+app.put('/api/users/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const UserSchema = require('./models/User');
+        const User = uniDb.model('User', UserSchema);
+        
+        // Don't allow password update through this endpoint
+        delete req.body.password;
+        
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true }
+        ).select('-password');
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        res.json({ message: 'User updated', user });
+        
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Delete user
+app.delete('/api/users/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const UserSchema = require('./models/User');
+        const User = uniDb.model('User', UserSchema);
+        
+        const user = await User.findByIdAndDelete(req.params.id);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        res.json({ message: 'User deleted' });
+        
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// ============================================
+// COURSES API
+// ============================================
+
+// Get all courses from university database
+app.get('/api/courses', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const CourseSchema = require('./models/Course');
+        const Course = uniDb.model('Course', CourseSchema);
+        
+        const courses = await Course.find({}).populate('department').sort({ createdAt: -1 });
+        res.json(courses);
+        
+    } catch (error) {
+        console.error('Error getting courses:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Create course
+app.post('/api/courses', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const CourseSchema = require('./models/Course');
+        const Course = uniDb.model('Course', CourseSchema);
+        
+        const course = new Course(req.body);
+        await course.save();
+        
+        console.log(`✅ Course created: ${course.name}`);
+        res.status(201).json({ message: 'Course created', course });
+        
+    } catch (error) {
+        console.error('Error creating course:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Update course
+app.put('/api/courses/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const CourseSchema = require('./models/Course');
+        const Course = uniDb.model('Course', CourseSchema);
+        
+        const course = await Course.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true }
+        );
+        
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+        
+        res.json({ message: 'Course updated', course });
+        
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Delete course
+app.delete('/api/courses/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const CourseSchema = require('./models/Course');
+        const Course = uniDb.model('Course', CourseSchema);
+        
+        const course = await Course.findByIdAndDelete(req.params.id);
+        
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+        
+        res.json({ message: 'Course deleted' });
         
     } catch (error) {
         res.status(500).json({ message: 'Error', error: error.message });

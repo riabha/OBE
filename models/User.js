@@ -237,6 +237,7 @@ userSchema.statics.findByDepartment = function(departmentId) {
     });
 };
 
-module.exports = mongoose.model('User', userSchema);
+// Export the schema for dynamic database connections
+module.exports = userSchema;
 
 

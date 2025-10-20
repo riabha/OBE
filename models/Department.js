@@ -283,6 +283,7 @@ departmentSchema.methods.updateStatistics = async function() {
     return this.save();
 };
 
-module.exports = mongoose.model('Department', departmentSchema);
+// Export the schema for dynamic database connections
+module.exports = departmentSchema;
 
 
