@@ -328,4 +328,12 @@ For support, email support@quest.edu.pk or create an issue in the GitHub reposit
 
 ---
 
+## 🔄 Auto-Deployment Status
+
+✅ **Auto-deployment is ACTIVE!** - Push to GitHub and watch it deploy automatically!
+
+**Last Update**: Testing auto-deployment webhook - October 20, 2025
+
+---
+
 **Made with ❤️ for QUEST University**
