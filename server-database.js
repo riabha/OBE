@@ -470,6 +470,25 @@ app.post('/api/universities/create', upload.single('logo'), async (req, res) => 
 
         await university.save();
 
+        // Create the university database in MongoDB
+        try {
+            const uniDbConnection = mongoose.connection.useDb(dbName, { useCache: true });
+            
+            // Create initial collections with metadata
+            await uniDbConnection.createCollection('_metadata');
+            await uniDbConnection.collection('_metadata').insertOne({
+                universityId: university._id,
+                universityName: university.universityName,
+                universityCode: university.universityCode,
+                created: new Date(),
+                version: '1.0.0'
+            });
+            
+            console.log(`✅ Database created in MongoDB: ${dbName}`);
+        } catch (dbError) {
+            console.log(`⚠️  Database creation note: ${dbError.message}`);
+        }
+
         // Create default subscription
         const subscription = new Subscription({
             university: university._id,
@@ -487,9 +506,16 @@ app.post('/api/universities/create', upload.single('logo'), async (req, res) => 
         console.log(`✅ University created: ${universityName} (${universityCode})`);
         console.log(`📊 Database: ${dbName}`);
 
+        // Prepare response with logo URL
+        const uniResponse = university.toObject();
+        if (university.logo && university.logo.contentType) {
+            uniResponse.logoUrl = `/api/universities/${university._id}/logo`;
+        }
+        delete uniResponse.logo; // Remove binary data from response
+
         res.status(201).json({
             message: 'University created successfully',
-            university,
+            university: uniResponse,
             subscription
         });
 
@@ -634,6 +660,53 @@ app.get('/api/databases', async (req, res) => {
         res.json(obeDatabases);
     } catch (error) {
         console.error('Error listing databases:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Create a new MongoDB database manually
+app.post('/api/databases/create', async (req, res) => {
+    try {
+        const { databaseName, description } = req.body;
+        
+        if (!databaseName) {
+            return res.status(400).json({ message: 'Database name is required' });
+        }
+        
+        // Validate database name
+        if (!databaseName.startsWith('obe_')) {
+            return res.status(400).json({ message: 'Database name must start with "obe_"' });
+        }
+        
+        if (!/^[a-z0-9_]+$/.test(databaseName)) {
+            return res.status(400).json({ message: 'Database name can only contain lowercase letters, numbers, and underscores' });
+        }
+        
+        // Create connection to the new database
+        const newDbConnection = mongoose.connection.useDb(databaseName, { useCache: true });
+        
+        // Create an initial collection to ensure database is created
+        // MongoDB doesn't create empty databases, so we create a metadata collection
+        await newDbConnection.createCollection('_metadata');
+        await newDbConnection.collection('_metadata').insertOne({
+            created: new Date(),
+            description: description || `Database for ${databaseName}`,
+            version: '1.0.0'
+        });
+        
+        console.log(`✅ Database created: ${databaseName}`);
+        
+        res.json({
+            message: 'Database created successfully',
+            database: {
+                name: databaseName,
+                description,
+                created: new Date()
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error creating database:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
