@@ -21,8 +21,8 @@ const universitySchema = new mongoose.Schema({
         trim: true
     },
     logo: {
-        type: String,
-        default: null
+        data: Buffer,
+        contentType: String
     },
     primaryColor: {
         type: String,

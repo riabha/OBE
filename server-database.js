@@ -31,16 +31,22 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/uploads/');
+// Configure multer for file uploads (memory storage for MongoDB)
+const storage = multer.memoryStorage();
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
     },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
+    fileFilter: (req, file, cb) => {
+        // Accept images only
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed!'), false);
+        }
     }
 });
-const upload = multer({ storage: storage });
 
 // ============================================
 // PLATFORM USER MODEL (for Pro Super Admin)
@@ -349,8 +355,36 @@ const Subscription = require('./models/Subscription');
 // Get all universities
 app.get('/api/universities', async (req, res) => {
     try {
-        const universities = await University.find({}).sort({ createdAt: -1 });
-        res.json(universities);
+        // Exclude logo data from list (for performance)
+        const universities = await University.find({}, '-logo.data').sort({ createdAt: -1 });
+        
+        // Add logo URL for each university
+        const universitiesWithLogoUrl = universities.map(uni => {
+            const uniObj = uni.toObject();
+            if (uni.logo && uni.logo.contentType) {
+                uniObj.logoUrl = `/api/universities/${uni._id}/logo`;
+            }
+            return uniObj;
+        });
+        
+        res.json(universitiesWithLogoUrl);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Get university logo
+app.get('/api/universities/:id/logo', async (req, res) => {
+    try {
+        const university = await University.findById(req.params.id);
+        
+        if (!university || !university.logo || !university.logo.data) {
+            return res.status(404).json({ message: 'Logo not found' });
+        }
+        
+        res.contentType(university.logo.contentType);
+        res.send(university.logo.data);
+        
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -393,7 +427,10 @@ app.post('/api/universities/create', upload.single('logo'), async (req, res) => 
             universityName,
             universityCode: universityCode.toUpperCase(),
             databaseName: dbName,
-            logo: req.file ? `/uploads/${req.file.filename}` : null,
+            logo: req.file ? {
+                data: req.file.buffer,
+                contentType: req.file.mimetype
+            } : undefined,
             address,
             city,
             country: country || 'Pakistan',
@@ -448,8 +485,12 @@ app.put('/api/universities/:id', upload.single('logo'), async (req, res) => {
         // Update fields
         Object.assign(university, req.body);
         
+        // Update logo if new one provided
         if (req.file) {
-            university.logo = `/uploads/${req.file.filename}`;
+            university.logo = {
+                data: req.file.buffer,
+                contentType: req.file.mimetype
+            };
         }
 
         await university.save();
