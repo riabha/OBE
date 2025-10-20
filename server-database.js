@@ -187,10 +187,18 @@ app.post('/api/auth/login', async (req, res) => {
         }
         
         // Check platform database (includes Pro Super Admins AND University Super Admins)
-        const platformUser = await PlatformUser.findOne({ email: email.toLowerCase() }).populate('university');
+        let platformUser = await PlatformUser.findOne({ email: email.toLowerCase() });
+        
+        // Populate university reference if it exists
+        if (platformUser && platformUser.university) {
+            await platformUser.populate('university');
+        }
         
         if (platformUser && platformUser.isActive) {
+            console.log(`📌 Platform user found: ${platformUser.email} (${platformUser.role})`);
+            
             const isPasswordValid = await platformUser.comparePassword(password);
+            console.log(`🔑 Password check result: ${isPasswordValid}`);
             
             if (isPasswordValid) {
                 // Update last login
