@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "production": "node server-production.js",
+    "deploy": "pm2 start server-production.js --name quest-obe --env production"
   },
   "engines": {
     "node": "22.x"
