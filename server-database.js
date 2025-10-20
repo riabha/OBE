@@ -337,19 +337,235 @@ app.post('/api/platform-users', async (req, res) => {
     }
 });
 
+// ============================================
+// UNIVERSITIES API
+// ============================================
+
+const UniversitySchema = require('./models/University');
+const University = mongoose.model('University', UniversitySchema);
+
+const Subscription = require('./models/Subscription');
+
+// Get all universities
+app.get('/api/universities', async (req, res) => {
+    try {
+        const universities = await University.find({}).sort({ createdAt: -1 });
+        res.json(universities);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Create new university
+app.post('/api/universities/create', upload.single('logo'), async (req, res) => {
+    try {
+        const {
+            universityName,
+            universityCode,
+            address,
+            city,
+            country,
+            contactEmail,
+            contactPhone,
+            website,
+            superAdminEmail,
+            databaseOption, // 'auto' or 'manual'
+            databaseName, // if manual
+            subscriptionPlan
+        } = req.body;
+
+        // Check if university code already exists
+        const existing = await University.findOne({ universityCode: universityCode.toUpperCase() });
+        if (existing) {
+            return res.status(400).json({ message: 'University code already exists' });
+        }
+
+        // Generate database name
+        let dbName;
+        if (databaseOption === 'manual' && databaseName) {
+            dbName = databaseName;
+        } else {
+            dbName = `obe_university_${universityCode.toLowerCase()}`;
+        }
+
+        // Create university
+        const university = new University({
+            universityName,
+            universityCode: universityCode.toUpperCase(),
+            databaseName: dbName,
+            logo: req.file ? `/uploads/${req.file.filename}` : null,
+            address,
+            city,
+            country: country || 'Pakistan',
+            contactEmail,
+            contactPhone,
+            website,
+            superAdminEmail,
+            subscriptionPlan: subscriptionPlan || 'Basic',
+            subscriptionStatus: 'Active',
+            isActive: true
+        });
+
+        await university.save();
+
+        // Create default subscription
+        const subscription = new Subscription({
+            university: university._id,
+            universityCode: university.universityCode,
+            planType: subscriptionPlan || 'Basic',
+            planName: `${subscriptionPlan || 'Basic'} Plan`,
+            status: 'Trial',
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days trial
+            trialEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        });
+
+        await subscription.save();
+
+        console.log(`✅ University created: ${universityName} (${universityCode})`);
+        console.log(`📊 Database: ${dbName}`);
+
+        res.status(201).json({
+            message: 'University created successfully',
+            university,
+            subscription
+        });
+
+    } catch (error) {
+        console.error('❌ Error creating university:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Update university
+app.put('/api/universities/:id', upload.single('logo'), async (req, res) => {
+    try {
+        const university = await University.findById(req.params.id);
+        if (!university) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+
+        // Update fields
+        Object.assign(university, req.body);
+        
+        if (req.file) {
+            university.logo = `/uploads/${req.file.filename}`;
+        }
+
+        await university.save();
+
+        res.json({
+            message: 'University updated successfully',
+            university
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Delete university
+app.delete('/api/universities/:id', async (req, res) => {
+    try {
+        const university = await University.findById(req.params.id);
+        if (!university) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+
+        // Delete associated subscription
+        await Subscription.deleteOne({ university: university._id });
+
+        // Delete university
+        await university.deleteOne();
+
+        res.json({ message: 'University deleted successfully' });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// ============================================
+// SUBSCRIPTIONS API
+// ============================================
+
+// Get all subscriptions
+app.get('/api/subscriptions', async (req, res) => {
+    try {
+        const subscriptions = await Subscription.find({})
+            .populate('university')
+            .sort({ createdAt: -1 });
+        res.json(subscriptions);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Get subscription by university
+app.get('/api/subscriptions/university/:universityId', async (req, res) => {
+    try {
+        const subscription = await Subscription.findOne({ 
+            university: req.params.universityId 
+        }).populate('university');
+        
+        if (!subscription) {
+            return res.status(404).json({ message: 'Subscription not found' });
+        }
+        
+        res.json(subscription);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Update subscription
+app.put('/api/subscriptions/:id', async (req, res) => {
+    try {
+        const subscription = await Subscription.findById(req.params.id);
+        if (!subscription) {
+            return res.status(404).json({ message: 'Subscription not found' });
+        }
+
+        Object.assign(subscription, req.body);
+        await subscription.save();
+
+        res.json({
+            message: 'Subscription updated successfully',
+            subscription
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Get subscription plans
+app.get('/api/subscriptions/plans', (req, res) => {
+    res.json(Subscription.getPlans());
+});
+
 // Get platform statistics
 app.get('/api/platform-stats', async (req, res) => {
     try {
         const totalPlatformUsers = await PlatformUser.countDocuments();
+        const totalUniversities = await University.countDocuments();
+        const activeUniversities = await University.countDocuments({ isActive: true });
+        const totalSubscriptions = await Subscription.countDocuments();
+        const activeSubscriptions = await Subscription.countDocuments({ status: 'Active' });
+        const trialSubscriptions = await Subscription.countDocuments({ status: 'Trial' });
         
         res.json({
-            totalUniversities: 0,
-            totalUsers: 0,
+            totalUniversities,
+            activeUniversities,
+            totalUsers: 0, // TODO: Count users from all university databases
             totalCourses: 0,
             totalDepartments: 0,
             totalStudents: 0,
             totalTeachers: 0,
-            platformUsers: totalPlatformUsers
+            platformUsers: totalPlatformUsers,
+            totalSubscriptions,
+            activeSubscriptions,
+            trialSubscriptions
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
