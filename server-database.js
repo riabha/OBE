@@ -231,17 +231,28 @@ app.post('/api/auth/login', async (req, res) => {
         
         // If not found in platform, check all university databases
         const universities = await University.find({ isActive: true });
+        console.log(`🔍 Checking ${universities.length} university databases for user: ${email}`);
+        
         const UserSchema = require('./models/User');
         
         for (const uni of universities) {
             try {
+                console.log(`   📂 Checking database: ${uni.databaseName}`);
                 const uniDbConnection = mongoose.connection.useDb(uni.databaseName, { useCache: true });
                 const UniversityUser = uniDbConnection.model('User', UserSchema);
                 
                 const user = await UniversityUser.findOne({ email: email.toLowerCase() });
                 
-                if (user && user.isActive) {
+                if (user) {
+                    console.log(`   ✅ User found in ${uni.databaseName}: ${user.email} (${user.role})`);
+                    
+                    if (!user.isActive) {
+                        console.log(`   ❌ User is inactive`);
+                        continue;
+                    }
+                    
                     const isPasswordValid = await user.comparePassword(password);
+                    console.log(`   🔑 Password check: ${isPasswordValid ? 'Valid' : 'Invalid'}`);
                     
                     if (isPasswordValid) {
                         // Update last login
@@ -281,9 +292,12 @@ app.post('/api/auth/login', async (req, res) => {
                             }
                         });
                     }
+                } else {
+                    console.log(`   ⚪ User not found in ${uni.databaseName}`);
                 }
             } catch (uniDbError) {
                 // Database might not exist yet, continue to next
+                console.log(`   ⚠️  Error accessing ${uni.databaseName}: ${uniDbError.message}`);
                 continue;
             }
         }
@@ -546,9 +560,9 @@ app.post('/api/universities/create', upload.single('logo'), async (req, res) => 
             
             // Create super admin
             const superAdmin = new UniversityUser({
-                firstName: 'Super',
-                lastName: 'Admin',
-                email: superAdminEmail,
+                firstName: 'University',
+                lastName: 'Administrator',
+                email: superAdminEmail.toLowerCase(),
                 password: hashedPassword,
                 role: 'controller', // Highest role in university
                 phone: contactPhone || '+92-000-0000000',
@@ -558,7 +572,10 @@ app.post('/api/universities/create', upload.single('logo'), async (req, res) => 
             });
             
             await superAdmin.save();
-            console.log(`✅ University Super Admin created: ${superAdminEmail}`);
+            console.log(`✅ University Super Admin created in ${dbName}.users:`);
+            console.log(`   📧 Email: ${superAdminEmail}`);
+            console.log(`   🔑 Password: ${superAdminPassword}`);
+            console.log(`   💾 Database: ${dbName}`);
             
         } catch (dbError) {
             console.log(`⚠️  Database creation note: ${dbError.message}`);
