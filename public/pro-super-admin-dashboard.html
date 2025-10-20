@@ -1216,8 +1216,12 @@
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const token = localStorage.getItem('token');
 
-        if (!token || !user || user.role !== 'pro_superadmin') {
-            window.location.href = '/';
+        // Allow pro_superadmin and platform_admin
+        const allowedRoles = ['pro_superadmin', 'platform_admin'];
+        
+        if (!token || !user || !allowedRoles.includes(user.role)) {
+            console.log('Access denied. Role:', user.role, 'Required:', allowedRoles);
+            window.location.href = '/login.html';
         }
 
         // Update user info

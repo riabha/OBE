@@ -1657,7 +1657,10 @@
         }
 
         // Initial validation
-        if (!token || !user || user.role !== 'superadmin') {
+        const allowedRoles = ['superadmin', 'university_superadmin', 'controller'];
+        
+        if (!token || !user || !allowedRoles.includes(user.role)) {
+            console.log('Access denied. Role:', user.role, 'Required:', allowedRoles);
             window.location.href = '/login.html';
         }
 
