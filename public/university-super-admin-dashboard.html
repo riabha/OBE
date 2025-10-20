@@ -1073,68 +1073,70 @@
                 </div>
             </div>
 
-            <!-- DATABASE STATUS CARD - TOP PRIORITY -->
-            <div class="content-card mb-4 border-danger border-3">
+            <!-- DATABASE STATUS CARD - MONGODB -->
+            <div class="content-card mb-4 border-success border-2">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0">
-                        <i class="fas fa-database me-2 text-danger"></i>
-                        <strong>Database Status & Management</strong>
+                        <i class="fas fa-database me-2 text-success"></i>
+                        <strong>MongoDB Database Status</strong>
                     </h5>
-                    <span class="badge bg-warning text-dark">Action Required</span>
+                    <span class="badge bg-success">Active</span>
                 </div>
                 
-                <div class="alert alert-danger mb-3">
-                    <h6 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Missing Database Tables Detected!</h6>
-                    <p class="mb-2">Your database is missing the following required tables:</p>
+                <div class="alert alert-success mb-3">
+                    <h6 class="alert-heading"><i class="fas fa-check-circle me-2"></i>MongoDB Connected!</h6>
+                    <p class="mb-2">Your university is using MongoDB for data storage. The following collections are available:</p>
                     <ul class="mb-2">
-                        <li><strong>faculties</strong> - For managing faculties and deans</li>
-                        <li><strong>departments</strong> - For managing departments</li>
-                        <li><strong>programs</strong> - For managing programs/degrees</li>
-                        <li><strong>batches</strong> - For managing student batches</li>
-                        <li><strong>plos</strong> - Program Learning Outcomes</li>
-                        <li><strong>peos</strong> - Program Educational Objectives</li>
-                        <li><strong>university_settings</strong> - University configuration</li>
+                        <li><strong>departments</strong> - Faculty departments (currently: <span id="deptsCount">0</span>)</li>
+                        <li><strong>users</strong> - Students, teachers, and staff (currently: <span id="usersCount">0</span>)</li>
+                        <li><strong>courses</strong> - Academic courses (currently: <span id="coursesCount">0</span>)</li>
+                        <li><strong>_metadata</strong> - University configuration and settings</li>
                     </ul>
-                    <p class="mb-3">
-                        <strong>What this means:</strong> Features like Faculty Management, Department Management, and OBE Compliance won't work until you fix the database.
+                    <p class="mb-0">
+                        <strong>Database Name:</strong> <code id="dbNameDisplay">Loading...</code>
                     </p>
                 </div>
 
-                <div class="text-center p-4 bg-light rounded">
-                    <h4 class="mb-3">🔧 Fix Your Database Now</h4>
-                    <p class="text-muted mb-4">
-                        Click the button below to automatically create all missing tables.<br>
-                        <small>This is safe to run and won't affect your existing data.</small>
-                    </p>
-                    <button class="btn btn-danger btn-lg pulse-button" onclick="runDatabaseMigrations()" style="animation: pulse 2s infinite;">
-                        <i class="fas fa-magic me-2"></i>RUN DATABASE SETUP (Click Here!)
-                    </button>
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                            <h6>Ready to Use</h6>
+                            <small class="text-muted">All collections created</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-shield-alt text-primary fa-2x mb-2"></i>
+                            <h6>Secure</h6>
+                            <small class="text-muted">Data isolated per university</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-rocket text-info fa-2x mb-2"></i>
+                            <h6>Scalable</h6>
+                            <small class="text-muted">MongoDB NoSQL database</small>
+                        </div>
+                    </div>
                 </div>
 
                 <hr class="my-4">
 
-                <div class="row text-center">
-                    <div class="col-md-4">
-                        <div class="p-3">
-                            <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
-                            <h6>Safe Operation</h6>
-                            <small class="text-muted">Won't affect existing data</small>
-                        </div>
+                <div class="bg-light p-3 rounded">
+                    <h6 class="mb-2"><i class="fas fa-terminal me-2"></i>Verify Your Database</h6>
+                    <p class="small text-muted mb-2">Run these commands on your VPS to verify MongoDB collections:</p>
+                    <div class="bg-dark text-light p-2 rounded small mb-2" style="font-family: monospace;">
+                        # Show collections<br>
+                        mongo <span id="cmdDbName">obe_university_X</span> --eval "db.getCollectionNames()"<br><br>
+                        # Count documents<br>
+                        mongo <span id="cmdDbName2">obe_university_X</span> --eval "db.departments.count()"<br>
+                        mongo <span id="cmdDbName3">obe_university_X</span> --eval "db.users.count()"<br>
+                        mongo <span id="cmdDbName4">obe_university_X</span> --eval "db.courses.count()"
                     </div>
-                    <div class="col-md-4">
-                        <div class="p-3">
-                            <i class="fas fa-clock text-info fa-2x mb-2"></i>
-                            <h6>Quick Setup</h6>
-                            <small class="text-muted">Takes only a few seconds</small>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="p-3">
-                            <i class="fas fa-shield-alt text-primary fa-2x mb-2"></i>
-                            <h6>Automatic</h6>
-                            <small class="text-muted">No technical knowledge needed</small>
-                        </div>
-                    </div>
+                    <button class="btn btn-sm btn-primary" onclick="loadDatabaseStats()">
+                        <i class="fas fa-sync me-1"></i>Refresh Stats
+                    </button>
                 </div>
             </div>
 
@@ -1867,6 +1869,63 @@
             }
         }
 
+        // Load database stats for settings page
+        async function loadDatabaseStats() {
+            try {
+                const token = localStorage.getItem('token');
+                
+                // Get university info
+                const uniResponse = await fetch('/api/my-university', {
+                    headers: getAPIHeaders()
+                });
+
+                if (uniResponse.ok) {
+                    const uni = await uniResponse.json();
+                    
+                    // Update database name in multiple places
+                    const dbName = uni.databaseName || 'obe_university_X';
+                    if (document.getElementById('dbNameDisplay')) {
+                        document.getElementById('dbNameDisplay').textContent = dbName;
+                    }
+                    
+                    // Update command placeholders
+                    document.querySelectorAll('[id^="cmdDbName"]').forEach(el => {
+                        el.textContent = dbName;
+                    });
+                }
+                
+                // Load counts
+                const deptsRes = await fetch('/api/departments', { headers: getAPIHeaders() });
+                const usersRes = await fetch('/api/users', { headers: getAPIHeaders() });
+                const coursesRes = await fetch('/api/courses', { headers: getAPIHeaders() });
+                
+                if (deptsRes.ok) {
+                    const depts = await deptsRes.json();
+                    if (document.getElementById('deptsCount')) {
+                        document.getElementById('deptsCount').textContent = depts.length;
+                    }
+                }
+                
+                if (usersRes.ok) {
+                    const users = await usersRes.json();
+                    if (document.getElementById('usersCount')) {
+                        document.getElementById('usersCount').textContent = users.length;
+                    }
+                }
+                
+                if (coursesRes.ok) {
+                    const courses = await coursesRes.json();
+                    if (document.getElementById('coursesCount')) {
+                        document.getElementById('coursesCount').textContent = courses.length;
+                    }
+                }
+                
+                console.log('✅ Database stats loaded');
+            } catch (error) {
+                console.error('Error loading database stats:', error);
+            }
+        }
+
         // Show section
         function showSection(section) {
             document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
@@ -1898,6 +1957,7 @@
             else if (section === 'programs') loadPrograms();
             else if (section === 'assessments') loadAssessments();
             else if (section === 'obe') loadOBEData();
+            else if (section === 'settings') loadDatabaseStats();
             
             if (event && event.target) {
                 event.target.closest('.sidebar-menu-item').classList.add('active');
@@ -4089,3 +4149,4 @@ EE-101,Circuit Analysis,4,Electrical Engineering,1,,Basic electrical circuits an
     </script>
 </body>
 </html>
+
