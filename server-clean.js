@@ -419,6 +419,9 @@ app.post('/api/universities/create', upload.single('logo'), async (req, res) => 
             console.log(`   🔑 Password: ${superAdminPassword}\n`);
         } catch (adminErr) {
             console.error(`❌ Super admin creation failed: ${adminErr.message}`);
+            console.error(`   Full error:`, adminErr);
+            // Don't fail the whole request, just log it
+            superAdminPassword = `ERROR: ${adminErr.message}`;
         }
 
         // Create subscription
