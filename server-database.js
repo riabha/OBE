@@ -175,7 +175,7 @@ app.get('/login', (req, res) => {
 // AUTHENTICATION API
 // ============================================
 
-// Login endpoint - DATABASE MODE
+// Login endpoint - DATABASE MODE (Multi-Database Support)
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -186,62 +186,111 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(400).json({ message: 'Email and password are required' });
         }
         
-        // Find user in database
-        const user = await PlatformUser.findOne({ email: email.toLowerCase() });
+        // First, check platform users (Pro Super Admin, etc.)
+        const platformUser = await PlatformUser.findOne({ email: email.toLowerCase() });
         
-        if (!user) {
-            console.log(`❌ User not found: ${email}`);
-            return res.status(401).json({ message: 'Invalid credentials' });
+        if (platformUser && platformUser.isActive) {
+            const isPasswordValid = await platformUser.comparePassword(password);
+            
+            if (isPasswordValid) {
+                // Update last login
+                platformUser.lastLogin = new Date();
+                await platformUser.save();
+                
+                console.log(`✅ Platform login successful: ${email} (${platformUser.role})`);
+                
+                // Create JWT token
+                const token = jwt.sign(
+                    { 
+                        userId: platformUser._id, 
+                        email: platformUser.email, 
+                        role: platformUser.role,
+                        permissions: platformUser.permissions,
+                        userType: 'platform'
+                    },
+                    process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024_very_secure_random_string',
+                    { expiresIn: process.env.JWT_EXPIRE || '7d' }
+                );
+                
+                return res.json({
+                    message: 'Login successful',
+                    token,
+                    user: {
+                        id: platformUser._id,
+                        email: platformUser.email,
+                        name: platformUser.name,
+                        role: platformUser.role,
+                        permissions: platformUser.permissions,
+                        userType: 'platform',
+                        isActive: platformUser.isActive,
+                        lastLogin: platformUser.lastLogin
+                    }
+                });
+            }
         }
         
-        // Check if user is active
-        if (!user.isActive) {
-            console.log(`❌ User inactive: ${email}`);
-            return res.status(401).json({ message: 'Account is inactive' });
+        // If not found in platform, check all university databases
+        const universities = await University.find({ isActive: true });
+        const UserSchema = require('./models/User');
+        
+        for (const uni of universities) {
+            try {
+                const uniDbConnection = mongoose.connection.useDb(uni.databaseName, { useCache: true });
+                const UniversityUser = uniDbConnection.model('User', UserSchema);
+                
+                const user = await UniversityUser.findOne({ email: email.toLowerCase() });
+                
+                if (user && user.isActive) {
+                    const isPasswordValid = await user.comparePassword(password);
+                    
+                    if (isPasswordValid) {
+                        // Update last login
+                        user.lastLogin = new Date();
+                        await user.save();
+                        
+                        console.log(`✅ University login successful: ${email} (${user.role}) - ${uni.universityName}`);
+                        
+                        // Create JWT token
+                        const token = jwt.sign(
+                            { 
+                                userId: user._id, 
+                                email: user.email, 
+                                role: user.role,
+                                universityId: uni._id,
+                                universityCode: uni.universityCode,
+                                databaseName: uni.databaseName,
+                                userType: 'university'
+                            },
+                            process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024_very_secure_random_string',
+                            { expiresIn: process.env.JWT_EXPIRE || '7d' }
+                        );
+                        
+                        return res.json({
+                            message: 'Login successful',
+                            token,
+                            user: {
+                                id: user._id,
+                                email: user.email,
+                                name: `${user.firstName} ${user.lastName}`,
+                                role: user.role,
+                                university: uni.universityName,
+                                universityCode: uni.universityCode,
+                                userType: 'university',
+                                isActive: user.isActive,
+                                lastLogin: user.lastLogin
+                            }
+                        });
+                    }
+                }
+            } catch (uniDbError) {
+                // Database might not exist yet, continue to next
+                continue;
+            }
         }
         
-        // Compare password
-        const isPasswordValid = await user.comparePassword(password);
-        
-        if (!isPasswordValid) {
-            console.log(`❌ Invalid password for: ${email}`);
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-        
-        // Update last login
-        user.lastLogin = new Date();
-        await user.save();
-        
-        console.log(`✅ Login successful: ${email} (${user.role})`);
-        
-        // Create JWT token
-        const token = jwt.sign(
-            { 
-                userId: user._id, 
-                email: user.email, 
-                role: user.role,
-                permissions: user.permissions
-            },
-            process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024_very_secure_random_string',
-            { expiresIn: process.env.JWT_EXPIRE || '7d' }
-        );
-        
-        // Remove password from response
-        const userResponse = {
-            id: user._id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            permissions: user.permissions,
-            isActive: user.isActive,
-            lastLogin: user.lastLogin
-        };
-        
-        return res.json({
-            message: 'Login successful',
-            token,
-            user: userResponse
-        });
+        // If we reach here, credentials are invalid
+        console.log(`❌ Invalid credentials for: ${email}`);
+        return res.status(401).json({ message: 'Invalid email or password' });
         
     } catch (error) {
         console.error('❌ Login error:', error);
@@ -471,6 +520,7 @@ app.post('/api/universities/create', upload.single('logo'), async (req, res) => 
         await university.save();
 
         // Create the university database in MongoDB
+        let superAdminPassword = '';
         try {
             const uniDbConnection = mongoose.connection.useDb(dbName, { useCache: true });
             
@@ -485,6 +535,31 @@ app.post('/api/universities/create', upload.single('logo'), async (req, res) => 
             });
             
             console.log(`✅ Database created in MongoDB: ${dbName}`);
+            
+            // Create super admin user in university database
+            const UserSchema = require('./models/User');
+            const UniversityUser = uniDbConnection.model('User', UserSchema);
+            
+            // Generate random password
+            superAdminPassword = 'Admin@' + universityCode.toUpperCase() + '2025';
+            const hashedPassword = await bcrypt.hash(superAdminPassword, 12);
+            
+            // Create super admin
+            const superAdmin = new UniversityUser({
+                firstName: 'Super',
+                lastName: 'Admin',
+                email: superAdminEmail,
+                password: hashedPassword,
+                role: 'controller', // Highest role in university
+                phone: contactPhone || '+92-000-0000000',
+                isActive: true,
+                isEmailVerified: true,
+                permissions: ['read', 'write', 'delete', 'admin']
+            });
+            
+            await superAdmin.save();
+            console.log(`✅ University Super Admin created: ${superAdminEmail}`);
+            
         } catch (dbError) {
             console.log(`⚠️  Database creation note: ${dbError.message}`);
         }
@@ -516,7 +591,8 @@ app.post('/api/universities/create', upload.single('logo'), async (req, res) => 
         res.status(201).json({
             message: 'University created successfully',
             university: uniResponse,
-            subscription
+            subscription,
+            superAdminPassword: superAdminPassword || 'Not created'
         });
 
     } catch (error) {

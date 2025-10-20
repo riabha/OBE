@@ -1835,11 +1835,14 @@
                 if (response.ok) {
                     // Success
                     alert(`✅ University Created Successfully!\n\n` +
-                          `University: ${data.university.universityName}\n` +
-                          `Database: obe_university_${data.university.universityCode}\n` +
-                          `Super Admin: ${data.university.superAdminEmail}\n` +
-                          `Password: ${data.superAdminPassword}\n\n` +
-                          `Login credentials have been sent to the super admin email.`);
+                          `🏛️ University: ${data.university.universityName}\n` +
+                          `🔖 Code: ${data.university.universityCode}\n` +
+                          `💾 Database: ${data.university.databaseName}\n\n` +
+                          `👤 Super Admin Account Created:\n` +
+                          `   📧 Email: ${data.university.superAdminEmail}\n` +
+                          `   🔑 Password: ${data.superAdminPassword}\n\n` +
+                          `✨ The super admin can now login to manage the university!\n` +
+                          `📊 Database is visible in aaPanel MongoDB section.`);
                     
                     // Close modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('addUniversityModal'));
@@ -2648,9 +2651,12 @@ Type "DELETE" to confirm:`;
                 // Get first letter of university name for logo fallback
                 const firstLetter = uni.universityName.charAt(0).toUpperCase();
                 
+                // Get university ID (MongoDB uses _id)
+                const uniId = uni._id || uni.id;
+                
                 // Logo display
-                const logoHtml = uni.logo ? 
-                    `<img src="${uni.logo}" alt="${uni.universityName}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px;">` :
+                const logoHtml = uni.logoUrl ? 
+                    `<img src="${uni.logoUrl}" alt="${uni.universityName}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px;">` :
                     `<div class="university-logo">${firstLetter}</div>`;
 
                 return `
@@ -2686,13 +2692,13 @@ Type "DELETE" to confirm:`;
                                 <strong>${uni.contactPhone || 'N/A'}</strong>
                             </div>
                             <div class="col-md-3 text-end">
-                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editUniversity(${uni.id})" title="Edit University">
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editUniversity('${uniId}')" title="Edit University">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-success me-1" onclick="viewUniversity(${uni.id})" title="View Details">
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="viewUniversity('${uniId}')" title="View Details">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUniversity(${uni.id})" title="Delete University">
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUniversity('${uniId}')" title="Delete University">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
