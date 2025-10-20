@@ -1319,26 +1319,24 @@
             
             if (!databases || databases.length === 0) {
                 container.innerHTML = `
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        No database connections configured. Click "Add Database" to add one.
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No databases created yet. Databases will appear here when you create universities.
                     </div>
                 `;
                 return;
             }
 
             // Separate platform and university databases
-            const platformDBs = databases.filter(db => db.databaseType === 'Platform' || db.isPlatformDB);
-            const universityDBs = databases.filter(db => db.databaseType === 'University' && !db.isPlatformDB);
+            const platformDBs = databases.filter(db => db.type === 'Platform' || db.name === 'obe_platform');
+            const universityDBs = databases.filter(db => db.type === 'University' && db.name !== 'obe_platform');
 
             let html = '';
 
             // Platform Databases Section
             if (platformDBs.length > 0) {
-                html += '<h6 class="fw-bold mb-3 text-primary"><i class="fas fa-globe me-2"></i>Platform Database (Website)</h6>';
+                html += '<h6 class="fw-bold mb-3 text-primary"><i class="fas fa-globe me-2"></i>Platform Database</h6>';
                 html += platformDBs.map(db => {
-                    const statusBadge = db.status === 'Active' ? 'badge-success' : 'badge-secondary';
-                    
                     return `
                         <div class="university-card" style="border-left: 4px solid #2563eb;">
                             <div class="university-header">
@@ -1347,33 +1345,17 @@
                                         <i class="fas fa-globe"></i>
                                     </div>
                                     <div>
-                                        <h6 class="mb-1 fw-bold">${db.databaseName} <span class="badge badge-primary ms-2">PLATFORM</span></h6>
-                                        <small class="text-muted">${db.host}:${db.port}</small>
+                                        <h6 class="mb-1 fw-bold">${db.name} <span class="badge badge-primary ms-2">PLATFORM</span></h6>
+                                        <small class="text-muted">Size: ${db.sizeMB} MB</small>
                                     </div>
                                 </div>
                                 <div>
-                                    <span class="badge ${statusBadge}">${db.status}</span>
+                                    <span class="badge badge-success">Active</span>
                                 </div>
                             </div>
-                            <div class="row g-3 mt-2">
-                                <div class="col-md-6">
-                                    <small class="text-muted d-block">Username</small>
-                                    <strong>${db.username}</strong>
-                                </div>
-                                <div class="col-md-6 text-end">
-                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="testSavedDatabase(${db.id})" title="Test Connection">
-                                        <i class="fas fa-plug"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="editDatabaseConnection(${db.id})" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <span class="badge bg-info"><i class="fas fa-info-circle me-1"></i>Current Platform DB</span>
-                                </div>
-                            </div>
-                            ${db.description ? `<p class="text-muted small mt-2 mb-0">${db.description}</p>` : ''}
                             <div class="alert alert-info mt-2 mb-0">
                                 <i class="fas fa-info-circle me-2"></i>
-                                <small>This is your main website database storing: universities metadata, PRO admins, database connections, and platform settings.</small>
+                                <small>Main database storing: Platform Users, Universities, Subscriptions</small>
                             </div>
                         </div>
                     `;
@@ -1384,12 +1366,6 @@
             if (universityDBs.length > 0) {
                 html += '<h6 class="fw-bold mb-3 mt-4 text-success"><i class="fas fa-university me-2"></i>University Databases</h6>';
                 html += universityDBs.map(db => {
-                    const statusBadge = db.status === 'Active' ? 'badge-success' : 
-                                       db.status === 'Testing' ? 'badge-warning' : 'badge-secondary';
-                    const availableBadge = db.isAvailable ? 'text-success' : 'text-danger';
-                    const availableText = db.isAvailable ? 'Available' : 'Assigned';
-                    const assignedTo = db.assignedUniversityId ? `Assigned to University ID: ${db.assignedUniversityId}` : 'Not assigned';
-
                     return `
                         <div class="university-card">
                             <div class="university-header">
@@ -1398,37 +1374,23 @@
                                         <i class="fas fa-database"></i>
                                     </div>
                                     <div>
-                                        <h6 class="mb-1 fw-bold">${db.databaseName}</h6>
-                                        <small class="text-muted">${db.host}:${db.port}</small>
+                                        <h6 class="mb-1 fw-bold">${db.name}</h6>
+                                        <small class="text-muted">Size: ${db.sizeMB} MB ${db.empty ? '(Empty)' : '(Has Data)'}</small>
                                     </div>
                                 </div>
                                 <div>
-                                    <span class="badge ${statusBadge}">${db.status}</span>
-                                    <span class="badge ${availableBadge} ms-1">${availableText}</span>
+                                    <span class="badge badge-success">Active</span>
                                 </div>
                             </div>
                             <div class="row g-3 mt-2">
-                                <div class="col-md-4">
-                                    <small class="text-muted d-block">Username</small>
-                                    <strong>${db.username}</strong>
-                                </div>
-                                <div class="col-md-4">
-                                    <small class="text-muted d-block">Status</small>
-                                    <strong>${assignedTo}</strong>
+                                <div class="col-md-8">
+                                    <small class="text-muted d-block">Database Type</small>
+                                    <strong>University Database (MongoDB)</strong>
                                 </div>
                                 <div class="col-md-4 text-end">
-                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="testSavedDatabase(${db.id})" title="Test Connection">
-                                        <i class="fas fa-plug"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="editDatabaseConnection(${db.id})" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm ${db.isAvailable ? 'btn-outline-danger' : 'btn-danger'}" onclick="deleteDatabase(${db.id})" title="${db.isAvailable ? 'Delete' : 'Force Delete (Assigned)'}">
-                                        <i class="fas fa-trash me-1"></i>${db.isAvailable ? '' : 'Force Delete'}
-                                    </button>
+                                    <span class="badge bg-info"><i class="fas fa-check me-1"></i>Ready to Use</span>
                                 </div>
                             </div>
-                            ${db.description ? `<p class="text-muted small mt-2 mb-0">${db.description}</p>` : ''}
                         </div>
                     `;
                 }).join('');
@@ -1946,7 +1908,7 @@
                     const uni = await response.json();
                     
                     // Populate edit form
-                    document.getElementById('editUniversityId').value = uni.id;
+                    document.getElementById('editUniversityId').value = uni._id || uni.id;
                     document.getElementById('editUniversityName').value = uni.universityName;
                     document.getElementById('editUniversitySlug').value = uni.universityCode;
                     document.getElementById('editCity').value = uni.city || '';
@@ -1961,8 +1923,8 @@
                     document.getElementById('editDatabaseName').value = uni.databaseName || 'N/A';
                     
                     // Show current logo
-                    if (uni.logo) {
-                        document.getElementById('editCurrentLogoImg').src = uni.logo;
+                    if (uni.logoUrl) {
+                        document.getElementById('editCurrentLogoImg').src = uni.logoUrl;
                         document.getElementById('editCurrentLogo').style.display = 'block';
                     } else {
                         document.getElementById('editCurrentLogo').style.display = 'none';
@@ -2543,9 +2505,12 @@ Type "DELETE" to confirm:`;
                 // Get first letter of university name for logo fallback
                 const firstLetter = uni.universityName.charAt(0).toUpperCase();
                 
+                // Get university ID (MongoDB uses _id)
+                const uniId = uni._id || uni.id;
+                
                 // Logo display
-                const logoHtml = uni.logo ? 
-                    `<img src="${uni.logo}" alt="${uni.universityName}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px;">` :
+                const logoHtml = uni.logoUrl ? 
+                    `<img src="${uni.logoUrl}" alt="${uni.universityName}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px;">` :
                     `<div class="university-logo">${firstLetter}</div>`;
 
                 return `
@@ -2578,13 +2543,13 @@ Type "DELETE" to confirm:`;
                                 <span class="badge ${planBadge}">${uni.subscriptionPlan}</span>
                             </div>
                             <div class="col-md-3 text-end">
-                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editUniversity(${uni.id})" title="Edit University">
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editUniversity('${uniId}')" title="Edit University">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-success me-1" onclick="viewUniversity(${uni.id})" title="View Details">
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="viewUniversity('${uniId}')" title="View Details">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUniversity(${uni.id})" title="Delete University">
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUniversity('${uniId}')" title="Delete University">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -2829,4 +2794,5 @@ Type "DELETE" to confirm:`;
     </script>
 </body>
 </html>
+
 

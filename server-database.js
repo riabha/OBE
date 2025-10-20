@@ -373,6 +373,31 @@ app.get('/api/universities', async (req, res) => {
     }
 });
 
+// Get single university by ID
+app.get('/api/universities/:id', async (req, res) => {
+    try {
+        const university = await University.findById(req.params.id);
+        
+        if (!university) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+        
+        // Return university with logo URL
+        const uniObj = university.toObject();
+        if (university.logo && university.logo.contentType) {
+            uniObj.logoUrl = `/api/universities/${university._id}/logo`;
+        }
+        // Remove binary logo data from response
+        delete uniObj.logo;
+        
+        res.json(uniObj);
+        
+    } catch (error) {
+        console.error('Error fetching university:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
 // Get university logo
 app.get('/api/universities/:id/logo', async (req, res) => {
     try {
@@ -583,6 +608,34 @@ app.put('/api/subscriptions/:id', async (req, res) => {
 // Get subscription plans
 app.get('/api/subscriptions/plans', (req, res) => {
     res.json(Subscription.getPlans());
+});
+
+// ============================================
+// DATABASES API
+// ============================================
+
+// List all MongoDB databases
+app.get('/api/databases', async (req, res) => {
+    try {
+        const admin = mongoose.connection.db.admin();
+        const { databases } = await admin.listDatabases();
+        
+        // Filter to show only OBE-related databases
+        const obeDatabases = databases
+            .filter(db => db.name.startsWith('obe_'))
+            .map(db => ({
+                name: db.name,
+                sizeOnDisk: db.sizeOnDisk,
+                sizeMB: (db.sizeOnDisk / 1024 / 1024).toFixed(2),
+                empty: db.empty,
+                type: db.name === 'obe_platform' ? 'Platform' : 'University'
+            }));
+        
+        res.json(obeDatabases);
+    } catch (error) {
+        console.error('Error listing databases:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
 });
 
 // Get platform statistics
