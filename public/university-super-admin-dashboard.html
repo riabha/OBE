@@ -85,6 +85,35 @@
         .sidebar-header small {
             color: rgba(255, 255, 255, 0.7);
         }
+        
+        .database-status {
+            margin-top: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 6px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .database-status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .database-name {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: 'Courier New', monospace;
+        }
 
         .sidebar-menu {
             padding: 1rem 0;
@@ -373,12 +402,18 @@
                 U
             </div>
             <h5 class="text-white fw-bold mb-2 mt-0" id="universityName">Loading...</h5>
-            <small class="text-white-50 fw-semibold d-block mb-3">Super Admin Portal</small>
+            <small class="text-white-50 fw-semibold d-block">Super Admin Portal</small>
             
-            <!-- PERMANENT FIX DATABASE BUTTON IN SIDEBAR -->
-            <button class="btn btn-danger btn-sm w-100 mb-3 pulse-button" onclick="runDatabaseMigrations()" style="animation: pulse 2s infinite; font-weight: bold;">
-                <i class="fas fa-database me-2"></i>FIX DATABASE
-            </button>
+            <!-- Database Connection Status -->
+            <div class="database-status">
+                <div class="d-flex align-items-center justify-content-center">
+                    <span class="database-status-indicator"></span>
+                    <span style="font-size: 0.75rem; color: #10b981; font-weight: 600;">Connected</span>
+                </div>
+                <div class="database-name text-center mt-1" id="sidebarDatabaseName">
+                    Loading database...
+                </div>
+            </div>
         </div>
         
         <div class="sidebar-menu">
@@ -1720,6 +1755,11 @@
                     }
                     if (document.getElementById('settingsUniversityCode')) {
                         document.getElementById('settingsUniversityCode').value = universityCode;
+                    }
+                    
+                    // Update database name in sidebar
+                    if (document.getElementById('sidebarDatabaseName')) {
+                        document.getElementById('sidebarDatabaseName').textContent = myUniversity.databaseName || 'obe_platform';
                     }
                     
                     // Update colors if provided
