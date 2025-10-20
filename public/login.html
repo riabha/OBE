@@ -174,17 +174,26 @@
                     setTimeout(() => {
                         const dashboardMap = {
                             'pro_superadmin': '/pro-super-admin-dashboard.html',
+                            'university_superadmin': '/university-super-admin-dashboard.html',
+                            'platform_admin': '/pro-super-admin-dashboard.html',
                             'superadmin': '/university-super-admin-dashboard.html',
-                            'student': '/student-dashboard-enhanced.html',
-                            'teacher': '/teacher-dashboard-enhanced.html',
-                            'focal': '/focal-dashboard-enhanced.html',
-                            'chairman': '/chairman-dashboard-enhanced.html',
+                            'controller': '/controller-dashboard-enhanced.html',
                             'dean': '/dean-dashboard-enhanced.html',
-                            'controller': '/controller-dashboard-enhanced.html'
+                            'chairman': '/chairman-dashboard-enhanced.html',
+                            'focal': '/focal-dashboard-enhanced.html',
+                            'teacher': '/teacher-dashboard-enhanced.html',
+                            'student': '/student-dashboard-enhanced.html'
                         };
                         
-                        const dashboardFile = dashboardMap[data.user.role] || '/student-dashboard-enhanced.html';
-                        window.location.href = dashboardFile;
+                        const dashboardFile = dashboardMap[data.user.role];
+                        
+                        if (dashboardFile) {
+                            console.log(`✅ Redirecting to ${dashboardFile} for role: ${data.user.role}`);
+                            window.location.href = dashboardFile;
+                        } else {
+                            console.error(`❌ Unknown role: ${data.user.role}`);
+                            showAlert('Unknown user role. Please contact administrator.');
+                        }
                     }, 1000);
                 } else {
                     showAlert(data.message || 'Invalid email or password. Please check your credentials.');
