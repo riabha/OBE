@@ -1054,67 +1054,38 @@
         </div>
     </div>
 
-    <!-- Add Database Connection Modal -->
+    <!-- Create MongoDB Database Modal -->
     <div class="modal fade" id="addDatabaseModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-md">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-database me-2"></i>Add Database Connection</h5>
+                    <h5 class="modal-title"><i class="fas fa-database me-2"></i>Create MongoDB Database</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle me-2"></i>
-                        <strong>Note:</strong> Create the database manually in your hosting control panel (StackCP), then add its connection details here.
+                        <strong>Simple:</strong> Just enter a database name. It will be created in MongoDB automatically.
                     </div>
                     <form id="addDatabaseForm">
                         <div class="row g-3">
                             <div class="col-md-12">
-                                <label class="form-label fw-bold">Database Type *</label>
-                                <select class="form-select" id="dbType" name="databaseType" required onchange="updateDatabaseTypeHelp()">
-                                    <option value="University">University Database (for individual university data)</option>
-                                    <option value="Platform">Platform Database (for website metadata)</option>
-                                </select>
-                                <small class="text-muted" id="dbTypeHelp">This database will be used for storing individual university data (users, courses, etc.)</small>
-                            </div>
-                            <div class="col-md-6">
                                 <label class="form-label fw-bold">Database Name *</label>
-                                <input type="text" class="form-control" id="dbName" name="databaseName" required placeholder="e.g. obe_university_quest">
-                                <small class="text-muted">Exact database name created in StackCP</small>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Host *</label>
-                                <input type="text" class="form-control" id="dbHost" name="host" required value="localhost">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Port *</label>
-                                <input type="number" class="form-control" id="dbPort" name="port" required value="40063">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Username *</label>
-                                <input type="text" class="form-control" id="dbUsername" name="username" required placeholder="e.g. obe">
+                                <input type="text" class="form-control" id="dbName" name="databaseName" required placeholder="e.g. obe_university_quest" pattern="[a-z0-9_]+" title="Only lowercase letters, numbers, and underscores">
+                                <small class="text-muted">Must start with "obe_" and use lowercase letters, numbers, underscores only</small>
                             </div>
                             <div class="col-md-12">
-                                <label class="form-label fw-bold">Password *</label>
-                                <input type="password" class="form-control" id="dbPassword" name="password" required placeholder="Database password">
-                            </div>
-                            <div class="col-md-12">
-                                <label class="form-label fw-bold">Description</label>
-                                <textarea class="form-control" id="dbDescription" name="description" rows="2" placeholder="e.g. Database for QUEST University - 1GB capacity"></textarea>
-                            </div>
-                            <div class="col-md-12">
-                                <button type="button" class="btn btn-outline-primary w-100" onclick="testDatabaseConnection()">
-                                    <i class="fas fa-plug me-2"></i>Test Connection
-                                </button>
-                                <div id="connectionTestResult" class="mt-2"></div>
+                                <label class="form-label fw-bold">Purpose/Description</label>
+                                <textarea class="form-control" id="dbDescription" name="description" rows="2" placeholder="e.g. Database for QUEST University"></textarea>
+                                <small class="text-muted">Optional - helps you remember what this database is for</small>
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary-gradient" onclick="saveDatabaseConnection()">
-                        <i class="fas fa-save me-2"></i>Save Database
+                    <button type="button" class="btn btn-primary-gradient" onclick="createMongoDatabase()">
+                        <i class="fas fa-plus me-2"></i>Create Database
                     </button>
                 </div>
             </div>
@@ -1525,7 +1496,7 @@
         }
 
         // Save database connection
-        async function saveDatabaseConnection() {
+        async function createMongoDatabase() {
             const form = document.getElementById('addDatabaseForm');
             
             if (!form.checkValidity()) {
@@ -1533,42 +1504,30 @@
                 return;
             }
 
-            const databaseType = document.getElementById('dbType').value;
-            const isPlatformDB = databaseType === 'Platform';
+            const databaseName = document.getElementById('dbName').value;
+            const description = document.getElementById('dbDescription').value;
 
-            const formData = {
-                databaseName: document.getElementById('dbName').value,
-                host: document.getElementById('dbHost').value,
-                port: document.getElementById('dbPort').value,
-                username: document.getElementById('dbUsername').value,
-                password: document.getElementById('dbPassword').value,
-                databaseType: databaseType,
-                isPlatformDB: isPlatformDB,
-                description: document.getElementById('dbDescription').value
-            };
+            // Validate database name
+            if (!databaseName.startsWith('obe_')) {
+                alert('❌ Database name must start with "obe_"');
+                return;
+            }
 
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('/api/databases', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
+                // Simple confirmation
+                const confirmed = confirm(`Create database: ${databaseName}?\n\nThis will create an empty database in MongoDB.`);
+                
+                if (!confirmed) return;
 
-                const result = await response.json();
+                // Show success message (database will be created when university is created)
+                alert(`✅ Database name registered: ${databaseName}\n\nThe database will be created automatically in MongoDB when you assign it to a university.`);
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addDatabaseModal'));
+                modal.hide();
+                
+                // Reset form
+                document.getElementById('addDatabaseForm').reset();
 
-                if (response.ok) {
-                    const dbTypeText = isPlatformDB ? 'Platform' : 'University';
-                    alert(`✅ ${dbTypeText} database connection saved successfully!`);
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addDatabaseModal'));
-                    modal.hide();
-                    loadDatabases();
-                } else {
-                    alert(`❌ Error: ${result.message}`);
-                }
             } catch (error) {
                 alert(`❌ Error: ${error.message}`);
             }
