@@ -6,6 +6,7 @@
     <title>PRO Super Admin Dashboard - OBE Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -411,16 +412,32 @@
                             <button class="btn btn-primary-gradient" onclick="showAddUniversityModal()">
                                 <i class="fas fa-plus me-2"></i>Add University
                             </button>
-                            <button class="btn btn-outline-primary">
-                                <i class="fas fa-file-download me-2"></i>Export Report
+                            <button class="btn btn-outline-primary" onclick="exportUniversitiesData()">
+                                <i class="fas fa-file-download me-2"></i>Export Universities
                             </button>
-                            <button class="btn btn-outline-success">
+                            <button class="btn btn-outline-success" onclick="showSection('analytics')">
                                 <i class="fas fa-chart-bar me-2"></i>View Analytics
                             </button>
-                            <button class="btn btn-outline-warning">
-                                <i class="fas fa-bell me-2"></i>Send Announcement
+                            <button class="btn btn-outline-info" onclick="refreshDashboard()">
+                                <i class="fas fa-sync me-2"></i>Refresh Data
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Charts -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="stats-card">
+                        <h6 class="mb-3"><i class="fas fa-chart-line me-2"></i>Revenue Trend</h6>
+                        <canvas id="revenueChart" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="stats-card">
+                        <h6 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Subscription Plans</h6>
+                        <canvas id="subscriptionChart" height="200"></canvas>
                     </div>
                 </div>
             </div>
@@ -460,9 +477,46 @@
                                 <h5 class="mb-0"><i class="fas fa-university me-2 text-primary"></i>All Universities</h5>
                                 <small class="text-muted">Complete list of registered universities</small>
                             </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-primary" onclick="exportUniversitiesData()">
+                                    <i class="fas fa-file-download me-1"></i>Export
+                                </button>
                             <button class="btn btn-sm btn-primary-gradient" onclick="showAddUniversityModal()">
                                 <i class="fas fa-plus me-1"></i>Add New University
                             </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Search and Filters -->
+                        <div class="row g-3 mb-3 mt-3">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" class="form-control" id="universitySearch" placeholder="Search universities..." onkeyup="filterUniversities()">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="filterByPlan" onchange="filterUniversities()">
+                                    <option value="">All Plans</option>
+                                    <option value="Free">Free</option>
+                                    <option value="Trial">Trial</option>
+                                    <option value="Basic">Basic</option>
+                                    <option value="Premium">Premium</option>
+                                    <option value="Enterprise">Enterprise</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="filterByStatus" onchange="filterUniversities()">
+                                    <option value="">All Status</option>
+                                    <option value="true">Active</option>
+                                    <option value="false">Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                                    <i class="fas fa-times me-1"></i>Clear
+                                </button>
+                            </div>
                         </div>
                         
                         <div id="allUniversitiesList">
@@ -564,7 +618,12 @@
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="stats-card">
-                        <h5 class="mb-4"><i class="fas fa-credit-card me-2 text-primary"></i>Subscription Overview</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0"><i class="fas fa-credit-card me-2 text-primary"></i>Subscription Overview</h5>
+                            <button class="btn btn-sm btn-outline-primary" onclick="exportSubscriptionsData()">
+                                <i class="fas fa-file-download me-2"></i>Export Subscriptions
+                            </button>
+                        </div>
                         
                         <!-- Revenue Summary -->
                         <div class="row g-3 mb-4">
@@ -606,8 +665,24 @@
                             </div>
                         </div>
 
+                        <!-- Subscription Charts -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded">
+                                    <h6 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Plan Distribution</h6>
+                                    <canvas id="subscriptionPlanChart" height="250"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded">
+                                    <h6 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Revenue by Plan</h6>
+                                    <canvas id="revenueByPlanChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Subscription Breakdown -->
-                        <h6 class="fw-bold mb-3">Subscription Plan Distribution</h6>
+                        <h6 class="fw-bold mb-3">Subscription Details</h6>
                         <div id="subscriptionBreakdown">
                             <!-- Will be loaded dynamically -->
                         </div>
@@ -2811,19 +2886,134 @@ Type "DELETE" to confirm:`;
         async function loadDashboardData() {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('/api/universities', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+                
+                // Load all data in parallel for better performance
+                const [universitiesRes, statsRes, subscriptionsRes, databasesRes] = await Promise.all([
+                    fetch('/api/universities', { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch('/api/platform-stats', { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch('/api/subscriptions', { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch('/api/databases', { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
 
-                if (response.ok) {
-                    const universities = await response.json();
-                    displayUniversities(universities);
-                    updateStats(universities);
-                }
+                const universities = await universitiesRes.json();
+                const stats = await statsRes.json();
+                const subscriptions = await subscriptionsRes.json();
+                const databases = await databasesRes.json();
+
+                // Update dashboard with real data
+                displayUniversities(universities);
+                updateRealTimeStats(stats, universities, subscriptions);
+                createDashboardCharts(universities, subscriptions, stats);
+
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
+                // Show error message to user
+                const universitiesList = document.getElementById('universitiesList');
+                if (universitiesList) {
+                    universitiesList.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error loading data. Please refresh the page.</div>';
+                }
+            }
+        }
+
+        // Update stats with real-time data from API
+        function updateRealTimeStats(stats, universities, subscriptions) {
+            // Update stat cards
+            document.getElementById('totalUniversities').textContent = stats.totalUniversities || universities.length;
+            document.getElementById('totalUsers').textContent = (stats.totalUsers || 0).toLocaleString();
+            document.getElementById('totalCourses').textContent = (stats.totalCourses || 0).toLocaleString();
+            
+            // Calculate revenue from subscriptions
+            const planPrices = {
+                'Free': 0,
+                'Trial': 0,
+                'Basic': 20000,
+                'Standard': 15000,
+                'Premium': 35000,
+                'Enterprise': 75000
+            };
+            
+            let monthlyRevenue = 0;
+            subscriptions.forEach(sub => {
+                if (sub.status === 'Active') {
+                    monthlyRevenue += planPrices[sub.planType] || 0;
+                }
+            });
+            
+            document.getElementById('totalRevenue').textContent = 'Rs. ' + monthlyRevenue.toLocaleString();
+        }
+
+        // Create dashboard charts
+        let revenueChart, subscriptionChart, growthChart, usersChart;
+
+        function createDashboardCharts(universities, subscriptions, stats) {
+            // Only create charts if canvas elements exist
+            if (!document.getElementById('revenueChart')) return;
+
+            // 1. Subscription Plans Distribution
+            const planCounts = {};
+            subscriptions.forEach(sub => {
+                planCounts[sub.planType] = (planCounts[sub.planType] || 0) + 1;
+            });
+
+            const ctxSub = document.getElementById('subscriptionChart');
+            if (ctxSub && subscriptionChart) subscriptionChart.destroy();
+            
+            if (ctxSub) {
+                subscriptionChart = new Chart(ctxSub, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(planCounts),
+                        datasets: [{
+                            data: Object.values(planCounts),
+                            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            title: { display: true, text: 'Subscription Plans Distribution' }
+                        }
+                    }
+                });
+            }
+
+            // 2. Revenue Trend (simulated - last 6 months)
+            const ctxRev = document.getElementById('revenueChart');
+            if (ctxRev && revenueChart) revenueChart.destroy();
+            
+            if (ctxRev) {
+                revenueChart = new Chart(ctxRev, {
+                    type: 'line',
+                    data: {
+                        labels: ['6 months ago', '5 months ago', '4 months ago', '3 months ago', '2 months ago', 'Last month'],
+                        datasets: [{
+                            label: 'Revenue (PKR)',
+                            data: [0, 20000, 35000, 55000, 70000, 90000],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: true, text: 'Revenue Trend' }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'Rs. ' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
             }
         }
 
@@ -2943,6 +3133,7 @@ Type "DELETE" to confirm:`;
 
                 if (response.ok) {
                     const universities = await response.json();
+                    allUniversitiesData = universities; // Store for filtering
                     displayAllUniversities(universities);
                 }
             } catch (error) {
@@ -3135,8 +3326,197 @@ Type "DELETE" to confirm:`;
         }
 
         // Initialize
+        // ============================================
+        // Utility Functions
+        // ============================================
+
+        // Refresh dashboard
+        async function refreshDashboard() {
+            const btn = event.target;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+            btn.disabled = true;
+            
+            await loadDashboardData();
+            
+            btn.innerHTML = '<i class="fas fa-sync me-2"></i>Refresh Data';
+            btn.disabled = false;
+        }
+
+        // Export universities data to CSV
+        function exportUniversitiesData() {
+            const token = localStorage.getItem('token');
+            
+            fetch('/api/universities', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(universities => {
+                if (universities.length === 0) {
+                    alert('No universities to export');
+                    return;
+                }
+
+                // Create CSV content
+                const headers = ['University Name', 'Code', 'City', 'Country', 'Super Admin Email', 'Contact Phone', 'Subscription Plan', 'Status', 'Created Date'];
+                const csvContent = [
+                    headers.join(','),
+                    ...universities.map(uni => [
+                        `"${uni.universityName}"`,
+                        uni.universityCode,
+                        `"${uni.city || ''}"`,
+                        `"${uni.country || 'Pakistan'}"`,
+                        uni.superAdminEmail,
+                        `"${uni.contactPhone || ''}"`,
+                        uni.subscriptionPlan,
+                        uni.isActive ? 'Active' : 'Inactive',
+                        new Date(uni.createdAt).toLocaleDateString()
+                    ].join(','))
+                ].join('\n');
+
+                // Download CSV
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `universities_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+
+                alert('✅ Universities exported successfully!');
+            })
+            .catch(error => {
+                alert('❌ Export failed: ' + error.message);
+            });
+        }
+
+        // Export subscriptions data
+        function exportSubscriptionsData() {
+            const token = localStorage.getItem('token');
+            
+            fetch('/api/subscriptions', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(subscriptions => {
+                if (subscriptions.length === 0) {
+                    alert('No subscriptions to export');
+                    return;
+                }
+
+                // Create CSV content
+                const headers = ['University', 'Code', 'Plan Type', 'Status', 'Start Date', 'End Date', 'Trial End Date'];
+                const csvContent = [
+                    headers.join(','),
+                    ...subscriptions.map(sub => [
+                        `"${sub.university?.universityName || sub.universityCode}"`,
+                        sub.universityCode,
+                        sub.planType,
+                        sub.status,
+                        new Date(sub.startDate).toLocaleDateString(),
+                        new Date(sub.endDate).toLocaleDateString(),
+                        sub.trialEndDate ? new Date(sub.trialEndDate).toLocaleDateString() : 'N/A'
+                    ].join(','))
+                ].join('\n');
+
+                // Download CSV
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `subscriptions_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+
+                alert('✅ Subscriptions exported successfully!');
+            })
+            .catch(error => {
+                alert('❌ Export failed: ' + error.message);
+            });
+        }
+
+        // Export platform users
+        function exportPlatformUsersData() {
+            const token = localStorage.getItem('token');
+            
+            fetch('/api/platform-users', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(users => {
+                if (users.length === 0) {
+                    alert('No users to export');
+                    return;
+                }
+
+                const headers = ['Name', 'Email', 'Role', 'University Code', 'Active', 'Last Login', 'Created Date'];
+                const csvContent = [
+                    headers.join(','),
+                    ...users.map(user => [
+                        `"${user.name}"`,
+                        user.email,
+                        user.role,
+                        user.universityCode || 'N/A',
+                        user.isActive ? 'Yes' : 'No',
+                        user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never',
+                        new Date(user.createdAt).toLocaleDateString()
+                    ].join(','))
+                ].join('\n');
+
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `platform_users_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+
+                alert('✅ Platform users exported successfully!');
+            })
+            .catch(error => {
+                alert('❌ Export failed: ' + error.message);
+            });
+        }
+
+        // Filter universities based on search and filters
+        let allUniversitiesData = [];
+
+        function filterUniversities() {
+            const searchTerm = document.getElementById('universitySearch')?.value.toLowerCase() || '';
+            const planFilter = document.getElementById('filterByPlan')?.value || '';
+            const statusFilter = document.getElementById('filterByStatus')?.value || '';
+
+            let filtered = allUniversitiesData.filter(uni => {
+                const matchesSearch = !searchTerm || 
+                    uni.universityName.toLowerCase().includes(searchTerm) ||
+                    uni.universityCode.toLowerCase().includes(searchTerm) ||
+                    (uni.city && uni.city.toLowerCase().includes(searchTerm));
+                
+                const matchesPlan = !planFilter || uni.subscriptionPlan === planFilter;
+                const matchesStatus = !statusFilter || uni.isActive.toString() === statusFilter;
+
+                return matchesSearch && matchesPlan && matchesStatus;
+            });
+
+            displayAllUniversities(filtered);
+        }
+
+        function clearFilters() {
+            if (document.getElementById('universitySearch')) document.getElementById('universitySearch').value = '';
+            if (document.getElementById('filterByPlan')) document.getElementById('filterByPlan').value = '';
+            if (document.getElementById('filterByStatus')) document.getElementById('filterByStatus').value = '';
+            
+            displayAllUniversities(allUniversitiesData);
+        }
+
+        // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboardData();
+            
+            // Auto-refresh every 5 minutes
+            setInterval(() => {
+                loadDashboardData();
+                console.log('Dashboard data refreshed');
+            }, 5 * 60 * 1000);
         });
     </script>
 </body>
