@@ -7,6 +7,8 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "production": "node server-production.js",
+    "database": "node server-database.js",
+    "init-db": "node scripts/init-platform-database.js",
     "deploy": "pm2 start server-production.js --name quest-obe --env production"
   },
   "engines": {

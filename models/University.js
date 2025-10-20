@@ -102,5 +102,15 @@ universitySchema.index({ universityCode: 1 });
 universitySchema.index({ superAdminEmail: 1 });
 universitySchema.index({ databaseName: 1 });
 
+// Virtual for full name
+universitySchema.virtual('displayName').get(function() {
+    return `${this.universityName} (${this.universityCode})`;
+});
+
+// Method to generate database name
+universitySchema.statics.generateDatabaseName = function(universityCode) {
+    return `obe_university_${universityCode.toLowerCase()}`;
+};
+
 module.exports = universitySchema;
 

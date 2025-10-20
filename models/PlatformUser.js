@@ -46,5 +46,11 @@ const platformUserSchema = new mongoose.Schema({
 platformUserSchema.index({ email: 1 });
 platformUserSchema.index({ role: 1 });
 
+// Method to compare password
+platformUserSchema.methods.comparePassword = async function(candidatePassword) {
+    const bcrypt = require('bcryptjs');
+    return await bcrypt.compare(candidatePassword, this.password);
+};
+
 module.exports = platformUserSchema;
 
