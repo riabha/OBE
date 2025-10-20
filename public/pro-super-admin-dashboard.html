@@ -1002,12 +1002,29 @@
                                     <option value="Enterprise">Enterprise - Rs. 40,000/month (Unlimited)</option>
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Database Connection *</label>
-                                <select class="form-select" id="databaseConnectionId" name="databaseConnectionId" required>
-                                    <option value="">Select Database...</option>
-                                </select>
-                                <small class="text-muted">Select a pre-configured database. <a href="#" onclick="event.preventDefault(); showSection('databases'); bootstrap.Modal.getInstance(document.getElementById('addUniversityModal')).hide();">Manage databases</a></small>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Database Setup *</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="databaseOption" id="dbOptionAuto" value="auto" checked onchange="toggleDatabaseOptions()">
+                                        <label class="form-check-label" for="dbOptionAuto">
+                                            <strong>Auto-create Database</strong>
+                                            <small class="d-block text-muted">Automatically create database as: obe_university_<span id="autoDbName">xxx</span></small>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="databaseOption" id="dbOptionManual" value="manual" onchange="toggleDatabaseOptions()">
+                                        <label class="form-check-label" for="dbOptionManual">
+                                            <strong>Manual Database Name</strong>
+                                            <small class="d-block text-muted">Specify custom database name</small>
+                                        </label>
+                                    </div>
+                                    <div id="manualDbNameField" style="display: none;" class="mt-3">
+                                        <label class="form-label fw-bold">Database Name</label>
+                                        <input type="text" class="form-control" id="manualDatabaseName" name="databaseName" placeholder="e.g. obe_quest_university" pattern="[a-z0-9_]+" title="Only lowercase letters, numbers, and underscores">
+                                        <small class="text-muted">Will be created in MongoDB if doesn't exist</small>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">University Logo *</label>
@@ -1830,24 +1847,30 @@
                 return;
             }
 
-            // Check database is selected
-            const databaseConnectionId = document.getElementById('databaseConnectionId').value;
-            if (!databaseConnectionId) {
-                alert('❌ Please select a database connection!\n\nGo to Databases section to add one if you haven\'t already.');
-                return;
+            // Get database option
+            const databaseOption = document.querySelector('input[name="databaseOption"]:checked').value;
+            let databaseName = '';
+            
+            if (databaseOption === 'manual') {
+                databaseName = document.getElementById('manualDatabaseName').value;
+                if (!databaseName) {
+                    alert('❌ Please enter a database name!');
+                    return;
+                }
             }
 
             // Get form data
             const formData = new FormData();
             formData.append('universityName', document.getElementById('universityName').value);
-            formData.append('universitySlug', document.getElementById('universitySlug').value);
+            formData.append('universityCode', document.getElementById('universitySlug').value.toUpperCase());
             formData.append('city', document.getElementById('city').value);
             formData.append('country', document.getElementById('country').value);
             formData.append('superAdminEmail', document.getElementById('superAdminEmail').value);
             formData.append('contactPhone', document.getElementById('contactPhone').value);
             formData.append('contactEmail', document.getElementById('contactEmail').value);
             formData.append('subscriptionPlan', document.getElementById('subscriptionPlan').value);
-            formData.append('databaseConnectionId', databaseConnectionId);
+            formData.append('databaseOption', databaseOption);
+            formData.append('databaseName', databaseName);
             formData.append('address', document.getElementById('address').value);
             
             // Add logo file
@@ -2233,6 +2256,23 @@ Type "DELETE" to confirm:`;
                 .replace(/^_+|_+$/g, '')
                 .substring(0, 30);
             document.getElementById('universitySlug').value = slug;
+            
+            // Update auto database name preview
+            document.getElementById('autoDbName').textContent = slug || 'xxx';
+        }
+
+        // Toggle database options
+        function toggleDatabaseOptions() {
+            const isManual = document.getElementById('dbOptionManual').checked;
+            const manualField = document.getElementById('manualDbNameField');
+            
+            if (isManual) {
+                manualField.style.display = 'block';
+                document.getElementById('manualDatabaseName').required = true;
+            } else {
+                manualField.style.display = 'none';
+                document.getElementById('manualDatabaseName').required = false;
+            }
         }
 
         // Preview logo
