@@ -1420,6 +1420,60 @@
         </div>
     </div>
 
+    <!-- Edit Department Modal -->
+    <div class="modal fade" id="editDepartmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Department</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editDepartmentForm">
+                        <input type="hidden" id="editDeptId">
+                        <div class="mb-3">
+                            <label class="form-label">Department Name *</label>
+                            <input type="text" class="form-control" id="editDeptName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Department Code *</label>
+                            <input type="text" class="form-control" id="editDeptCode" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Faculty *</label>
+                            <select class="form-select" id="editDeptFaculty" required>
+                                <option value="">Select Faculty...</option>
+                                <option value="Engineering">Engineering</option>
+                                <option value="Sciences">Sciences</option>
+                                <option value="Management">Management</option>
+                                <option value="Arts">Arts</option>
+                                <option value="Medicine">Medicine</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Contact Email *</label>
+                            <input type="email" class="form-control" id="editDeptEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Contact Phone *</label>
+                            <input type="tel" class="form-control" id="editDeptPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="editDeptDescription" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDepartmentEdit()">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Program Modal -->
     <div class="modal fade" id="addProgramModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -2456,12 +2510,106 @@
                                         <div>${d.head || 'Not Assigned'}</div>
                                     </div>
                                     ${d.description ? `<p class="text-muted small mt-2">${d.description}</p>` : ''}
+                                    <div class="d-flex gap-2 mt-3">
+                                        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="editDepartment('${d._id}')">
+                                            <i class="fas fa-edit me-1"></i>Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger flex-fill" onclick="deleteDepartment('${d._id}', '${d.name}')">
+                                            <i class="fas fa-trash me-1"></i>Delete
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     `).join('')}
                 </div>
             `;
+        }
+
+        // Edit Department
+        async function editDepartment(id) {
+            const dept = allDepartments.find(d => d._id === id);
+            if (!dept) return;
+
+            // Populate edit form
+            document.getElementById('editDeptId').value = dept._id;
+            document.getElementById('editDeptName').value = dept.name;
+            document.getElementById('editDeptCode').value = dept.code;
+            document.getElementById('editDeptFaculty').value = dept.faculty || '';
+            document.getElementById('editDeptDescription').value = dept.description || '';
+            document.getElementById('editDeptEmail').value = dept.contactInfo?.email || '';
+            document.getElementById('editDeptPhone').value = dept.contactInfo?.phone || '';
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('editDepartmentModal'));
+            modal.show();
+        }
+
+        // Save Department Edit
+        async function saveDepartmentEdit() {
+            const id = document.getElementById('editDeptId').value;
+            const data = {
+                name: document.getElementById('editDeptName').value,
+                code: document.getElementById('editDeptCode').value.toUpperCase(),
+                faculty: document.getElementById('editDeptFaculty').value,
+                description: document.getElementById('editDeptDescription').value,
+                contactInfo: {
+                    email: document.getElementById('editDeptEmail').value,
+                    phone: document.getElementById('editDeptPhone').value
+                }
+            };
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/departments/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showNotification('Department updated successfully', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('editDepartmentModal')).hide();
+                    loadDepartments();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.message || 'Failed to update department', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error updating department', 'danger');
+            }
+        }
+
+        // Delete Department
+        async function deleteDepartment(id, name) {
+            if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/departments/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    showNotification('Department deleted successfully', 'success');
+                    loadDepartments();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.message || 'Failed to delete department', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error deleting department', 'danger');
+            }
         }
 
         // Load Programs
