@@ -186,8 +186,8 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(400).json({ message: 'Email and password are required' });
         }
         
-        // First, check platform users (Pro Super Admin, etc.)
-        const platformUser = await PlatformUser.findOne({ email: email.toLowerCase() });
+        // Check platform database (includes Pro Super Admins AND University Super Admins)
+        const platformUser = await PlatformUser.findOne({ email: email.toLowerCase() }).populate('university');
         
         if (platformUser && platformUser.isActive) {
             const isPasswordValid = await platformUser.comparePassword(password);
@@ -197,34 +197,52 @@ app.post('/api/auth/login', async (req, res) => {
                 platformUser.lastLogin = new Date();
                 await platformUser.save();
                 
-                console.log(`✅ Platform login successful: ${email} (${platformUser.role})`);
+                const userType = platformUser.role === 'university_superadmin' ? 'university_admin' : 'platform';
+                console.log(`✅ Login successful: ${email} (${platformUser.role})`);
                 
-                // Create JWT token
+                // Create JWT token with university info if applicable
+                const tokenData = { 
+                    userId: platformUser._id, 
+                    email: platformUser.email, 
+                    role: platformUser.role,
+                    permissions: platformUser.permissions,
+                    userType: userType
+                };
+                
+                // Add university info for university super admins
+                if (platformUser.role === 'university_superadmin' && platformUser.university) {
+                    tokenData.universityId = platformUser.university._id;
+                    tokenData.universityCode = platformUser.universityCode;
+                    tokenData.universityName = platformUser.university.universityName;
+                }
+                
                 const token = jwt.sign(
-                    { 
-                        userId: platformUser._id, 
-                        email: platformUser.email, 
-                        role: platformUser.role,
-                        permissions: platformUser.permissions,
-                        userType: 'platform'
-                    },
+                    tokenData,
                     process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024_very_secure_random_string',
                     { expiresIn: process.env.JWT_EXPIRE || '7d' }
                 );
                 
+                const userResponse = {
+                    id: platformUser._id,
+                    email: platformUser.email,
+                    name: platformUser.name,
+                    role: platformUser.role,
+                    permissions: platformUser.permissions,
+                    userType: userType,
+                    isActive: platformUser.isActive,
+                    lastLogin: platformUser.lastLogin
+                };
+                
+                // Add university info for university super admins
+                if (platformUser.role === 'university_superadmin' && platformUser.university) {
+                    userResponse.university = platformUser.university.universityName;
+                    userResponse.universityCode = platformUser.universityCode;
+                }
+                
                 return res.json({
                     message: 'Login successful',
                     token,
-                    user: {
-                        id: platformUser._id,
-                        email: platformUser.email,
-                        name: platformUser.name,
-                        role: platformUser.role,
-                        permissions: platformUser.permissions,
-                        userType: 'platform',
-                        isActive: platformUser.isActive,
-                        lastLogin: platformUser.lastLogin
-                    }
+                    user: userResponse
                 });
             }
         }
@@ -550,35 +568,37 @@ app.post('/api/universities/create', upload.single('logo'), async (req, res) => 
             
             console.log(`✅ Database created in MongoDB: ${dbName}`);
             
-            // Create super admin user in university database
-            const UserSchema = require('./models/User');
-            const UniversityUser = uniDbConnection.model('User', UserSchema);
-            
+        } catch (dbError) {
+            console.log(`⚠️  Database creation note: ${dbError.message}`);
+        }
+        
+        // Create university super admin in PLATFORM database (not university database)
+        try {
             // Generate random password
             superAdminPassword = 'Admin@' + universityCode.toUpperCase() + '2025';
             const hashedPassword = await bcrypt.hash(superAdminPassword, 12);
             
-            // Create super admin
-            const superAdmin = new UniversityUser({
-                firstName: 'University',
-                lastName: 'Administrator',
+            // Create super admin in platform database with university reference
+            const universitySuperAdmin = new PlatformUser({
                 email: superAdminEmail.toLowerCase(),
                 password: hashedPassword,
-                role: 'controller', // Highest role in university
-                phone: contactPhone || '+92-000-0000000',
-                isActive: true,
-                isEmailVerified: true,
-                permissions: ['read', 'write', 'delete', 'admin']
+                name: `${universityName} - Super Administrator`,
+                role: 'university_superadmin',
+                university: university._id,
+                universityCode: university.universityCode,
+                permissions: ['all'],
+                isActive: true
             });
             
-            await superAdmin.save();
-            console.log(`✅ University Super Admin created in ${dbName}.users:`);
+            await universitySuperAdmin.save();
+            console.log(`✅ University Super Admin created in obe_platform.platformusers:`);
             console.log(`   📧 Email: ${superAdminEmail}`);
             console.log(`   🔑 Password: ${superAdminPassword}`);
-            console.log(`   💾 Database: ${dbName}`);
+            console.log(`   🏛️ University: ${universityName} (${universityCode})`);
+            console.log(`   💾 Stored in: obe_platform (centralized)`);
             
-        } catch (dbError) {
-            console.log(`⚠️  Database creation note: ${dbError.message}`);
+        } catch (adminError) {
+            console.error(`❌ Error creating super admin: ${adminError.message}`);
         }
 
         // Create default subscription

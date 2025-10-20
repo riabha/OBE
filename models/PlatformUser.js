@@ -19,8 +19,24 @@ const platformUserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['pro-superadmin', 'platform-admin', 'support'],
-        default: 'platform-admin'
+        enum: ['pro_superadmin', 'platform_admin', 'university_superadmin', 'support'],
+        default: 'platform_admin'
+    },
+    
+    // University reference (for university_superadmin role)
+    university: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'University',
+        required: function() {
+            return this.role === 'university_superadmin';
+        }
+    },
+    universityCode: {
+        type: String,
+        uppercase: true,
+        required: function() {
+            return this.role === 'university_superadmin';
+        }
     },
     permissions: {
         type: [String],
