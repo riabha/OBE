@@ -551,6 +551,97 @@ app.post('/api/platform-users', async (req, res) => {
     }
 });
 
+// Create university super admin
+app.post('/api/university-super-admins', async (req, res) => {
+    try {
+        const { universityId, universityCode, email, name, password } = req.body;
+
+        // Check if email already exists
+        const existing = await PlatformUser.findOne({ email: email.toLowerCase() });
+        if (existing) {
+            return res.status(400).json({ message: 'Email already exists' });
+        }
+
+        // Verify university exists
+        const university = await University.findById(universityId);
+        if (!university) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        const superAdmin = await PlatformUser.create({
+            email: email.toLowerCase(),
+            password: hashedPassword,
+            name,
+            role: 'university_superadmin',
+            university: universityId,
+            universityCode: universityCode,
+            permissions: ['all'],
+            isActive: true
+        });
+
+        console.log(`✅ University Super Admin created: ${email} for ${universityCode}`);
+
+        const userObj = superAdmin.toObject();
+        delete userObj.password;
+
+        res.status(201).json({ message: 'University Super Admin created', user: userObj });
+
+    } catch (error) {
+        console.error('Error creating university super admin:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Reset password
+app.post('/api/platform-users/:id/reset-password', async (req, res) => {
+    try {
+        const { newPassword } = req.body;
+
+        if (!newPassword || newPassword.length < 8) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters' });
+        }
+
+        const user = await PlatformUser.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.password = await bcrypt.hash(newPassword, 12);
+        await user.save();
+
+        console.log(`✅ Password reset for: ${user.email}`);
+
+        res.json({ message: 'Password reset successfully' });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Delete platform user
+app.delete('/api/platform-users/:id', async (req, res) => {
+    try {
+        const user = await PlatformUser.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Don't allow deleting pro_superadmin
+        if (user.role === 'pro_superadmin') {
+            return res.status(403).json({ message: 'Cannot delete Pro Super Admin' });
+        }
+
+        await user.deleteOne();
+
+        res.json({ message: 'User deleted' });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
 // ============================================
 // SUBSCRIPTIONS API
 // ============================================

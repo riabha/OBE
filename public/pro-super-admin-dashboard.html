@@ -516,27 +516,43 @@
 
         <!-- Platform Users Section (Hidden by default) -->
         <div id="platformUsersSection" class="content-section" style="display: none;">
+            <!-- Platform Admins -->
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="stats-card">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div>
-                                <h5 class="mb-0"><i class="fas fa-users-cog me-2 text-primary"></i>Platform Users Management</h5>
-                                <small class="text-muted">Manage users who can access platform administration</small>
+                                <h5 class="mb-0"><i class="fas fa-users-cog me-2 text-primary"></i>Platform Administrators</h5>
+                                <small class="text-muted">Pro Super Admins and Platform Staff</small>
                             </div>
                             <button class="btn btn-sm btn-primary-gradient" onclick="showAddPlatformUserModal()">
-                                <i class="fas fa-plus me-1"></i>Add Platform User
+                                <i class="fas fa-plus me-1"></i>Add Platform Admin
                             </button>
                         </div>
                         
-                        <div id="platformUsersList">
-                            <!-- Platform users will be loaded here -->
-                            <div class="text-center py-5">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <p class="mt-3 text-muted">Loading platform users...</p>
+                        <div id="platformAdminsList">
+                            <!-- Platform admins will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- University Super Admins -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="stats-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="mb-0"><i class="fas fa-user-shield me-2 text-success"></i>University Super Admins</h5>
+                                <small class="text-muted">Administrators for individual universities</small>
                             </div>
+                            <button class="btn btn-sm btn-success" onclick="showAddUniversitySuperAdminModal()">
+                                <i class="fas fa-plus me-1"></i>Add University Super Admin
+                            </button>
+                        </div>
+                        
+                        <div id="universitySuperAdminsList">
+                            <!-- University super admins will be loaded here -->
                         </div>
                     </div>
                 </div>
@@ -1199,6 +1215,77 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary-gradient" onclick="addPlatformUser()">
                         <i class="fas fa-plus me-2"></i>Add User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add University Super Admin Modal -->
+    <div class="modal fade" id="addUniversitySuperAdminModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-user-shield me-2"></i>Add University Super Admin</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Quick & Easy:</strong> Just select a university and we'll auto-generate the credentials!
+                    </div>
+                    <form id="addUniversitySuperAdminForm">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Select University *</label>
+                                <select class="form-select" id="uniSuperAdminUniversity" required onchange="autoFillUniversityAdmin()">
+                                    <option value="">Choose a university...</option>
+                                </select>
+                                <small class="text-muted">Only universities without super admin are shown</small>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Email *</label>
+                                <input type="email" class="form-control" id="uniSuperAdminEmail" required placeholder="Will be auto-filled">
+                                <small class="text-muted">Auto-generated as: admin@university_domain.edu.pk</small>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Full Name *</label>
+                                <input type="text" class="form-control" id="uniSuperAdminName" required placeholder="Will be auto-filled">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Password Generation</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="passwordOption" id="pwdOptionAuto" value="auto" checked onchange="togglePasswordFields()">
+                                    <label class="form-check-label" for="pwdOptionAuto">
+                                        <strong>Auto-generate Password</strong>
+                                        <small class="d-block text-muted">Secure password like: Admin@QUEST2025</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="radio" name="passwordOption" id="pwdOptionManual" value="manual" onchange="togglePasswordFields()">
+                                    <label class="form-check-label" for="pwdOptionManual">
+                                        <strong>Set Custom Password</strong>
+                                        <small class="d-block text-muted">Choose your own password</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="manualPasswordFields" style="display: none;">
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold">Password *</label>
+                                    <input type="password" class="form-control" id="uniSuperAdminPassword" minlength="8" placeholder="Minimum 8 characters">
+                                </div>
+                                <div class="col-md-12 mt-3">
+                                    <label class="form-label fw-bold">Confirm Password *</label>
+                                    <input type="password" class="form-control" id="uniSuperAdminConfirmPassword" minlength="8">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="addUniversitySuperAdmin()">
+                        <i class="fas fa-plus me-2"></i>Create Super Admin
                     </button>
                 </div>
             </div>
@@ -2272,21 +2359,24 @@ Type "DELETE" to confirm:`;
             }
         }
 
-        // Display platform users
+        // Display platform users (separated into platform admins and university super admins)
         function displayPlatformUsers(users) {
-            const container = document.getElementById('platformUsersList');
-            
             if (!users || users.length === 0) {
-                container.innerHTML = `
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        No platform users yet. Click "Add Platform User" to create one.
-                    </div>
-                `;
+                document.getElementById('platformAdminsList').innerHTML = '<div class="alert alert-info">No platform admins yet.</div>';
+                document.getElementById('universitySuperAdminsList').innerHTML = '<div class="alert alert-info">No university super admins yet.</div>';
                 return;
             }
 
-            container.innerHTML = users.map(user => {
+            // Separate users by role
+            const platformAdmins = users.filter(u => u.role !== 'university_superadmin');
+            const universitySuperAdmins = users.filter(u => u.role === 'university_superadmin');
+
+            // Display Platform Admins
+            const platformAdminsContainer = document.getElementById('platformAdminsList');
+            if (platformAdmins.length === 0) {
+                platformAdminsContainer.innerHTML = '<div class="alert alert-info">No platform admins yet.</div>';
+            } else {
+                platformAdminsContainer.innerHTML = platformAdmins.map(user => {
                 const roleLabels = {
                     'pro_superadmin': 'PRO Super Admin',
                     'platform_admin': 'Platform Admin',
@@ -2334,6 +2424,51 @@ Type "DELETE" to confirm:`;
                     </div>
                 `;
             }).join('');
+            }
+
+            // Display University Super Admins
+            const universitySuperAdminsContainer = document.getElementById('universitySuperAdminsList');
+            if (universitySuperAdmins.length === 0) {
+                universitySuperAdminsContainer.innerHTML = '<div class="alert alert-info">No university super admins yet. Create universities to add their admins.</div>';
+            } else {
+                universitySuperAdminsContainer.innerHTML = universitySuperAdmins.map(user => {
+                    const uniId = user._id || user.id;
+                    return `
+                        <div class="university-card" style="border-left: 4px solid #10b981;">
+                            <div class="university-header">
+                                <div class="d-flex gap-3 align-items-center">
+                                    <div class="university-logo" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                        <i class="fas fa-university"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold">${user.name}</h6>
+                                        <small class="text-muted">${user.email}</small>
+                                    </div>
+                                </div>
+                                <span class="badge badge-success">University Super Admin</span>
+                            </div>
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block">University</small>
+                                    <strong>${user.university?.universityName || user.universityCode || 'N/A'}</strong>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block">University Code</small>
+                                    <strong>${user.universityCode || 'N/A'}</strong>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="resetUniversitySuperAdminPassword('${uniId}', '${user.email}')" title="Reset Password">
+                                        <i class="fas fa-key"></i> Reset Password
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUniversitySuperAdmin('${uniId}', '${user.email}', '${user.universityCode}')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
         }
 
         // Add platform user
@@ -2400,6 +2535,194 @@ Type "DELETE" to confirm:`;
 
                 if (response.ok) {
                     alert('✅ Platform user deleted!');
+                    loadPlatformUsers();
+                } else {
+                    const result = await response.json();
+                    alert(`❌ Error: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // ============================================
+        // University Super Admin Management
+        // ============================================
+
+        async function showAddUniversitySuperAdminModal() {
+            // Load universities without super admins
+            try {
+                const token = localStorage.getItem('token');
+                const [universitiesRes, usersRes] = await Promise.all([
+                    fetch('/api/universities', { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch('/api/platform-users', { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+
+                const universities = await universitiesRes.json();
+                const users = await usersRes.json();
+
+                // Get universities that don't have super admin yet
+                const superAdminEmails = users.filter(u => u.role === 'university_superadmin').map(u => u.email.toLowerCase());
+                const availableUniversities = universities.filter(uni => !superAdminEmails.includes(uni.superAdminEmail.toLowerCase()));
+
+                const select = document.getElementById('uniSuperAdminUniversity');
+                select.innerHTML = '<option value="">Choose a university...</option>';
+
+                if (availableUniversities.length === 0) {
+                    select.innerHTML += '<option value="" disabled>All universities already have super admins</option>';
+                } else {
+                    availableUniversities.forEach(uni => {
+                        select.innerHTML += `<option value="${uni._id}" data-code="${uni.universityCode}" data-name="${uni.universityName}" data-email="${uni.superAdminEmail}">${uni.universityName} (${uni.universityCode})</option>`;
+                    });
+                }
+
+                const modal = new bootstrap.Modal(document.getElementById('addUniversitySuperAdminModal'));
+                modal.show();
+
+            } catch (error) {
+                alert('Error loading universities: ' + error.message);
+            }
+        }
+
+        function autoFillUniversityAdmin() {
+            const select = document.getElementById('uniSuperAdminUniversity');
+            const selectedOption = select.options[select.selectedIndex];
+
+            if (selectedOption.value) {
+                const uniCode = selectedOption.dataset.code;
+                const uniName = selectedOption.dataset.name;
+                const superAdminEmail = selectedOption.dataset.email;
+
+                // Auto-fill fields
+                document.getElementById('uniSuperAdminEmail').value = superAdminEmail;
+                document.getElementById('uniSuperAdminName').value = `${uniName} - Administrator`;
+            }
+        }
+
+        function togglePasswordFields() {
+            const isManual = document.getElementById('pwdOptionManual').checked;
+            const manualFields = document.getElementById('manualPasswordFields');
+
+            if (isManual) {
+                manualFields.style.display = 'block';
+                document.getElementById('uniSuperAdminPassword').required = true;
+                document.getElementById('uniSuperAdminConfirmPassword').required = true;
+            } else {
+                manualFields.style.display = 'none';
+                document.getElementById('uniSuperAdminPassword').required = false;
+                document.getElementById('uniSuperAdminConfirmPassword').required = false;
+            }
+        }
+
+        async function addUniversitySuperAdmin() {
+            const form = document.getElementById('addUniversitySuperAdminForm');
+
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const universityId = document.getElementById('uniSuperAdminUniversity').value;
+            const select = document.getElementById('uniSuperAdminUniversity');
+            const selectedOption = select.options[select.selectedIndex];
+            const uniCode = selectedOption.dataset.code;
+
+            const isManualPassword = document.getElementById('pwdOptionManual').checked;
+            let password;
+
+            if (isManualPassword) {
+                password = document.getElementById('uniSuperAdminPassword').value;
+                const confirmPassword = document.getElementById('uniSuperAdminConfirmPassword').value;
+
+                if (password !== confirmPassword) {
+                    alert('❌ Passwords do not match!');
+                    return;
+                }
+            } else {
+                password = `Admin@${uniCode}2025`;
+            }
+
+            const data = {
+                universityId: universityId,
+                universityCode: uniCode,
+                email: document.getElementById('uniSuperAdminEmail').value,
+                name: document.getElementById('uniSuperAdminName').value,
+                password: password,
+                role: 'university_superadmin'
+            };
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/university-super-admins', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`✅ University Super Admin Created!\n\n📧 Email: ${data.email}\n🔑 Password: ${password}\n\n⚠️ Save these credentials!`);
+
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addUniversitySuperAdminModal'));
+                    modal.hide();
+                    form.reset();
+                    loadPlatformUsers();
+                } else {
+                    alert(`❌ Error: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function resetUniversitySuperAdminPassword(userId, email) {
+            const newPassword = prompt(`🔑 Reset Password for ${email}\n\nEnter new password (min 8 characters):`);
+
+            if (!newPassword || newPassword.length < 8) {
+                alert('❌ Password must be at least 8 characters!');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/platform-users/${userId}/reset-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ newPassword })
+                });
+
+                if (response.ok) {
+                    alert(`✅ Password Reset Successfully!\n\n📧 Email: ${email}\n🔑 New Password: ${newPassword}`);
+                } else {
+                    const result = await response.json();
+                    alert(`❌ Error: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function deleteUniversitySuperAdmin(userId, email, uniCode) {
+            if (!confirm(`⚠️ Delete University Super Admin?\n\nEmail: ${email}\nUniversity: ${uniCode}\n\nThis will remove admin access but university will remain.`)) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/platform-users/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    alert('✅ University Super Admin deleted!');
                     loadPlatformUsers();
                 } else {
                     const result = await response.json();
