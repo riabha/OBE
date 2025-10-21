@@ -387,17 +387,51 @@ app.post('/api/universities/create', upload.single('logo'), async (req, res) => 
         await university.save();
         console.log(`✅ University created in obe_platform`);
 
-        // Create university database
+        // Create university database with all collections
         try {
             const uniDb = mongoose.connection.useDb(dbName);
-            await uniDb.createCollection('_metadata');
+            
+            // List of collections to create
+            const collections = [
+                '_metadata',
+                'departments',
+                'users',
+                'courses',
+                'sections',
+                'enrollments',
+                'assessments',
+                'results',
+                'clos',
+                'plos',
+                'attainments',
+                'reports',
+                'settings'
+            ];
+
+            // Create all collections
+            for (const collectionName of collections) {
+                try {
+                    await uniDb.createCollection(collectionName);
+                    console.log(`   ✓ Created collection: ${collectionName}`);
+                } catch (err) {
+                    // Collection might already exist, ignore error
+                    if (!err.message.includes('already exists')) {
+                        console.log(`   ⚠️  ${collectionName}: ${err.message}`);
+                    }
+                }
+            }
+
+            // Insert metadata
             await uniDb.collection('_metadata').insertOne({
                 universityId: university._id,
                 universityName: university.universityName,
                 universityCode: university.universityCode,
-                created: new Date()
+                created: new Date(),
+                collections: collections,
+                version: '1.0'
             });
-            console.log(`✅ Database created: ${dbName}`);
+
+            console.log(`✅ Database created: ${dbName} with ${collections.length} collections`);
         } catch (dbErr) {
             console.log(`⚠️  Database creation: ${dbErr.message}`);
         }
@@ -621,19 +655,132 @@ app.post('/api/databases/create', async (req, res) => {
         }
         
         const db = mongoose.connection.useDb(databaseName);
-        await db.createCollection('_metadata');
+        
+        // Create all necessary collections
+        const collections = [
+            '_metadata',
+            'departments',
+            'users',
+            'courses',
+            'sections',
+            'enrollments',
+            'assessments',
+            'results',
+            'clos',
+            'plos',
+            'attainments',
+            'reports',
+            'settings'
+        ];
+
+        for (const collectionName of collections) {
+            try {
+                await db.createCollection(collectionName);
+            } catch (err) {
+                // Ignore if collection already exists
+            }
+        }
+
         await db.collection('_metadata').insertOne({
             created: new Date(),
-            description: description || `Database: ${databaseName}`
+            description: description || `Database: ${databaseName}`,
+            collections: collections
         });
         
-        console.log(`✅ Database created: ${databaseName}`);
+        console.log(`✅ Database created: ${databaseName} with ${collections.length} collections`);
         
         res.json({ message: 'Database created successfully', database: { name: databaseName } });
         
     } catch (error) {
         console.error('Error creating database:', error);
         res.status(500).json({ message: 'Error creating database', error: error.message });
+    }
+});
+
+// Get database collections
+app.get('/api/databases/:dbName/collections', async (req, res) => {
+    try {
+        const { dbName } = req.params;
+        
+        if (!dbName.startsWith('obe_')) {
+            return res.status(400).json({ message: 'Invalid database name' });
+        }
+
+        const db = mongoose.connection.useDb(dbName);
+        const collections = await db.db.listCollections().toArray();
+        
+        res.json({
+            database: dbName,
+            collections: collections.map(c => c.name)
+        });
+    } catch (error) {
+        console.error('Error fetching collections:', error);
+        res.status(500).json({ message: 'Error fetching collections', error: error.message });
+    }
+});
+
+// Get database details
+app.get('/api/databases/:dbName/details', async (req, res) => {
+    try {
+        const { dbName } = req.params;
+        
+        if (!dbName.startsWith('obe_')) {
+            return res.status(400).json({ message: 'Invalid database name' });
+        }
+
+        const db = mongoose.connection.useDb(dbName);
+        const collections = await db.db.listCollections().toArray();
+        
+        // Try to get metadata
+        let metadata = null;
+        try {
+            metadata = await db.collection('_metadata').findOne({});
+        } catch (err) {
+            // Metadata might not exist
+        }
+
+        // Get database stats
+        const stats = await db.db.stats();
+
+        res.json({
+            database: dbName,
+            collections: collections.map(c => c.name),
+            sizeMB: (stats.dataSize / 1024 / 1024).toFixed(2),
+            created: metadata?.created || null,
+            metadata: metadata
+        });
+    } catch (error) {
+        console.error('Error fetching database details:', error);
+        res.status(500).json({ message: 'Error fetching details', error: error.message });
+    }
+});
+
+// Delete database
+app.delete('/api/databases/:dbName', async (req, res) => {
+    try {
+        const { dbName } = req.params;
+        
+        // Prevent deleting platform database
+        if (dbName === 'obe_platform') {
+            return res.status(403).json({ message: 'Cannot delete platform database' });
+        }
+
+        if (!dbName.startsWith('obe_')) {
+            return res.status(400).json({ message: 'Invalid database name' });
+        }
+
+        const db = mongoose.connection.useDb(dbName);
+        await db.dropDatabase();
+        
+        console.log(`✅ Database deleted: ${dbName}`);
+        
+        res.json({ 
+            message: 'Database deleted successfully',
+            database: dbName
+        });
+    } catch (error) {
+        console.error('Error deleting database:', error);
+        res.status(500).json({ message: 'Error deleting database', error: error.message });
     }
 });
 

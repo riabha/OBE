@@ -1620,17 +1620,31 @@
                                         <small class="text-muted">Size: ${db.sizeMB} MB ${db.empty ? '(Empty)' : '(Has Data)'}</small>
                                     </div>
                                 </div>
-                                <div>
+                                <div class="d-flex gap-2">
                                     <span class="badge badge-success">Active</span>
                                 </div>
                             </div>
                             <div class="row g-3 mt-2">
-                                <div class="col-md-8">
+                                <div class="col-md-6">
                                     <small class="text-muted d-block">Database Type</small>
                                     <strong>University Database (MongoDB)</strong>
                                 </div>
-                                <div class="col-md-4 text-end">
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block">Status</small>
                                     <span class="badge bg-info"><i class="fas fa-check me-1"></i>Ready to Use</span>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" onclick="viewDatabaseDetails('${db.name}')" title="View Details">
+                                            <i class="fas fa-info-circle"></i>
+                                        </button>
+                                        <button class="btn btn-outline-success" onclick="viewCollections('${db.name}')" title="View Collections">
+                                            <i class="fas fa-list"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" onclick="confirmDeleteDatabase('${db.name}')" title="Delete Database">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1779,21 +1793,113 @@
             }
         }
 
-        // Test saved database
-        async function testSavedDatabase(id) {
+        // View database details
+        async function viewDatabaseDetails(dbName) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`/api/databases/${id}/test`, {
-                    method: 'POST',
+                const response = await fetch(`/api/databases/${dbName}/details`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const details = await response.json();
+                    
+                    let infoHtml = `
+                        <strong>Database Name:</strong> ${dbName}<br>
+                        <strong>Size:</strong> ${details.sizeMB} MB<br>
+                        <strong>Collections:</strong> ${details.collections.length}<br>
+                        <strong>Created:</strong> ${details.created || 'N/A'}<br><br>
+                        <strong>Collections List:</strong><br>
+                        ${details.collections.map(c => `• ${c}`).join('<br>')}
+                    `;
+                    
+                    alert(infoHtml);
+                } else {
+                    alert('❌ Error fetching database details');
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // View collections in database
+        async function viewCollections(dbName) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/databases/${dbName}/collections`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const collections = data.collections || [];
+                    
+                    if (collections.length === 0) {
+                        alert(`📦 Database "${dbName}" has no collections yet.\n\nCollections will be created automatically when the university starts using the system.`);
+                    } else {
+                        let collectionList = `📚 Collections in "${dbName}":\n\n`;
+                        collections.forEach((col, index) => {
+                            collectionList += `${index + 1}. ${col}\n`;
+                        });
+                        alert(collectionList);
+                    }
+                } else {
+                    alert('❌ Error fetching collections');
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // Confirm delete database
+        async function confirmDeleteDatabase(dbName) {
+            if (dbName === 'obe_platform') {
+                alert('❌ Cannot delete the platform database!');
+                return;
+            }
+
+            const confirmation = confirm(
+                `⚠️ WARNING: Delete Database?\n\n` +
+                `Database: ${dbName}\n\n` +
+                `This will permanently delete:\n` +
+                `• All collections\n` +
+                `• All data\n` +
+                `• All student records\n` +
+                `• All course data\n\n` +
+                `This action CANNOT be undone!\n\n` +
+                `Type YES in the next prompt to confirm.`
+            );
+
+            if (!confirmation) {
+                return;
+            }
+
+            const finalConfirm = prompt('Type "YES" to permanently delete this database:');
+            
+            if (finalConfirm !== 'YES') {
+                alert('❌ Database deletion cancelled.');
+                return;
+            }
+
+            await deleteDatabase(dbName);
+        }
+
+        // Delete database
+        async function deleteDatabase(dbName) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/databases/${dbName}`, {
+                    method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 const result = await response.json();
 
-                if (response.ok && result.success) {
-                    alert('✅ Connection successful! Database is working.');
+                if (response.ok) {
+                    alert(`✅ ${result.message}\n\nDatabase "${dbName}" has been deleted.`);
+                    loadDatabases(); // Refresh the list
                 } else {
-                    alert(`❌ Connection failed! ${result.message}`);
+                    alert(`❌ Error: ${result.message}`);
                 }
             } catch (error) {
                 alert(`❌ Error: ${error.message}`);
