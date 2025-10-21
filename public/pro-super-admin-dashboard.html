@@ -760,29 +760,101 @@
 
                         <hr class="my-4">
 
-                        <!-- Database Information (Read-only) -->
+                        <!-- MongoDB Connection Settings -->
                         <div class="mb-4">
-                            <h6 class="fw-bold mb-3">Current Platform Database</h6>
-                            <div class="alert alert-secondary">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold mb-0">MongoDB Connection Settings</h6>
+                                <button class="btn btn-sm btn-outline-primary" onclick="loadMongoDBSettings()">
+                                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                                </button>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Important:</strong> These settings control the main MongoDB connection. Changes require server restart to take effect.
+                            </div>
+
+                            <!-- Current Connection Status -->
+                            <div class="alert alert-secondary mb-3">
                                 <div class="row g-3">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <small class="text-muted d-block">Host</small>
-                                        <strong id="platformDbHost">MongoDB (Future)</strong>
+                                        <strong id="currentMongoHost">Loading...</strong>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-2">
+                                        <small class="text-muted d-block">Port</small>
+                                        <strong id="currentMongoPort">-</strong>
+                                    </div>
+                                    <div class="col-md-3">
                                         <small class="text-muted d-block">Database</small>
-                                        <strong id="platformDbName">obe_platform</strong>
+                                        <strong id="currentMongoDatabase">-</strong>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-2">
+                                        <small class="text-muted d-block">Username</small>
+                                        <strong id="currentMongoUser">-</strong>
+                                    </div>
+                                    <div class="col-md-2">
                                         <small class="text-muted d-block">Status</small>
-                                        <span class="badge badge-success">Connected</span>
+                                        <span class="badge badge-success" id="currentMongoStatus">Connected</span>
                                     </div>
                                 </div>
                             </div>
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle me-1"></i>
-                                To change the platform database connection, update the <code>config.env</code> file and restart the server.
-                            </small>
+
+                            <!-- Edit MongoDB Settings Form -->
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0"><i class="fas fa-edit me-2"></i>Edit MongoDB Connection</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="mongoSettingsForm">
+                                        <div class="row g-3">
+                                            <div class="col-md-8">
+                                                <label class="form-label fw-bold">MongoDB Host/IP *</label>
+                                                <input type="text" class="form-control" id="mongoHost" placeholder="e.g. localhost or 194.60.87.212" required>
+                                                <small class="text-muted">Server IP address or hostname</small>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-bold">Port *</label>
+                                                <input type="number" class="form-control" id="mongoPort" placeholder="27017" value="27017" required>
+                                                <small class="text-muted">Default: 27017</small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold">Username</label>
+                                                <input type="text" class="form-control" id="mongoUsername" placeholder="root">
+                                                <small class="text-muted">Leave empty if no auth</small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold">Password</label>
+                                                <input type="password" class="form-control" id="mongoPassword" placeholder="Enter password">
+                                                <small class="text-muted">Leave empty if no auth</small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold">Database Name *</label>
+                                                <input type="text" class="form-control" id="mongoDatabase" placeholder="obe_platform" value="obe_platform" required>
+                                                <small class="text-muted">Main platform database</small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold">Auth Source</label>
+                                                <input type="text" class="form-control" id="mongoAuthSource" placeholder="admin" value="admin">
+                                                <small class="text-muted">Default: admin</small>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="d-flex gap-2">
+                                                    <button type="button" class="btn btn-outline-primary" onclick="testMongoDBConnection()">
+                                                        <i class="fas fa-plug me-2"></i>Test Connection
+                                                    </button>
+                                                    <button type="button" class="btn btn-primary-gradient" onclick="saveMongoDBSettings()">
+                                                        <i class="fas fa-save me-2"></i>Save Settings
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div id="mongoSettingsResult"></div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
 
                         <hr class="my-4">
@@ -1170,6 +1242,9 @@
                                 <textarea class="form-control" id="dbDescription" name="description" rows="2" placeholder="e.g. Database for QUEST University"></textarea>
                                 <small class="text-muted">Optional - helps you remember what this database is for</small>
                             </div>
+                            <div class="col-12">
+                                <div id="addDatabaseResult"></div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -1430,6 +1505,7 @@
                 loadPlatformUsers();
             } else if (section === 'settings') {
                 loadPlatformSettings();
+                loadMongoDBSettings();
             }
             
             // Add active class to clicked menu item
@@ -1443,7 +1519,7 @@
         // Show add database modal
         function showAddDatabaseModal() {
             document.getElementById('addDatabaseForm').reset();
-            document.getElementById('connectionTestResult').innerHTML = '';
+            document.getElementById('addDatabaseResult').innerHTML = '';
             const modal = new bootstrap.Modal(document.getElementById('addDatabaseModal'));
             modal.show();
         }
@@ -1626,20 +1702,29 @@
         // Save database connection
         async function createMongoDatabase() {
             const form = document.getElementById('addDatabaseForm');
+            const resultDiv = document.getElementById('addDatabaseResult');
             
             if (!form.checkValidity()) {
                 form.reportValidity();
                 return;
             }
 
-            const databaseName = document.getElementById('dbName').value;
-            const description = document.getElementById('dbDescription').value;
+            const databaseName = document.getElementById('dbName').value.trim();
+            const description = document.getElementById('dbDescription').value.trim();
 
             // Validate database name
             if (!databaseName.startsWith('obe_')) {
-                alert('❌ Database name must start with "obe_"');
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        <strong>Invalid Name!</strong> Database name must start with "obe_"
+                    </div>
+                `;
                 return;
             }
+
+            // Show loading
+            resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Creating database...</div>';
 
             try {
                 const token = localStorage.getItem('token');
@@ -1656,22 +1741,41 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    alert(`✅ Database created successfully!\n\nDatabase: ${result.database.name}\n\nYou can now see it in aaPanel MongoDB and assign it to universities.`);
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Success!</strong> Database <code>${result.database.name}</code> created successfully!
+                        </div>
+                    `;
                     
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addDatabaseModal'));
-                    modal.hide();
-                    
-                    // Reset form
-                    document.getElementById('addDatabaseForm').reset();
-                    
-                    // Reload databases list
-                    loadDatabases();
+                    // Wait a moment, then close modal
+                    setTimeout(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addDatabaseModal'));
+                        modal.hide();
+                        
+                        // Reset form
+                        document.getElementById('addDatabaseForm').reset();
+                        resultDiv.innerHTML = '';
+                        
+                        // Reload databases list
+                        loadDatabases();
+                    }, 1500);
                 } else {
-                    alert(`❌ Error: ${result.message}`);
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle me-2"></i>
+                            <strong>Error!</strong> ${result.message}
+                        </div>
+                    `;
                 }
 
             } catch (error) {
-                alert(`❌ Error: ${error.message}`);
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        <strong>Error!</strong> ${error.message}
+                    </div>
+                `;
             }
         }
 
@@ -2870,6 +2974,187 @@ Type "DELETE" to confirm:`;
                 }
             } catch (error) {
                 alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // ============================================
+        // MONGODB SETTINGS MANAGEMENT
+        // ============================================
+
+        // Load MongoDB settings
+        async function loadMongoDBSettings() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/mongodb-settings', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const settings = data.settings;
+
+                    // Update current connection display
+                    document.getElementById('currentMongoHost').textContent = settings.host || '-';
+                    document.getElementById('currentMongoPort').textContent = settings.port || '-';
+                    document.getElementById('currentMongoDatabase').textContent = settings.database || '-';
+                    document.getElementById('currentMongoUser').textContent = settings.username || 'No Auth';
+                    
+                    const statusBadge = document.getElementById('currentMongoStatus');
+                    if (settings.connectionStatus === 'Connected') {
+                        statusBadge.className = 'badge badge-success';
+                        statusBadge.textContent = 'Connected';
+                    } else {
+                        statusBadge.className = 'badge badge-danger';
+                        statusBadge.textContent = 'Disconnected';
+                    }
+
+                    // Populate edit form
+                    document.getElementById('mongoHost').value = settings.host || '';
+                    document.getElementById('mongoPort').value = settings.port || '27017';
+                    document.getElementById('mongoUsername').value = settings.username || '';
+                    document.getElementById('mongoPassword').value = settings.password || '';
+                    document.getElementById('mongoDatabase').value = settings.database || 'obe_platform';
+                    document.getElementById('mongoAuthSource').value = settings.authSource || 'admin';
+
+                    console.log('✅ MongoDB settings loaded');
+                } else {
+                    console.error('Failed to load MongoDB settings');
+                }
+            } catch (error) {
+                console.error('Error loading MongoDB settings:', error);
+                document.getElementById('currentMongoHost').textContent = 'Error loading settings';
+            }
+        }
+
+        // Test MongoDB connection
+        async function testMongoDBConnection() {
+            const form = document.getElementById('mongoSettingsForm');
+            const resultDiv = document.getElementById('mongoSettingsResult');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const settings = {
+                host: document.getElementById('mongoHost').value,
+                port: document.getElementById('mongoPort').value,
+                username: document.getElementById('mongoUsername').value,
+                password: document.getElementById('mongoPassword').value,
+                database: document.getElementById('mongoDatabase').value,
+                authSource: document.getElementById('mongoAuthSource').value
+            };
+
+            resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Testing connection...</div>';
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/mongodb-settings/test', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Success!</strong> ${result.message}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle me-2"></i>
+                            <strong>Failed!</strong> ${result.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        <strong>Error!</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Save MongoDB settings
+        async function saveMongoDBSettings() {
+            const form = document.getElementById('mongoSettingsForm');
+            const resultDiv = document.getElementById('mongoSettingsResult');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            if (!confirm('⚠️ WARNING: Changing MongoDB settings will require a server restart. Are you sure you want to proceed?')) {
+                return;
+            }
+
+            const settings = {
+                host: document.getElementById('mongoHost').value,
+                port: document.getElementById('mongoPort').value,
+                username: document.getElementById('mongoUsername').value,
+                password: document.getElementById('mongoPassword').value,
+                database: document.getElementById('mongoDatabase').value,
+                authSource: document.getElementById('mongoAuthSource').value
+            };
+
+            resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Saving settings...</div>';
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/mongodb-settings', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Success!</strong> ${result.message}
+                            <div class="mt-3">
+                                <strong class="d-block mb-2">⚠️ IMPORTANT: Server restart required</strong>
+                                <p class="mb-2">The MongoDB connection settings have been saved to <code>config.env</code>.</p>
+                                <p class="mb-0">Please restart the server for the changes to take effect.</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Reload settings after a short delay
+                    setTimeout(() => {
+                        loadMongoDBSettings();
+                    }, 2000);
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle me-2"></i>
+                            <strong>Failed!</strong> ${result.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        <strong>Error!</strong> ${error.message}
+                    </div>
+                `;
             }
         }
 

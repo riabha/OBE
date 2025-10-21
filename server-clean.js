@@ -1081,10 +1081,180 @@ app.post('/api/databases/create', async (req, res) => {
         
         console.log(`✅ Database created: ${databaseName}`);
         
-        res.json({ message: 'Database created', database: { name: databaseName } });
+        res.json({ message: 'Database created successfully', database: { name: databaseName } });
         
     } catch (error) {
-        res.status(500).json({ message: 'Error', error: error.message });
+        console.error('Error creating database:', error);
+        res.status(500).json({ message: 'Error creating database', error: error.message });
+    }
+});
+
+// ============================================
+// MONGODB SETTINGS API
+// ============================================
+
+const fs = require('fs');
+const { promisify } = require('util');
+const readFile = promisify(fs.readFile);
+const writeFile = promisify(fs.writeFile);
+
+// Get current MongoDB settings
+app.get('/api/mongodb-settings', async (req, res) => {
+    try {
+        // Read current MongoDB URI from environment
+        const currentUri = process.env.MONGODB_URI || '';
+        
+        // Parse MongoDB URI to extract components
+        let parsedSettings = {
+            host: 'localhost',
+            port: '27017',
+            username: '',
+            password: '',
+            database: 'obe_platform',
+            authSource: 'admin',
+            connectionStatus: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
+        };
+
+        // Parse the MongoDB URI
+        try {
+            const uriMatch = currentUri.match(/mongodb:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/([^?]+)(\?.*)?/);
+            if (uriMatch) {
+                parsedSettings.username = decodeURIComponent(uriMatch[1]);
+                parsedSettings.password = decodeURIComponent(uriMatch[2]);
+                parsedSettings.host = uriMatch[3];
+                parsedSettings.port = uriMatch[4];
+                parsedSettings.database = uriMatch[5];
+                
+                // Extract authSource if present
+                if (uriMatch[6]) {
+                    const authSourceMatch = uriMatch[6].match(/authSource=([^&]+)/);
+                    if (authSourceMatch) {
+                        parsedSettings.authSource = authSourceMatch[1];
+                    }
+                }
+            } else {
+                // Try simpler format without auth
+                const simpleMatch = currentUri.match(/mongodb:\/\/([^:]+):(\d+)\/(.+)/);
+                if (simpleMatch) {
+                    parsedSettings.host = simpleMatch[1];
+                    parsedSettings.port = simpleMatch[2];
+                    parsedSettings.database = simpleMatch[3];
+                }
+            }
+        } catch (parseError) {
+            console.error('Error parsing MongoDB URI:', parseError);
+        }
+
+        res.json({
+            success: true,
+            settings: parsedSettings,
+            rawUri: currentUri
+        });
+
+    } catch (error) {
+        console.error('Error getting MongoDB settings:', error);
+        res.status(500).json({ message: 'Error retrieving settings', error: error.message });
+    }
+});
+
+// Test MongoDB connection
+app.post('/api/mongodb-settings/test', async (req, res) => {
+    try {
+        const { host, port, username, password, database, authSource } = req.body;
+
+        // Build MongoDB URI
+        let testUri;
+        if (username && password) {
+            const encodedUser = encodeURIComponent(username);
+            const encodedPass = encodeURIComponent(password);
+            testUri = `mongodb://${encodedUser}:${encodedPass}@${host}:${port}/${database}?authSource=${authSource || 'admin'}`;
+        } else {
+            testUri = `mongodb://${host}:${port}/${database}`;
+        }
+
+        console.log(`Testing MongoDB connection to: ${host}:${port}/${database}`);
+
+        // Create a new connection to test
+        const testConnection = await mongoose.createConnection(testUri, {
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 5000
+        });
+
+        // Test if connection is successful
+        if (testConnection.readyState === 1) {
+            await testConnection.close();
+            console.log('✅ MongoDB connection test successful');
+            res.json({ 
+                success: true, 
+                message: 'Connection successful! MongoDB is accessible.',
+                status: 'Connected'
+            });
+        } else {
+            await testConnection.close();
+            res.status(400).json({ 
+                success: false, 
+                message: 'Connection failed. Please check your settings.'
+            });
+        }
+
+    } catch (error) {
+        console.error('MongoDB connection test failed:', error);
+        res.status(400).json({ 
+            success: false, 
+            message: `Connection failed: ${error.message}`,
+            error: error.message
+        });
+    }
+});
+
+// Update MongoDB settings
+app.put('/api/mongodb-settings', async (req, res) => {
+    try {
+        const { host, port, username, password, database, authSource } = req.body;
+
+        // Build new MongoDB URI
+        let newUri;
+        if (username && password) {
+            const encodedUser = encodeURIComponent(username);
+            const encodedPass = encodeURIComponent(password);
+            newUri = `mongodb://${encodedUser}:${encodedPass}@${host}:${port}/${database}?authSource=${authSource || 'admin'}`;
+        } else {
+            newUri = `mongodb://${host}:${port}/${database}`;
+        }
+
+        // Read current config.env file
+        const configPath = './config.env';
+        let configContent = await readFile(configPath, 'utf8');
+
+        // Update MONGODB_URI in config file
+        const mongoUriRegex = /MONGODB_URI=.*/;
+        if (mongoUriRegex.test(configContent)) {
+            configContent = configContent.replace(mongoUriRegex, `MONGODB_URI=${newUri}`);
+        } else {
+            // Add MONGODB_URI if it doesn't exist
+            configContent += `\nMONGODB_URI=${newUri}\n`;
+        }
+
+        // Write updated config
+        await writeFile(configPath, configContent, 'utf8');
+
+        console.log('✅ MongoDB settings updated in config.env');
+        console.log('⚠️  Server restart required for changes to take effect');
+
+        res.json({ 
+            success: true, 
+            message: 'MongoDB settings updated successfully. Please restart the server for changes to take effect.',
+            requiresRestart: true,
+            newUri: newUri
+        });
+
+    } catch (error) {
+        console.error('Error updating MongoDB settings:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error updating settings', 
+            error: error.message 
+        });
     }
 });
 
