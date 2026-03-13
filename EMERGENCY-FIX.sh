@@ -1,74 +1,60 @@
 #!/bin/bash
 
-# 🚑 EMERGENCY FIX - Restore Working State
-# Run this on VPS to fix login and all issues
+# 🚀 EMERGENCY FIX: MongoDB Connection Issue
+# This script fixes the "getaddrinfo ENOTFOUND quest" error
 
-echo ""
-echo "╔══════════════════════════════════════════════════════════╗"
-echo "║  🚑 EMERGENCY FIX - Restoring Working State            ║"
-echo "╚══════════════════════════════════════════════════════════╝"
-echo ""
+echo "🔧 EMERGENCY FIX: MongoDB Connection Issue"
+echo "=========================================="
 
-cd /www/wwwroot/obe || exit 1
+# Navigate to project directory
+cd /www/wwwroot/obe-portal || { echo "❌ Directory not found"; exit 1; }
 
-echo "1️⃣ Pulling latest code..."
-git pull origin main
-echo ""
+echo "📍 Current directory: $(pwd)"
 
-echo "2️⃣ Stopping current app..."
-pm2 stop obe
-pm2 delete obe
-echo ""
+# Stop containers
+echo "🛑 Stopping containers..."
+docker-compose down
 
-echo "3️⃣ Updating config..."
-cat > config.env << 'EOF'
-PORT=3000
+# Create .env file with correct settings
+echo "📝 Creating .env file..."
+cat > .env << 'EOF'
+# QUEST OBE Portal - Docker Environment Configuration
+APP_PORT=3200
 NODE_ENV=production
-MONGODB_URI=mongodb://127.0.0.1:27017/obe_platform
-JWT_SECRET=quest_obe_jwt_secret_key_2024_very_secure_random_string
-JWT_EXPIRE=7d
-SESSION_SECRET=quest_obe_session_secret_key_2024_another_random_string
-MAX_FILE_SIZE=10485760
-UPLOAD_PATH=./public/uploads
-BCRYPT_ROUNDS=12
+MONGO_ROOT_USER=admin
+MONGO_ROOT_PASSWORD=SecureOBE2025!MongoDB@Quest
+MONGODB_URI=mongodb://admin:SecureOBE2025!MongoDB@Quest@mongodb:27017/obe_platform?authSource=admin
+JWT_SECRET=OBE2025SecureJWTSecretForQuestUniversityPortal123456789
+SESSION_SECRET=QuestOBESessionSecret2025SecureRandomString987654321
+MONGO_EXPRESS_PORT=8081
+MONGO_EXPRESS_USER=admin
+MONGO_EXPRESS_PASSWORD=SecureOBE2025!MongoExpress@Quest
 EOF
-echo "✅ Config updated"
-echo ""
 
-echo "4️⃣ Starting with CLEAN server..."
-pm2 start server-clean.js --name obe
-pm2 save
-echo ""
+echo "✅ .env file created"
 
-echo "5️⃣ Checking status..."
-sleep 3
-pm2 status
-echo ""
+# Start containers
+echo "🚀 Starting containers..."
+docker-compose up -d
 
-echo "6️⃣ Testing login..."
-sleep 2
-curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"pro@obe.org.pk","password":"proadmin123"}' \
-  | python3 -m json.tool 2>/dev/null || curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"pro@obe.org.pk","password":"proadmin123"}'
-echo ""
-echo ""
+# Wait for containers to start
+echo "⏳ Waiting for containers to start..."
+sleep 10
 
-echo "7️⃣ Testing health..."
-curl -s http://localhost:3000/api/health | python3 -m json.tool 2>/dev/null || curl -s http://localhost:3000/api/health
-echo ""
-echo ""
+# Check status
+echo "📊 Container Status:"
+docker-compose ps
 
-echo "╔══════════════════════════════════════════════════════════╗"
-echo "║  ✅ FIX COMPLETE!                                       ║"
-echo "╚══════════════════════════════════════════════════════════╝"
 echo ""
-echo "🌐 Your website: http://obe.org.pk"
-echo "🔐 Login: pro@obe.org.pk / proadmin123"
-echo ""
-echo "📊 Check status: pm2 status"
-echo "📋 View logs: pm2 logs obe"
-echo ""
+echo "📋 Application Logs (last 10 lines):"
+docker-compose logs --tail=10 obe-app
 
+echo ""
+echo "🎉 FIX COMPLETE!"
+echo "==============="
+echo "🌐 Application URL: http://YOUR_VPS_IP:3200"
+echo "📧 Login: pro@obe.org.pk"
+echo "🔑 Password: proadmin123"
+echo ""
+echo "📊 Monitor logs: docker-compose logs -f obe-app"
+echo "🔍 Check status: docker-compose ps"

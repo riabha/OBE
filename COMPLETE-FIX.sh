@@ -1,127 +1,56 @@
 #!/bin/bash
 
-# 🔧 COMPLETE FIX - Test Everything and Fix All Issues
-# This script will diagnose and fix all problems
+# 🚀 COMPLETE FIX: All Commands in One Script
+# Run this on your VPS to fix the MongoDB connection issue
 
-echo ""
-echo "╔══════════════════════════════════════════════════════════╗"
-echo "║  🔧 COMPLETE SYSTEM FIX - Diagnosing & Fixing          ║"
-echo "╚══════════════════════════════════════════════════════════╝"
-echo ""
+echo "🔧 QUEST OBE Portal - Complete Fix"
+echo "=================================="
 
-cd /www/wwwroot/obe || exit 1
+# Navigate to project directory
+cd /www/wwwroot/obe-portal
 
-echo "📊 STEP 1: Current Status"
-echo "─────────────────────────────────────────────"
-pm2 list
-echo ""
+# Stop any running containers
+echo "🛑 Stopping containers..."
+docker-compose down
 
-echo "📥 STEP 2: Pulling Latest Code"
-echo "─────────────────────────────────────────────"
-git pull origin main
-echo ""
-
-echo "🗑️ STEP 3: Complete Cleanup"
-echo "─────────────────────────────────────────────"
-pm2 stop all
-pm2 delete all
-pm2 flush
-echo "✅ PM2 cleaned"
-echo ""
-
-echo "📝 STEP 4: Ensure Correct Config"
-echo "─────────────────────────────────────────────"
-cat > config.env << 'ENVEOF'
-PORT=3000
+# Create .env file with correct MongoDB connection
+echo "📝 Creating .env file with correct settings..."
+cat > .env << 'EOF'
+APP_PORT=3200
 NODE_ENV=production
-MONGODB_URI=mongodb://127.0.0.1:27017/obe_platform
-JWT_SECRET=quest_obe_jwt_secret_key_2024_very_secure_random_string
-JWT_EXPIRE=7d
-SESSION_SECRET=quest_obe_session_secret_key_2024_another_random_string
-MAX_FILE_SIZE=10485760
-UPLOAD_PATH=./public/uploads
-BCRYPT_ROUNDS=12
-ENVEOF
-echo "✅ Config updated"
+MONGO_ROOT_USER=admin
+MONGO_ROOT_PASSWORD=SecureOBE2025!MongoDB@Quest
+MONGODB_URI=mongodb://admin:SecureOBE2025!MongoDB@Quest@mongodb:27017/obe_platform?authSource=admin
+JWT_SECRET=OBE2025SecureJWTSecretForQuestUniversityPortal123456789
+SESSION_SECRET=QuestOBESessionSecret2025SecureRandomString987654321
+MONGO_EXPRESS_PORT=8081
+MONGO_EXPRESS_USER=admin
+MONGO_EXPRESS_PASSWORD=SecureOBE2025!MongoExpress@Quest
+EOF
+
+# Start containers
+echo "🚀 Starting containers..."
+docker-compose up -d
+
+# Wait for startup
+echo "⏳ Waiting 15 seconds for containers to initialize..."
+sleep 15
+
+# Show status
+echo "📊 Container Status:"
+docker-compose ps
+
 echo ""
+echo "📋 Recent Application Logs:"
+docker-compose logs --tail=15 obe-app
 
-echo "🧪 STEP 5: Testing MongoDB Connection"
-echo "─────────────────────────────────────────────"
-if mongo --eval "db.version()" mongodb://127.0.0.1:27017/obe_platform 2>/dev/null; then
-    echo "✅ MongoDB is accessible"
-else
-    echo "⚠️  MongoDB check inconclusive (might still work)"
-fi
 echo ""
-
-echo "🚀 STEP 6: Starting Clean Server"
-echo "─────────────────────────────────────────────"
-pm2 start server-clean.js --name obe --time
-pm2 start deploy-webhook.js --name obe-webhook --time
-pm2 save
+echo "🎉 DEPLOYMENT COMPLETE!"
+echo "======================"
+echo "🌐 Application: http://YOUR_VPS_IP:3200"
+echo "📧 Login: pro@obe.org.pk"
+echo "🔑 Password: proadmin123"
 echo ""
-
-echo "⏳ Waiting for startup..."
-sleep 5
-echo ""
-
-echo "📊 STEP 7: Checking Status"
-echo "─────────────────────────────────────────────"
-pm2 status
-echo ""
-
-echo "📋 STEP 8: Checking Logs"
-echo "─────────────────────────────────────────────"
-pm2 logs obe --lines 30 --nostream
-echo ""
-
-echo "🧪 STEP 9: Testing API Endpoints"
-echo "─────────────────────────────────────────────"
-
-echo "Test 1: Health Check"
-curl -s http://localhost:3000/api/health
-echo -e "\n"
-
-echo "Test 2: Pro Super Admin Login"
-RESPONSE=$(curl -s -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"pro@obe.org.pk","password":"proadmin123"}')
-
-echo "$RESPONSE"
-echo ""
-
-if echo "$RESPONSE" | grep -q "token"; then
-    echo "✅ LOGIN WORKS!"
-else
-    echo "❌ LOGIN FAILED!"
-    echo ""
-    echo "Checking recent error logs:"
-    pm2 logs obe --err --lines 20 --nostream
-fi
-echo ""
-
-echo "Test 3: Platform Stats"
-curl -s http://localhost:3000/api/platform-stats
-echo -e "\n"
-
-echo "Test 4: List Universities"
-curl -s http://localhost:3000/api/universities
-echo -e "\n"
-
-echo "Test 5: List Databases"
-curl -s http://localhost:3000/api/databases
-echo -e "\n"
-
-echo "╔══════════════════════════════════════════════════════════╗"
-echo "║  📊 DIAGNOSTIC COMPLETE                                 ║"
-echo "╚══════════════════════════════════════════════════════════╝"
-echo ""
-echo "🌐 Website: http://obe.org.pk"
-echo "🔐 Login: pro@obe.org.pk / proadmin123"
-echo ""
-echo "📋 Next Steps:"
-echo "   1. Check if login test passed above"
-echo "   2. Try logging in via browser"
-echo "   3. Check PM2 logs if issues: pm2 logs obe"
-echo ""
-
+echo "🔍 Monitor: docker-compose logs -f obe-app"
+echo "📊 Status: docker-compose ps"
+echo "🔄 Restart: docker-compose restart obe-app"
