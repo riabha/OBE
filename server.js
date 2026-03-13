@@ -1237,6 +1237,64 @@ app.get('/api/departments', async (req, res) => {
     }
 });
 
+// Change university super admin password (for Pro Admin)
+app.post('/api/universities/:id/change-admin-password', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        // Verify this is a pro admin
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
+        const proAdmin = await PlatformUser.findById(decoded.userId);
+        
+        if (!proAdmin || proAdmin.role !== 'pro_superadmin') {
+            return res.status(403).json({ message: 'Only Pro Admin can change university passwords' });
+        }
+        
+        const { newPassword } = req.body;
+        if (!newPassword || newPassword.length < 6) {
+            return res.status(400).json({ message: 'Password must be at least 6 characters' });
+        }
+        
+        // Find the university
+        const university = await University.findById(req.params.id);
+        if (!university) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+        
+        // Find the university super admin
+        const universityAdmin = await PlatformUser.findOne({ 
+            university: university._id, 
+            role: 'university_superadmin' 
+        });
+        
+        if (!universityAdmin) {
+            return res.status(404).json({ message: 'University super admin not found' });
+        }
+        
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
+        
+        // Update password
+        await PlatformUser.findByIdAndUpdate(universityAdmin._id, {
+            password: hashedPassword
+        });
+        
+        console.log(`✅ Password changed for university admin: ${universityAdmin.email}`);
+        
+        res.json({ 
+            message: 'Password changed successfully',
+            adminEmail: universityAdmin.email
+        });
+        
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
 // ============================================
 // ERROR HANDLING
 // ============================================
