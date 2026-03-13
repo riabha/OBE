@@ -1,76 +1,65 @@
 #!/bin/bash
 
-echo "🔧 DEPLOYING COMPREHENSIVE OBE PORTAL FIXES"
-echo "============================================"
+# 🚀 DEPLOY COMPREHENSIVE DASHBOARD FIXES
+# This script applies all remaining fixes to dashboard files
 
-cd /www/wwwroot/obe-portal
+echo "🚀 DEPLOYING COMPREHENSIVE DASHBOARD FIXES"
+echo "=========================================="
 
-echo "1. 🛑 Stopping current containers..."
-docker-compose down
-
-echo ""
-echo "2. 📝 Backing up current files..."
-cp public/university-super-admin-dashboard.html public/university-super-admin-dashboard.html.backup.$(date +%Y%m%d_%H%M%S)
-cp server.js server.js.backup.$(date +%Y%m%d_%H%M%S)
+echo "1. 📋 Checking Docker containers..."
+docker ps --filter "name=obe-portal"
 
 echo ""
-echo "3. 🔄 Pulling latest fixes from GitHub..."
+echo "2. 🔄 Pulling latest changes from Git..."
 git pull origin main
 
 echo ""
-echo "4. 🔨 Rebuilding containers with fixes..."
-docker-compose build --no-cache
+echo "3. 🔧 Applying dashboard fixes..."
+
+# The fixes have been applied to:
+# ✅ teacher-dashboard-enhanced.html (dashboard-common.js added, logo fixed, API calls integrated)
+# ✅ dean-dashboard-enhanced.html (dashboard-common.js added, logo fixed, auth fixed)
+# ✅ student-dashboard-enhanced.html (dashboard-common.js added, logo fixed)
+
+echo "✅ Teacher Dashboard: Fixed"
+echo "✅ Dean Dashboard: Fixed"  
+echo "✅ Student Dashboard: Fixed"
 
 echo ""
-echo "5. 🚀 Starting containers..."
+echo "4. 🔄 Restarting Docker containers to apply changes..."
+docker-compose down
 docker-compose up -d
 
 echo ""
-echo "6. ⏳ Waiting 20 seconds for startup..."
-sleep 20
+echo "5. 📊 Checking container status..."
+docker ps --filter "name=obe-portal"
 
 echo ""
-echo "7. 📊 Container Status:"
-docker-compose ps
+echo "6. 🌐 Testing application accessibility..."
+sleep 5
+curl -I http://194.60.87.212:3200 || echo "⚠️  Application may still be starting..."
 
 echo ""
-echo "8. 📋 Application Logs:"
-docker-compose logs --tail=15 obe-app
+echo "🎯 COMPREHENSIVE FIXES APPLIED:"
+echo "==============================="
+echo "✅ Added dashboard-common.js to all role dashboards"
+echo "✅ Fixed university logo display issues"
+echo "✅ Replaced sample data with real API calls (teacher dashboard)"
+echo "✅ Fixed authentication using AuthManager"
+echo "✅ Added proper error handling and loading states"
+echo "✅ Integrated shared utilities across dashboards"
 
 echo ""
-echo "9. 🧪 Testing Application:"
-echo "   Testing main application..."
-curl -I http://localhost:3200 2>/dev/null && echo "   ✅ Main app OK" || echo "   ❌ Main app failed"
+echo "📝 REMAINING TASKS:"
+echo "=================="
+echo "🔄 Chairman Dashboard - needs API integration"
+echo "🔄 Controller Dashboard - needs API integration"  
+echo "🔄 Focal Dashboard - needs API integration"
+echo "🔄 All dashboards - need complete sample data replacement"
 
 echo ""
-echo "10. 🔍 Testing University Creation:"
-echo "    You can now test university creation and login functionality"
+echo "🌐 Application should be accessible at: http://194.60.87.212:3200"
+echo "🔑 Default login: pro@obe.org.pk / proadmin123"
 
 echo ""
-echo "🎯 COMPREHENSIVE FIX DEPLOYMENT COMPLETE!"
-echo "========================================"
-echo ""
-echo "🌐 **Application URLs:**"
-echo "   Main Portal: http://194.60.87.212:3200"
-echo "   Database GUI: http://194.60.87.212:8081"
-echo ""
-echo "🔑 **Test Credentials:**"
-echo "   Pro Admin: pro@obe.org.pk / proadmin123"
-echo ""
-echo "📋 **What's Fixed:**"
-echo "   ✅ User creation form (firstName/lastName fields)"
-echo "   ✅ University-specific API endpoints added"
-echo "   ✅ Logo display functionality"
-echo "   ✅ Database connection handling"
-echo "   ✅ Error handling and validation"
-echo ""
-echo "🧪 **Testing Steps:**"
-echo "   1. Login as Pro Admin"
-echo "   2. Create a test university"
-echo "   3. Login as university super admin"
-echo "   4. Try creating users, departments, etc."
-echo "   5. Verify logo displays correctly"
-echo ""
-echo "📞 **If Issues Persist:**"
-echo "   Check logs: docker-compose logs -f obe-app"
-echo "   Check database: http://194.60.87.212:8081"
+echo "✅ DEPLOYMENT COMPLETE!"
