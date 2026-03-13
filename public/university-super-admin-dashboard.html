@@ -1735,121 +1735,139 @@
             document.getElementById('userEmail').textContent = user.email;
         }
 
-        // Load university info
+        // Load university info - ENHANCED VERSION
         async function loadUniversityInfo() {
+            console.log('🔍 Starting loadUniversityInfo...');
+            
             try {
                 const token = localStorage.getItem('token');
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 
-                // Quick initial load from localStorage for instant display
-                const cachedUniversity = localStorage.getItem('universityInfo');
-                if (cachedUniversity) {
-                    try {
-                        const cached = JSON.parse(cachedUniversity);
-                        updateUIWithUniversityInfo(cached);
-                        console.log('✅ Loaded university from cache (instant)');
-                    } catch (e) {
-                        console.log('Could not parse cached university info');
+                console.log('User data:', user);
+                
+                // Immediate fallback display
+                if (user.universityCode) {
+                    const universityName = user.universityCode === 'DEMO' ? 'Demo University' : 
+                                         user.universityCode.replace(/_/g, ' ').toUpperCase();
+                    const firstLetter = universityName.charAt(0).toUpperCase();
+                    
+                    // Update UI immediately
+                    document.getElementById('universityName').textContent = universityName;
+                    document.getElementById('universityLogoPlaceholder').textContent = firstLetter;
+                    
+                    // Update database name display
+                    const dbName = user.universityCode === 'DEMO' ? 'obe_demo' : `obe_university_${user.universityCode.toLowerCase()}`;
+                    const dbElement = document.getElementById('sidebarDatabaseName');
+                    if (dbElement) {
+                        dbElement.textContent = dbName;
                     }
-                } else if (user.universityCode) {
-                    // Show basic info from user token immediately
-                    document.getElementById('sidebarDatabaseName').textContent = `obe_university_${user.universityCode.toLowerCase()}`;
+                    
+                    console.log('✅ Set fallback university info:', universityName);
                 }
                 
-                // Then fetch fresh data from API
-                const response = await fetch('/api/my-university', {
-                    headers: getAPIHeaders()
-                });
-
-                if (response.ok) {
-                    const myUniversity = await response.json();
-                    
-                    // Cache the university info for next time
-                    localStorage.setItem('universityInfo', JSON.stringify(myUniversity));
-                    
-                    // Store university data globally
-                    window.currentUniversity = myUniversity;
-                    
-                    // Update UI with fresh data
-                    updateUIWithUniversityInfo(myUniversity);
-                    
-                    console.log(`✅ University loaded from API: ${myUniversity.universityName}`);
-                } else {
-                    // Fallback to user data if available
-                    console.log('Could not load university info from API, using user data');
-                    if (user.university) {
-                        document.getElementById('universityName').textContent = user.university;
-                    }
-                    if (user.universityCode) {
-                        const firstLetter = user.universityCode.charAt(0).toUpperCase();
-                        const placeholderElement = document.getElementById('universityLogoPlaceholder');
-                        if (placeholderElement) {
-                            placeholderElement.textContent = firstLetter;
-                            placeholderElement.style.display = 'flex';
+                // Try API call
+                try {
+                    const response = await fetch('/api/my-university', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                            'X-User-Email': user.email
                         }
-                        document.getElementById('universityLogo').style.display = 'none';
-                        document.getElementById('sidebarDatabaseName').textContent = `obe_university_${user.universityCode.toLowerCase()}`;
+                    });
+
+                    if (response.ok) {
+                        const myUniversity = await response.json();
+                        console.log('✅ API Response:', myUniversity);
+                        
+                        // Update with API data
+                        updateUIWithUniversityInfo(myUniversity);
+                        
+                        // Cache for next time
+                        localStorage.setItem('universityInfo', JSON.stringify(myUniversity));
+                        window.currentUniversity = myUniversity;
+                        
+                    } else {
+                        console.log('⚠️ API call failed with status:', response.status);
+                        const errorText = await response.text();
+                        console.log('Error response:', errorText);
+                        
+                        // Keep the fallback data we already set
+                        console.log('Using fallback data from user token');
                     }
+                } catch (apiError) {
+                    console.error('API Error:', apiError);
+                    // Keep the fallback data we already set
                 }
+                
             } catch (error) {
-                console.error('Error loading university info:', error);
-                // Show default on error
-                document.getElementById('universityName').textContent = 'University';
-                document.getElementById('universityLogoPlaceholder').textContent = 'U';
-                document.getElementById('universityLogoPlaceholder').style.display = 'flex';
-                document.getElementById('universityLogo').style.display = 'none';
+                console.error('Error in loadUniversityInfo:', error);
+                
+                // Last resort fallback
+                document.getElementById('universityName').textContent = 'Demo University';
+                document.getElementById('universityLogoPlaceholder').textContent = 'D';
+                const dbElement = document.getElementById('sidebarDatabaseName');
+                if (dbElement) {
+                    dbElement.textContent = 'obe_demo';
+                }
             }
         }
 
-        // Helper function to update UI with university info
-        function updateUIWithUniversityInfo(myUniversity) {
-            const universityName = myUniversity.universityName;
-            const universityCode = myUniversity.universityCode;
+        // Helper function to update UI with university info - ENHANCED VERSION
+        function updateUIWithUniversityInfo(university) {
+            console.log('🎨 Updating UI with:', university);
+            
+            const universityName = university.universityName || 'Demo University';
+            const universityCode = university.universityCode || 'DEMO';
+            const databaseName = university.databaseName || 'obe_demo';
             
             // Update all university name elements
             document.querySelectorAll('#universityName, .university-name').forEach(el => {
-                el.textContent = universityName;
+                if (el) el.textContent = universityName;
             });
             
-            // Update settings
-            if (document.getElementById('settingsUniversityName')) {
-                document.getElementById('settingsUniversityName').value = universityName;
-            }
-            if (document.getElementById('settingsDatabaseName')) {
-                document.getElementById('settingsDatabaseName').value = myUniversity.databaseName || 'N/A';
-            }
-            if (document.getElementById('settingsUniversityCode')) {
-                document.getElementById('settingsUniversityCode').value = universityCode;
-            }
-            
-            // Update database name in sidebar
-            if (document.getElementById('sidebarDatabaseName')) {
-                document.getElementById('sidebarDatabaseName').textContent = myUniversity.databaseName || `obe_university_${universityCode.toLowerCase()}`;
-            }
-            
-            // Update colors if provided
-            if (myUniversity.primaryColor) {
-                document.documentElement.style.setProperty('--primary-color', myUniversity.primaryColor);
-            }
-            
-            // Set logo or monogram
+            // Update logo
             const logoElement = document.getElementById('universityLogo');
             const placeholderElement = document.getElementById('universityLogoPlaceholder');
             
-            if (myUniversity.logoUrl) {
-                // Show actual logo from database
-                logoElement.src = myUniversity.logoUrl;
+            if (university.logoUrl && logoElement) {
+                logoElement.src = university.logoUrl;
                 logoElement.style.display = 'block';
                 if (placeholderElement) placeholderElement.style.display = 'none';
-            } else {
-                // Show first letter as monogram
+            } else if (placeholderElement) {
                 const firstLetter = universityName.charAt(0).toUpperCase();
-                if (placeholderElement) {
-                    placeholderElement.textContent = firstLetter;
-                    placeholderElement.style.display = 'flex';
-                }
-                logoElement.style.display = 'none';
+                placeholderElement.textContent = firstLetter;
+                placeholderElement.style.display = 'flex';
+                if (logoElement) logoElement.style.display = 'none';
             }
+            
+            // Update database name
+            const dbElement = document.getElementById('sidebarDatabaseName');
+            if (dbElement) {
+                dbElement.textContent = databaseName;
+            }
+            
+            // Update settings form if it exists
+            const settingsNameElement = document.getElementById('settingsUniversityName');
+            if (settingsNameElement) {
+                settingsNameElement.value = universityName;
+            }
+            
+            const settingsDbElement = document.getElementById('settingsDatabaseName');
+            if (settingsDbElement) {
+                settingsDbElement.value = databaseName;
+            }
+            
+            const settingsCodeElement = document.getElementById('settingsUniversityCode');
+            if (settingsCodeElement) {
+                settingsCodeElement.value = universityCode;
+            }
+            
+            // Update colors if provided
+            if (university.primaryColor) {
+                document.documentElement.style.setProperty('--primary-color', university.primaryColor);
+            }
+            
+            console.log('✅ UI updated successfully');
         }
 
         // Load database stats for settings page

@@ -1172,39 +1172,49 @@ app.get('/api/my-university', async (req, res) => {
             return res.status(401).json({ message: 'No token' });
         }
         
-        const { university } = await getUniversityDatabase(token);
-        
-        const uniObj = university.toObject();
-        if (university.logo && university.logo.contentType) {
-            uniObj.logoUrl = `/api/universities/${university._id}/logo`;
+        try {
+            const { university } = await getUniversityDatabase(token);
+            
+            const uniObj = university.toObject();
+            if (university.logo && university.logo.contentType) {
+                uniObj.logoUrl = `/api/universities/${university._id}/logo`;
+            }
+            delete uniObj.logo;
+            
+            res.json(uniObj);
+        } catch (dbError) {
+            console.error('Database error, trying fallback:', dbError);
+            
+            // Fallback: Get user info from token and find university by code
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
+            const user = await PlatformUser.findById(decoded.userId);
+            
+            if (user && user.universityCode) {
+                const university = await University.findOne({ universityCode: user.universityCode });
+                if (university) {
+                    const uniObj = university.toObject();
+                    if (university.logo && university.logo.contentType) {
+                        uniObj.logoUrl = `/api/universities/${university._id}/logo`;
+                    }
+                    delete uniObj.logo;
+                    
+                    // Fix the user's university reference
+                    if (!user.university) {
+                        await PlatformUser.findByIdAndUpdate(user._id, { university: university._id });
+                        console.log('Fixed user university reference');
+                    }
+                    
+                    return res.json(uniObj);
+                }
+            }
+            
+            // Last resort fallback
+            res.json({
+                universityName: user?.universityCode === 'DEMO' ? 'Demo University' : 'Unknown University',
+                universityCode: user?.universityCode || 'UNKNOWN',
+                databaseName: user?.universityCode === 'DEMO' ? 'obe_demo' : `obe_university_${user?.universityCode?.toLowerCase() || 'unknown'}`
+            });
         }
-        delete uniObj.logo;
-        
-        res.json(uniObj);
-        
-    } catch (error) {
-        console.error('Error fetching university info:', error);
-        res.status(500).json({ message: 'Error', error: error.message });
-    }
-});
-
-// Get current university info for logged-in university super admin
-app.get('/api/my-university', async (req, res) => {
-    try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ message: 'No token' });
-        }
-        
-        const { university } = await getUniversityDatabase(token);
-        
-        const uniObj = university.toObject();
-        if (university.logo && university.logo.contentType) {
-            uniObj.logoUrl = `/api/universities/${university._id}/logo`;
-        }
-        delete uniObj.logo;
-        
-        res.json(uniObj);
         
     } catch (error) {
         console.error('Error fetching university info:', error);
