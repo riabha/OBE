@@ -2,10 +2,11 @@ node_modules
 npm-debug.log
 .git
 .gitignore
-.env
-.env.*
-config.env
-config.env.*
+# Allow config files for Docker deployment
+# .env
+# .env.*
+# config.env
+# config.env.*
 *.md
 !README.md
 .vscode
