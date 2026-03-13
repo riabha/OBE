@@ -791,13 +791,13 @@ app.delete('/api/databases/:dbName', async (req, res) => {
 // Get current MongoDB settings
 app.get('/api/mongodb-settings', async (req, res) => {
     try {
-        const currentUri = process.env.MONGODB_URI || '';
+        const currentUri = process.env.MONGODB_URI || 'mongodb://admin:SecureOBE2025MongoDBQuest@mongodb:27017/obe_platform?authSource=admin';
         
         let parsedSettings = {
-            host: 'localhost',
+            host: 'mongodb', // Docker container name
             port: '27017',
-            username: '',
-            password: '',
+            username: 'admin',
+            password: 'SecureOBE2025MongoDBQuest',
             database: 'obe_platform',
             authSource: 'admin',
             connectionStatus: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
@@ -830,6 +830,14 @@ app.get('/api/mongodb-settings', async (req, res) => {
             console.error('Error parsing MongoDB URI:', parseError);
         }
 
+        // Test actual connection status
+        try {
+            await mongoose.connection.db.admin().ping();
+            parsedSettings.connectionStatus = 'Connected';
+        } catch (pingError) {
+            parsedSettings.connectionStatus = 'Disconnected';
+        }
+
         res.json({
             success: true,
             settings: parsedSettings,
@@ -857,33 +865,66 @@ app.post('/api/mongodb-settings/test', async (req, res) => {
         }
 
         console.log(`Testing MongoDB connection to: ${host}:${port}/${database}`);
+        console.log(`Test URI: ${testUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}`); // Hide credentials in log
 
-        const testConnection = await mongoose.createConnection(testUri, {
-            serverSelectionTimeoutMS: 5000,
-            socketTimeoutMS: 5000
-        });
+        try {
+            const testConnection = await mongoose.createConnection(testUri, {
+                serverSelectionTimeoutMS: 10000,
+                socketTimeoutMS: 10000,
+                connectTimeoutMS: 10000,
+                maxPoolSize: 1,
+                retryWrites: false
+            });
 
-        if (testConnection.readyState === 1) {
+            // Test the connection with a ping
+            await testConnection.db.admin().ping();
+            
+            // List databases to verify access
+            const adminDb = testConnection.db.admin();
+            const dbList = await adminDb.listDatabases();
+            
             await testConnection.close();
+            
             console.log('✅ MongoDB connection test successful');
+            console.log(`✅ Found ${dbList.databases.length} databases`);
+            
             res.json({ 
                 success: true, 
-                message: 'Connection successful! MongoDB is accessible.',
-                status: 'Connected'
+                message: `Connection successful! MongoDB is accessible with ${dbList.databases.length} databases.`,
+                status: 'Connected',
+                databases: dbList.databases.map(db => db.name)
             });
-        } else {
-            await testConnection.close();
+            
+        } catch (connectionError) {
+            console.error('MongoDB connection test failed:', connectionError);
+            
+            // Provide specific error messages
+            let errorMessage = 'Connection failed: ';
+            if (connectionError.message.includes('ENOTFOUND')) {
+                errorMessage += `Host "${host}" not found. In Docker, use container name "mongodb" instead of "localhost".`;
+            } else if (connectionError.message.includes('ECONNREFUSED')) {
+                errorMessage += `Connection refused to ${host}:${port}. Check if MongoDB is running.`;
+            } else if (connectionError.message.includes('Authentication failed')) {
+                errorMessage += 'Authentication failed. Check username and password.';
+            } else if (connectionError.message.includes('not authorized')) {
+                errorMessage += `Not authorized to access database "${database}". Check permissions.`;
+            } else {
+                errorMessage += connectionError.message;
+            }
+            
             res.status(400).json({ 
                 success: false, 
-                message: 'Connection failed. Please check your settings.'
+                message: errorMessage,
+                error: connectionError.message,
+                suggestion: host === 'localhost' ? 'Try using "mongodb" as host (Docker container name)' : null
             });
         }
 
     } catch (error) {
-        console.error('MongoDB connection test failed:', error);
-        res.status(400).json({ 
+        console.error('MongoDB connection test error:', error);
+        res.status(500).json({ 
             success: false, 
-            message: `Connection failed: ${error.message}`,
+            message: `Test failed: ${error.message}`,
             error: error.message
         });
     }
