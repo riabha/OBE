@@ -627,21 +627,73 @@ app.get('/api/subscriptions', async (req, res) => {
 
 app.get('/api/databases', async (req, res) => {
     try {
+        console.log('📋 Fetching all databases from MongoDB...');
+        
         const admin = mongoose.connection.db.admin();
         const { databases } = await admin.listDatabases();
         
-        const obeDatabases = databases
-            .filter(db => db.name.startsWith('obe_'))
-            .map(db => ({
-                name: db.name,
-                sizeOnDisk: db.sizeOnDisk,
-                sizeMB: (db.sizeOnDisk / 1024 / 1024).toFixed(2),
-                empty: db.empty,
-                type: db.name === 'obe_platform' ? 'Platform' : 'University'
-            }));
+        console.log(`Found ${databases.length} total databases`);
         
-        res.json(obeDatabases);
+        // Return ALL databases, not just obe_ ones
+        const allDatabases = databases.map(db => ({
+            name: db.name,
+            sizeOnDisk: db.sizeOnDisk,
+            sizeMB: (db.sizeOnDisk / 1024 / 1024).toFixed(2),
+            empty: db.empty,
+            type: db.name === 'obe_platform' ? 'Platform' : 
+                  db.name.startsWith('obe_') ? 'University' : 'Other',
+            canAssign: db.name !== 'admin' && db.name !== 'config' && db.name !== 'local'
+        }));
+        
+        console.log('📊 Database breakdown:');
+        allDatabases.forEach(db => {
+            console.log(`  - ${db.name} (${db.sizeMB} MB) [${db.type}]`);
+        });
+        
+        res.json(allDatabases);
     } catch (error) {
+        console.error('❌ Error fetching databases:', error);
+        res.status(500).json({ 
+            message: 'Error fetching databases', 
+            error: error.message,
+            suggestion: 'Check MongoDB connection and permissions'
+        });
+    }
+});
+
+// Get database connection info
+app.get('/api/database-connection-info', async (req, res) => {
+    try {
+        const connectionState = mongoose.connection.readyState;
+        const connectionStates = {
+            0: 'Disconnected',
+            1: 'Connected', 
+            2: 'Connecting',
+            3: 'Disconnecting'
+        };
+        
+        const admin = mongoose.connection.db.admin();
+        const serverStatus = await admin.serverStatus();
+        
+        res.json({
+            status: connectionStates[connectionState],
+            host: mongoose.connection.host,
+            port: mongoose.connection.port,
+            name: mongoose.connection.name,
+            version: serverStatus.version,
+            uptime: serverStatus.uptime,
+            connections: serverStatus.connections,
+            externalHost: '194.60.87.212',
+            externalPort: '27018',
+            internalHost: 'mongodb',
+            internalPort: '27017',
+            credentials: {
+                username: 'admin',
+                authDatabase: 'admin'
+            }
+        });
+    } catch (error) {
+        console.error('Error getting connection info:', error);
         res.status(500).json({ message: 'Error', error: error.message });
     }
 });

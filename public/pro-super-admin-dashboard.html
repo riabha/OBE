@@ -1539,10 +1539,111 @@
                 if (response.ok) {
                     const databases = await response.json();
                     displayDatabases(databases);
+                } else {
+                    const error = await response.json();
+                    document.getElementById('databasesList').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Failed to load databases!</strong><br>
+                            ${error.message || 'Unknown error occurred'}
+                            ${error.suggestion ? `<br><small class="text-muted">${error.suggestion}</small>` : ''}
+                        </div>
+                    `;
                 }
             } catch (error) {
                 console.error('Error loading databases:', error);
+                document.getElementById('databasesList').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Connection Error!</strong><br>
+                        Could not connect to database server. Check if MongoDB is running.
+                    </div>
+                `;
             }
+        }
+
+        // Load database connection info
+        async function loadDatabaseConnectionInfo() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/database-connection-info', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const info = await response.json();
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('connectionInfoModal') || createConnectionInfoModal());
+                    document.getElementById('connectionInfoContent').innerHTML = `
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <h6 class="text-primary"><i class="fas fa-server me-2"></i>MongoDB Server Information</h6>
+                                <table class="table table-sm table-bordered">
+                                    <tr><th width="30%">Status:</th><td><span class="badge badge-${info.status === 'Connected' ? 'success' : 'danger'}">${info.status}</span></td></tr>
+                                    <tr><th>Version:</th><td>${info.version}</td></tr>
+                                    <tr><th>Uptime:</th><td>${Math.floor(info.uptime / 3600)} hours</td></tr>
+                                    <tr><th>Active Connections:</th><td>${info.connections.current}/${info.connections.available}</td></tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-success"><i class="fas fa-network-wired me-2"></i>Internal Access (Docker)</h6>
+                                <table class="table table-sm table-bordered">
+                                    <tr><th>Host:</th><td><code>${info.internalHost}</code></td></tr>
+                                    <tr><th>Port:</th><td><code>${info.internalPort}</code></td></tr>
+                                    <tr><th>Database:</th><td><code>${info.name}</code></td></tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-warning"><i class="fas fa-globe me-2"></i>External Access</h6>
+                                <table class="table table-sm table-bordered">
+                                    <tr><th>Host:</th><td><code>${info.externalHost}</code></td></tr>
+                                    <tr><th>Port:</th><td><code>${info.externalPort}</code></td></tr>
+                                    <tr><th>Username:</th><td><code>${info.credentials.username}</code></td></tr>
+                                    <tr><th>Auth DB:</th><td><code>${info.credentials.authDatabase}</code></td></tr>
+                                </table>
+                            </div>
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>External Connection String:</strong><br>
+                                    <code>mongodb://admin:SecureOBE2025MongoDBQuest@${info.externalHost}:${info.externalPort}/DATABASE_NAME?authSource=admin</code>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    modal.show();
+                } else {
+                    alert('Failed to load connection information');
+                }
+            } catch (error) {
+                console.error('Error loading connection info:', error);
+                alert('Error loading connection information');
+            }
+        }
+
+        // Create connection info modal if it doesn't exist
+        function createConnectionInfoModal() {
+            const modalHtml = `
+                <div class="modal fade" id="connectionInfoModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>Database Connection Information</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body" id="connectionInfoContent">
+                                Loading...
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            return document.getElementById('connectionInfoModal');
+        }
         }
 
         // Update database type help text
@@ -1565,19 +1666,37 @@
             
             if (!databases || databases.length === 0) {
                 container.innerHTML = `
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        No databases created yet. Databases will appear here when you create universities.
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>No databases found!</strong><br>
+                        This could mean:
+                        <ul class="mb-0 mt-2">
+                            <li>MongoDB connection is not working</li>
+                            <li>No databases exist on the server</li>
+                            <li>Permission issues accessing database list</li>
+                        </ul>
+                        <button class="btn btn-sm btn-primary mt-2" onclick="loadDatabaseConnectionInfo()">
+                            <i class="fas fa-info-circle me-1"></i>Check Connection Info
+                        </button>
                     </div>
                 `;
                 return;
             }
 
-            // Separate platform and university databases
-            const platformDBs = databases.filter(db => db.type === 'Platform' || db.name === 'obe_platform');
-            const universityDBs = databases.filter(db => db.type === 'University' && db.name !== 'obe_platform');
+            // Separate databases by type
+            const platformDBs = databases.filter(db => db.type === 'Platform');
+            const universityDBs = databases.filter(db => db.type === 'University');
+            const otherDBs = databases.filter(db => db.type === 'Other');
 
-            let html = '';
+            let html = `
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Database Server Info:</strong> Found ${databases.length} databases total
+                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="loadDatabaseConnectionInfo()">
+                        <i class="fas fa-server me-1"></i>Connection Details
+                    </button>
+                </div>
+            `;
 
             // Platform Databases Section
             if (platformDBs.length > 0) {
@@ -1592,12 +1711,86 @@
                                     </div>
                                     <div>
                                         <h6 class="mb-1 fw-bold">${db.name} <span class="badge badge-primary ms-2">PLATFORM</span></h6>
-                                        <small class="text-muted">Size: ${db.sizeMB} MB</small>
+                                        <small class="text-muted">Size: ${db.sizeMB} MB | ${db.empty ? 'Empty' : 'Has Data'}</small>
                                     </div>
                                 </div>
                                 <div>
-                                    <span class="badge badge-success">Active</span>
+                                    <span class="badge badge-success">System Database</span>
                                 </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // University Databases Section
+            if (universityDBs.length > 0) {
+                html += '<h6 class="fw-bold mb-3 mt-4 text-success"><i class="fas fa-university me-2"></i>University Databases</h6>';
+                html += universityDBs.map(db => {
+                    return `
+                        <div class="university-card" style="border-left: 4px solid #10b981;">
+                            <div class="university-header">
+                                <div class="d-flex gap-3">
+                                    <div class="university-logo" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                        <i class="fas fa-university"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold">${db.name} <span class="badge badge-success ms-2">UNIVERSITY</span></h6>
+                                        <small class="text-muted">Size: ${db.sizeMB} MB | ${db.empty ? 'Empty' : 'Has Data'}</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewDatabaseDetails('${db.name}')">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </button>
+                                    ${db.canAssign ? `
+                                        <button class="btn btn-sm btn-primary" onclick="assignDatabaseToUniversity('${db.name}')">
+                                            <i class="fas fa-link me-1"></i>Assign
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Other Databases Section
+            if (otherDBs.length > 0) {
+                html += '<h6 class="fw-bold mb-3 mt-4 text-warning"><i class="fas fa-database me-2"></i>Other Databases</h6>';
+                html += otherDBs.map(db => {
+                    return `
+                        <div class="university-card" style="border-left: 4px solid #f59e0b;">
+                            <div class="university-header">
+                                <div class="d-flex gap-3">
+                                    <div class="university-logo" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold">${db.name} <span class="badge badge-warning ms-2">OTHER</span></h6>
+                                        <small class="text-muted">Size: ${db.sizeMB} MB | ${db.empty ? 'Empty' : 'Has Data'}</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewDatabaseDetails('${db.name}')">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </button>
+                                    ${db.canAssign ? `
+                                        <button class="btn btn-sm btn-warning" onclick="assignDatabaseToUniversity('${db.name}')">
+                                            <i class="fas fa-link me-1"></i>Assign
+                                        </button>
+                                    ` : `
+                                        <span class="badge badge-secondary">System DB</span>
+                                    `}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            container.innerHTML = html;
+        }
                             </div>
                             <div class="alert alert-info mt-2 mb-0">
                                 <i class="fas fa-info-circle me-2"></i>
