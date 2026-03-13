@@ -1033,7 +1033,40 @@ app.post('/api/users', async (req, res) => {
         
         const { uniDb } = await getUniversityDatabase(token);
         const UserSchema = require('./models/User');
+        const DepartmentSchema = require('./models/Department');
         const User = uniDb.model('User', UserSchema);
+        const Department = uniDb.model('Department', DepartmentSchema);
+        
+        // Handle department - if it's a string, find or create the department
+        if (req.body.department && typeof req.body.department === 'string') {
+            let department = await Department.findOne({ 
+                name: { $regex: new RegExp(req.body.department, 'i') } 
+            });
+            
+            if (!department) {
+                // Create default department if it doesn't exist
+                const departmentCode = req.body.department.toUpperCase().replace(/\s+/g, '').substring(0, 5);
+                department = new Department({
+                    name: req.body.department,
+                    code: departmentCode,
+                    description: `${req.body.department} Department`,
+                    faculty: 'Engineering', // Default faculty
+                    contactInfo: {
+                        email: `${departmentCode.toLowerCase()}@university.edu`,
+                        phone: '000-000-0000'
+                    }
+                });
+                await department.save();
+                console.log(`✅ Created department: ${department.name}`);
+            }
+            
+            req.body.department = department._id;
+        }
+        
+        // For controller and dean roles, department is not required
+        if (['controller', 'dean'].includes(req.body.role)) {
+            delete req.body.department;
+        }
         
         // Hash password
         const hashedPassword = await bcrypt.hash(req.body.password, 12);
@@ -1188,9 +1221,15 @@ app.get('/api/departments', async (req, res) => {
         }
         
         const { uniDb } = await getUniversityDatabase(token);
+        const DepartmentSchema = require('./models/Department');
+        const Department = uniDb.model('Department', DepartmentSchema);
         
-        // For now, return empty array - departments functionality can be added later
-        res.json([]);
+        const departments = await Department.find({ isActive: true })
+            .select('name code description faculty statistics')
+            .populate('chairman', 'firstName lastName email')
+            .sort({ name: 1 });
+        
+        res.json(departments);
         
     } catch (error) {
         console.error('Error fetching departments:', error);
