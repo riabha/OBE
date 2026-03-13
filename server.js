@@ -978,6 +978,230 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Not Found', path: req.path });
 });
 
+// ============================================
+// UNIVERSITY-SPECIFIC API ENDPOINTS
+// ============================================
+
+// Helper function to get university database connection
+async function getUniversityDatabase(token) {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
+    
+    // Get user's university
+    const user = await PlatformUser.findById(decoded.userId);
+    if (!user || user.role !== 'university_superadmin') {
+        throw new Error('Not authorized');
+    }
+    
+    const university = await University.findById(user.university);
+    if (!university) {
+        throw new Error('University not found');
+    }
+    
+    // Return connection to university database
+    const uniDb = mongoose.connection.useDb(university.databaseName);
+    return { uniDb, university };
+}
+
+// Get all users from university database
+app.get('/api/users', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const UserSchema = require('./models/User');
+        const User = uniDb.model('User', UserSchema);
+        
+        const users = await User.find({}).select('-password').populate('department');
+        res.json(users);
+        
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Create user in university database
+app.post('/api/users', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const UserSchema = require('./models/User');
+        const User = uniDb.model('User', UserSchema);
+        
+        // Hash password
+        const hashedPassword = await bcrypt.hash(req.body.password, 12);
+        req.body.password = hashedPassword;
+        
+        const user = new User(req.body);
+        await user.save();
+        
+        console.log(`✅ User created: ${user.email}`);
+        
+        const userObj = user.toObject();
+        delete userObj.password;
+        
+        res.status(201).json({ message: 'User created', user: userObj });
+        
+    } catch (error) {
+        console.error('Error creating user:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Update user
+app.put('/api/users/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const UserSchema = require('./models/User');
+        const User = uniDb.model('User', UserSchema);
+        
+        // Don't allow password update through this endpoint
+        delete req.body.password;
+        
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true }
+        ).select('-password');
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        res.json({ message: 'User updated', user });
+        
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Delete user
+app.delete('/api/users/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        const UserSchema = require('./models/User');
+        const User = uniDb.model('User', UserSchema);
+        
+        const user = await User.findByIdAndDelete(req.params.id);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        res.json({ message: 'User deleted' });
+        
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Get all courses from university database
+app.get('/api/courses', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        
+        // For now, return empty array - courses functionality can be added later
+        res.json([]);
+        
+    } catch (error) {
+        console.error('Error fetching courses:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Get current user's university information
+app.get('/api/my-university', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { university } = await getUniversityDatabase(token);
+        
+        const uniObj = university.toObject();
+        if (university.logo && university.logo.contentType) {
+            uniObj.logoUrl = `/api/universities/${university._id}/logo`;
+        }
+        delete uniObj.logo;
+        
+        res.json(uniObj);
+        
+    } catch (error) {
+        console.error('Error fetching university info:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Get current university info for logged-in university super admin
+app.get('/api/my-university', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { university } = await getUniversityDatabase(token);
+        
+        const uniObj = university.toObject();
+        if (university.logo && university.logo.contentType) {
+            uniObj.logoUrl = `/api/universities/${university._id}/logo`;
+        }
+        delete uniObj.logo;
+        
+        res.json(uniObj);
+        
+    } catch (error) {
+        console.error('Error fetching university info:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Get all departments from university databaseGet all departments from university database
+app.get('/api/departments', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token' });
+        }
+        
+        const { uniDb } = await getUniversityDatabase(token);
+        
+        // For now, return empty array - departments functionality can be added later
+        res.json([]);
+        
+    } catch (error) {
+        console.error('Error fetching departments:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// ============================================
+// ERROR HANDLING
+// ============================================
+
 app.use((err, req, res, next) => {
     console.error('❌ Error:', err);
     res.status(500).json({ error: 'Server Error', message: err.message });
