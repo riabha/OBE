@@ -4166,10 +4166,46 @@ EE-101,Circuit Analysis,4,Electrical Engineering,1,,Basic electrical circuits an
 
         // Initialize Dashboard
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 DOM Content Loaded - Initializing dashboard...');
             loadUniversityInfo();
             loadDashboardStats();
             loadFaculties(); // Preload faculties for dropdowns
         });
+
+        // IMMEDIATE FALLBACK - Run this right away to prevent "Loading..." state
+        (function() {
+            console.log('🔧 Immediate fallback executing...');
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (user.universityCode) {
+                    const universityName = user.universityCode === 'DEMO' ? 'Demo University' : 
+                                         user.universityCode.replace(/_/g, ' ').toUpperCase();
+                    const firstLetter = universityName.charAt(0).toUpperCase();
+                    const dbName = user.universityCode === 'DEMO' ? 'obe_demo' : `obe_university_${user.universityCode.toLowerCase()}`;
+                    
+                    // Set immediately
+                    const nameEl = document.getElementById('universityName');
+                    const logoEl = document.getElementById('universityLogoPlaceholder');
+                    const dbEl = document.getElementById('sidebarDatabaseName');
+                    
+                    if (nameEl) nameEl.textContent = universityName;
+                    if (logoEl) logoEl.textContent = firstLetter;
+                    if (dbEl) dbEl.textContent = dbName;
+                    
+                    console.log('✅ Immediate fallback applied:', universityName);
+                }
+            } catch (e) {
+                console.error('Immediate fallback error:', e);
+                // Last resort
+                const nameEl = document.getElementById('universityName');
+                const logoEl = document.getElementById('universityLogoPlaceholder');
+                const dbEl = document.getElementById('sidebarDatabaseName');
+                
+                if (nameEl) nameEl.textContent = 'Demo University';
+                if (logoEl) logoEl.textContent = 'D';
+                if (dbEl) dbEl.textContent = 'obe_demo';
+            }
+        })();
     </script>
 </body>
 </html>
