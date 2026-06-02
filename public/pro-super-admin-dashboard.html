@@ -310,31 +310,31 @@
         </div>
         
         <div class="sidebar-menu">
-            <a href="#dashboard" class="sidebar-menu-item active" onclick="showSection('dashboard')">
+            <a href="#dashboard" class="sidebar-menu-item active" onclick="showSection('dashboard', event)">
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="#universities" class="sidebar-menu-item" onclick="showSection('universities')">
+            <a href="#universities" class="sidebar-menu-item" onclick="showSection('universities', event)">
                 <i class="fas fa-university"></i>
                 <span>Universities</span>
             </a>
-            <a href="#databases" class="sidebar-menu-item" onclick="showSection('databases')">
+            <a href="#databases" class="sidebar-menu-item" onclick="showSection('databases', event)">
                 <i class="fas fa-database"></i>
                 <span>Databases</span>
             </a>
-            <a href="#analytics" class="sidebar-menu-item" onclick="showSection('analytics')">
+            <a href="#analytics" class="sidebar-menu-item" onclick="showSection('analytics', event)">
                 <i class="fas fa-chart-line"></i>
                 <span>Analytics</span>
             </a>
-            <a href="#subscriptions" class="sidebar-menu-item" onclick="showSection('subscriptions')">
+            <a href="#subscriptions" class="sidebar-menu-item" onclick="showSection('subscriptions', event)">
                 <i class="fas fa-credit-card"></i>
                 <span>Subscriptions</span>
             </a>
-            <a href="#platform-users" class="sidebar-menu-item" onclick="showSection('platformUsers')">
+            <a href="#platform-users" class="sidebar-menu-item" onclick="showSection('platformUsers', event)">
                 <i class="fas fa-users-cog"></i>
                 <span>Platform Users</span>
             </a>
-            <a href="#settings" class="sidebar-menu-item" onclick="showSection('settings')">
+            <a href="#settings" class="sidebar-menu-item" onclick="showSection('settings', event)">
                 <i class="fas fa-cog"></i>
                 <span>Platform Settings</span>
             </a>
@@ -418,7 +418,7 @@
                             <button class="btn btn-outline-primary" onclick="exportUniversitiesData()">
                                 <i class="fas fa-file-download me-2"></i>Export Universities
                             </button>
-                            <button class="btn btn-outline-success" onclick="showSection('analytics')">
+                            <button class="btn btn-outline-success" onclick="showSection('analytics', event)">
                                 <i class="fas fa-chart-bar me-2"></i>View Analytics
                             </button>
                             <button class="btn btn-outline-info" onclick="refreshDashboard()">
@@ -567,8 +567,16 @@
 
         <!-- Analytics Section (Hidden by default) -->
         <div id="analyticsSection" class="content-section" style="display: none;">
-            <h3>Platform Analytics</h3>
-            <p>Detailed analytics and insights...</p>
+            <div class="stats-card">
+                <h5 class="mb-3"><i class="fas fa-chart-line me-2 text-primary"></i>Platform Analytics</h5>
+                <p class="text-muted mb-4">Overview of platform usage and growth.</p>
+                <div class="row g-3" id="analyticsSummary">
+                    <div class="col-md-3"><div class="p-3 bg-light rounded text-center"><small class="text-muted d-block">Universities</small><strong id="analyticsUniversities">-</strong></div></div>
+                    <div class="col-md-3"><div class="p-3 bg-light rounded text-center"><small class="text-muted d-block">Platform Users</small><strong id="analyticsPlatformUsers">-</strong></div></div>
+                    <div class="col-md-3"><div class="p-3 bg-light rounded text-center"><small class="text-muted d-block">Active Subscriptions</small><strong id="analyticsActiveSubs">-</strong></div></div>
+                    <div class="col-md-3"><div class="p-3 bg-light rounded text-center"><small class="text-muted d-block">Trial Subscriptions</small><strong id="analyticsTrialSubs">-</strong></div></div>
+                </div>
+            </div>
         </div>
 
         <!-- Platform Users Section (Hidden by default) -->
@@ -938,9 +946,10 @@
 
                         <hr class="my-4">
 
-                        <!-- Security Settings -->
-                        <div class="mb-4">
-                            <h6 class="fw-bold mb-3">Security Settings</h6>
+                            <div class="alert alert-secondary mb-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Security toggles below are planned for a future release and are not active yet.
+                            </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="form-check form-switch">
@@ -975,7 +984,7 @@
 
                         <!-- Save Button -->
                         <div class="text-end mt-4">
-                            <button class="btn btn-secondary me-2">Reset to Defaults</button>
+                            <button class="btn btn-secondary me-2" type="button" onclick="loadPlatformSettings()">Reset to Defaults</button>
                             <button class="btn btn-primary-gradient" onclick="savePlatformSettings()">
                                 <i class="fas fa-save me-2"></i>Save Settings
                             </button>
@@ -1474,7 +1483,7 @@
         }
 
         // Show section
-        function showSection(section) {
+        function showSection(section, evt) {
             // Hide all sections
             document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
             
@@ -1507,14 +1516,33 @@
                 loadSubscriptionData();
             } else if (section === 'platformUsers') {
                 loadPlatformUsers();
+            } else if (section === 'analytics') {
+                loadAnalyticsSummary();
             } else if (section === 'settings') {
                 loadPlatformSettings();
                 loadMongoDBSettings();
             }
             
             // Add active class to clicked menu item
-            if (event && event.target) {
-                event.target.closest('.sidebar-menu-item').classList.add('active');
+            if (evt && evt.target) {
+                evt.target.closest('.sidebar-menu-item')?.classList.add('active');
+            }
+        }
+
+        async function loadAnalyticsSummary() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/platform-stats', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) return;
+                const stats = await response.json();
+                document.getElementById('analyticsUniversities').textContent = stats.totalUniversities ?? '-';
+                document.getElementById('analyticsPlatformUsers').textContent = stats.platformUsers ?? '-';
+                document.getElementById('analyticsActiveSubs').textContent = stats.activeSubscriptions ?? '-';
+                document.getElementById('analyticsTrialSubs').textContent = stats.trialSubscriptions ?? '-';
+            } catch (error) {
+                console.error('Error loading analytics:', error);
             }
         }
 
@@ -3254,7 +3282,14 @@ Type "DELETE" to confirm:`;
                     document.getElementById('mongoHost').value = settings.host || '';
                     document.getElementById('mongoPort').value = settings.port || '27017';
                     document.getElementById('mongoUsername').value = settings.username || '';
-                    document.getElementById('mongoPassword').value = settings.password || '';
+                    const pwdField = document.getElementById('mongoPassword');
+                    if (settings.password === '********') {
+                        pwdField.value = '';
+                        pwdField.placeholder = 'Leave blank to keep current password';
+                    } else {
+                        pwdField.value = settings.password || '';
+                        pwdField.placeholder = '';
+                    }
                     document.getElementById('mongoDatabase').value = settings.database || 'obe_platform';
                     document.getElementById('mongoAuthSource').value = settings.authSource || 'admin';
 
@@ -3282,7 +3317,7 @@ Type "DELETE" to confirm:`;
                 host: document.getElementById('mongoHost').value,
                 port: document.getElementById('mongoPort').value,
                 username: document.getElementById('mongoUsername').value,
-                password: document.getElementById('mongoPassword').value,
+                password: document.getElementById('mongoPassword').value || '********',
                 database: document.getElementById('mongoDatabase').value,
                 authSource: document.getElementById('mongoAuthSource').value
             };
@@ -3345,7 +3380,7 @@ Type "DELETE" to confirm:`;
                 host: document.getElementById('mongoHost').value,
                 port: document.getElementById('mongoPort').value,
                 username: document.getElementById('mongoUsername').value,
-                password: document.getElementById('mongoPassword').value,
+                password: document.getElementById('mongoPassword').value || '********',
                 database: document.getElementById('mongoDatabase').value,
                 authSource: document.getElementById('mongoAuthSource').value
             };
@@ -3372,8 +3407,7 @@ Type "DELETE" to confirm:`;
                             <strong>Success!</strong> ${result.message}
                             <div class="mt-3">
                                 <strong class="d-block mb-2">⚠️ IMPORTANT: Server restart required</strong>
-                                <p class="mb-2">The MongoDB connection settings have been saved to <code>config.env</code>.</p>
-                                <p class="mb-0">Please restart the server for the changes to take effect.</p>
+                                <p class="mb-2">Settings saved to <code>config.env</code>. On Docker VPS, also update <code>MONGODB_URI</code> in <code>.env</code> and restart the app container.</p>
                             </div>
                         </div>
                     `;
@@ -3446,8 +3480,10 @@ Type "DELETE" to confirm:`;
         function updateRealTimeStats(stats, universities, subscriptions) {
             // Update stat cards
             document.getElementById('totalUniversities').textContent = stats.totalUniversities || universities.length;
-            document.getElementById('totalUsers').textContent = (stats.totalUsers || 0).toLocaleString();
-            document.getElementById('totalCourses').textContent = (stats.totalCourses || 0).toLocaleString();
+            const totalUsers = universities.reduce((sum, uni) => sum + (uni.totalUsers || 0), 0);
+            const totalCourses = universities.reduce((sum, uni) => sum + (uni.totalCourses || 0), 0);
+            document.getElementById('totalUsers').textContent = totalUsers.toLocaleString();
+            document.getElementById('totalCourses').textContent = totalCourses.toLocaleString();
             
             // Calculate revenue from subscriptions
             const planPrices = {
@@ -3455,8 +3491,8 @@ Type "DELETE" to confirm:`;
                 'Trial': 0,
                 'Basic': 20000,
                 'Standard': 15000,
-                'Premium': 35000,
-                'Enterprise': 75000
+                'Premium': 30000,
+                'Enterprise': 40000
             };
             
             let monthlyRevenue = 0;

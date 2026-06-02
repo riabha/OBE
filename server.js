@@ -122,6 +122,69 @@ const subscriptionSchema = new mongoose.Schema({
 
 const Subscription = mongoose.model('Subscription', subscriptionSchema);
 
+// Platform Settings Schema (single document in obe_platform)
+const platformSettingsSchema = new mongoose.Schema({
+    platformName: { type: String, default: 'OBE Portal' },
+    platformEmail: { type: String, default: 'admin@obe.org.pk' },
+    supportEmail: { type: String, default: 'support@obe.org.pk' },
+    platformUrl: { type: String, default: 'https://obe.org.pk' },
+    smtpHost: String,
+    smtpPort: String,
+    smtpUsername: String,
+    smtpPassword: String,
+    smtpFromName: { type: String, default: 'OBE Portal' },
+    smtpFromEmail: { type: String, default: 'noreply@obe.org.pk' }
+}, { timestamps: true });
+
+const PlatformSettings = mongoose.model('PlatformSettings', platformSettingsSchema);
+
+const JWT_SECRET = process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024';
+const PRO_ADMIN_ROLES = ['pro_superadmin', 'platform_admin'];
+
+async function requireAuth(req, res, next) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Authentication required' });
+    }
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = await PlatformUser.findById(decoded.userId);
+        if (!user || !user.isActive) {
+            return res.status(401).json({ message: 'Invalid or inactive account' });
+        }
+        req.user = user;
+        req.tokenPayload = decoded;
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Invalid token' });
+    }
+}
+
+function requireProAdmin(req, res, next) {
+    if (!req.user || !PRO_ADMIN_ROLES.includes(req.user.role)) {
+        return res.status(403).json({ message: 'Pro admin access required' });
+    }
+    next();
+}
+
+const proAdminAuth = [requireAuth, requireProAdmin];
+
+function maskMongoPassword(settings) {
+    return {
+        ...settings,
+        password: settings.password ? '********' : '',
+        passwordSet: !!settings.password
+    };
+}
+
+async function getDefaultPlatformSettings() {
+    let settings = await PlatformSettings.findOne();
+    if (!settings) {
+        settings = await PlatformSettings.create({});
+    }
+    return settings;
+}
+
 // ============================================
 // MONGODB CONNECTION
 // ============================================
@@ -134,6 +197,7 @@ async function connectDatabase() {
         
         // Create default Pro Super Admin
         await createDefaultAdmin();
+        await getDefaultPlatformSettings();
         
     } catch (error) {
         console.error('❌ MongoDB error:', error.message);
@@ -220,7 +284,7 @@ app.post('/api/auth/login', async (req, res) => {
                 universityId: user.university,
                 universityCode: user.universityCode
             },
-            process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024',
+            JWT_SECRET,
             { expiresIn: '7d' }
         );
         
@@ -249,7 +313,7 @@ app.get('/api/auth/check', async (req, res) => {
     if (!token) return res.status(401).json({ authenticated: false });
     
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
+        const decoded = jwt.verify(token, JWT_SECRET);
         const user = await PlatformUser.findById(decoded.userId);
         
         if (!user || !user.isActive) {
@@ -279,7 +343,7 @@ app.post('/api/auth/logout', (req, res) => {
 // ============================================
 
 // Get all universities
-app.get('/api/universities', async (req, res) => {
+app.get('/api/universities', proAdminAuth, async (req, res) => {
     try {
         const universities = await University.find({}, '-logo.data').sort({ createdAt: -1 });
         const result = universities.map(uni => {
@@ -296,7 +360,7 @@ app.get('/api/universities', async (req, res) => {
 });
 
 // Get single university
-app.get('/api/universities/:id', async (req, res) => {
+app.get('/api/universities/:id', proAdminAuth, async (req, res) => {
     try {
         const university = await University.findById(req.params.id);
         if (!university) {
@@ -330,7 +394,7 @@ app.get('/api/universities/:id/logo', async (req, res) => {
 });
 
 // Create university
-app.post('/api/universities/create', upload.single('logo'), async (req, res) => {
+app.post('/api/universities/create', proAdminAuth, upload.single('logo'), async (req, res) => {
     try {
         const {
             universityName,
@@ -495,7 +559,7 @@ app.post('/api/universities/create', upload.single('logo'), async (req, res) => 
 });
 
 // Update university
-app.put('/api/universities/:id', upload.single('logo'), async (req, res) => {
+app.put('/api/universities/:id', proAdminAuth, upload.single('logo'), async (req, res) => {
     try {
         const university = await University.findById(req.params.id);
         if (!university) {
@@ -523,7 +587,7 @@ app.put('/api/universities/:id', upload.single('logo'), async (req, res) => {
 });
 
 // Delete university
-app.delete('/api/universities/:id', async (req, res) => {
+app.delete('/api/universities/:id', proAdminAuth, async (req, res) => {
     try {
         const university = await University.findById(req.params.id);
         if (!university) {
@@ -550,7 +614,7 @@ app.delete('/api/universities/:id', async (req, res) => {
 // PLATFORM USERS API
 // ============================================
 
-app.get('/api/platform-users', async (req, res) => {
+app.get('/api/platform-users', proAdminAuth, async (req, res) => {
     try {
         const users = await PlatformUser.find({}, '-password').populate('university');
         res.json(users);
@@ -559,7 +623,7 @@ app.get('/api/platform-users', async (req, res) => {
     }
 });
 
-app.post('/api/platform-users', async (req, res) => {
+app.post('/api/platform-users', proAdminAuth, async (req, res) => {
     try {
         const { email, password, name, role } = req.body;
         
@@ -589,7 +653,7 @@ app.post('/api/platform-users', async (req, res) => {
 });
 
 // Delete platform user
-app.delete('/api/platform-users/:id', async (req, res) => {
+app.delete('/api/platform-users/:id', proAdminAuth, async (req, res) => {
     try {
         const user = await PlatformUser.findById(req.params.id);
         if (!user) {
@@ -612,7 +676,7 @@ app.delete('/api/platform-users/:id', async (req, res) => {
 // SUBSCRIPTIONS API
 // ============================================
 
-app.get('/api/subscriptions', async (req, res) => {
+app.get('/api/subscriptions', proAdminAuth, async (req, res) => {
     try {
         const subscriptions = await Subscription.find({}).populate('university').sort({ createdAt: -1 });
         res.json(subscriptions);
@@ -625,7 +689,7 @@ app.get('/api/subscriptions', async (req, res) => {
 // DATABASES API
 // ============================================
 
-app.get('/api/databases', async (req, res) => {
+app.get('/api/databases', proAdminAuth, async (req, res) => {
     try {
         console.log('📋 Fetching all databases from MongoDB...');
         
@@ -662,7 +726,7 @@ app.get('/api/databases', async (req, res) => {
 });
 
 // Get database connection info
-app.get('/api/database-connection-info', async (req, res) => {
+app.get('/api/database-connection-info', proAdminAuth, async (req, res) => {
     try {
         const connectionState = mongoose.connection.readyState;
         const connectionStates = {
@@ -683,14 +747,11 @@ app.get('/api/database-connection-info', async (req, res) => {
             version: serverStatus.version,
             uptime: serverStatus.uptime,
             connections: serverStatus.connections,
-            externalHost: '194.60.87.212',
+            externalHost: process.env.APP_PUBLIC_HOST || 'obe.org.pk',
             externalPort: '27018',
             internalHost: 'mongodb',
             internalPort: '27017',
-            credentials: {
-                username: 'admin',
-                authDatabase: 'admin'
-            }
+            note: 'Credentials are configured via server environment (.env on VPS).'
         });
     } catch (error) {
         console.error('Error getting connection info:', error);
@@ -698,7 +759,68 @@ app.get('/api/database-connection-info', async (req, res) => {
     }
 });
 
-app.post('/api/databases/create', async (req, res) => {
+// List databases available for university assignment
+app.get('/api/databases/available', proAdminAuth, async (req, res) => {
+    try {
+        const admin = mongoose.connection.db.admin();
+        const { databases } = await admin.listDatabases();
+        const universities = await University.find({}, 'databaseName');
+        const assigned = new Set(universities.map(u => u.databaseName));
+
+        const available = databases
+            .filter(db => db.name.startsWith('obe_') && db.name !== 'obe_platform' && !assigned.has(db.name))
+            .map(db => ({
+                name: db.name,
+                sizeMB: (db.sizeOnDisk / 1024 / 1024).toFixed(2),
+                empty: db.empty
+            }));
+
+        res.json(available);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching available databases', error: error.message });
+    }
+});
+
+// Test external database connection (add-database form)
+app.post('/api/databases/test', proAdminAuth, async (req, res) => {
+    try {
+        const { host, port, username, password, databaseName, database, authSource } = req.body;
+        const dbName = databaseName || database || 'obe_platform';
+        const dbHost = host || 'mongodb';
+        const dbPort = port || 27017;
+        let dbUser = username;
+        let dbPass = password;
+
+        if (!dbPass || dbPass === '********') {
+            const uri = process.env.MONGODB_URI || '';
+            const uriMatch = uri.match(/mongodb:\/\/([^:]+):([^@]+)@/);
+            if (uriMatch) {
+                dbUser = dbUser || decodeURIComponent(uriMatch[1]);
+                dbPass = decodeURIComponent(uriMatch[2]);
+            }
+        }
+
+        let testUri;
+        if (dbUser && dbPass) {
+            testUri = `mongodb://${encodeURIComponent(dbUser)}:${encodeURIComponent(dbPass)}@${dbHost}:${dbPort}/${dbName}?authSource=${authSource || 'admin'}`;
+        } else {
+            testUri = `mongodb://${dbHost}:${dbPort}/${dbName}`;
+        }
+
+        const testConnection = await mongoose.createConnection(testUri, {
+            serverSelectionTimeoutMS: 10000,
+            maxPoolSize: 1
+        });
+        await testConnection.db.admin().ping();
+        await testConnection.close();
+
+        res.json({ success: true, message: 'Connection successful!' });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+});
+
+app.post('/api/databases/create', proAdminAuth, async (req, res) => {
     try {
         const { databaseName, description } = req.body;
         
@@ -750,7 +872,7 @@ app.post('/api/databases/create', async (req, res) => {
 });
 
 // Get database collections
-app.get('/api/databases/:dbName/collections', async (req, res) => {
+app.get('/api/databases/:dbName/collections', proAdminAuth, async (req, res) => {
     try {
         const { dbName } = req.params;
         
@@ -772,7 +894,7 @@ app.get('/api/databases/:dbName/collections', async (req, res) => {
 });
 
 // Get database details
-app.get('/api/databases/:dbName/details', async (req, res) => {
+app.get('/api/databases/:dbName/details', proAdminAuth, async (req, res) => {
     try {
         const { dbName } = req.params;
         
@@ -808,7 +930,7 @@ app.get('/api/databases/:dbName/details', async (req, res) => {
 });
 
 // Delete database
-app.delete('/api/databases/:dbName', async (req, res) => {
+app.delete('/api/databases/:dbName', proAdminAuth, async (req, res) => {
     try {
         const { dbName } = req.params;
         
@@ -841,15 +963,15 @@ app.delete('/api/databases/:dbName', async (req, res) => {
 // ============================================
 
 // Get current MongoDB settings
-app.get('/api/mongodb-settings', async (req, res) => {
+app.get('/api/mongodb-settings', proAdminAuth, async (req, res) => {
     try {
-        const currentUri = process.env.MONGODB_URI || 'mongodb://admin:SecureOBE2025MongoDBQuest@mongodb:27017/obe_platform?authSource=admin';
+        const currentUri = process.env.MONGODB_URI || 'mongodb://mongodb:27017/obe_platform';
         
         let parsedSettings = {
-            host: 'mongodb', // Docker container name
+            host: 'mongodb',
             port: '27017',
-            username: 'admin',
-            password: 'SecureOBE2025MongoDBQuest',
+            username: '',
+            password: '',
             database: 'obe_platform',
             authSource: 'admin',
             connectionStatus: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
@@ -892,8 +1014,7 @@ app.get('/api/mongodb-settings', async (req, res) => {
 
         res.json({
             success: true,
-            settings: parsedSettings,
-            rawUri: currentUri
+            settings: maskMongoPassword(parsedSettings)
         });
 
     } catch (error) {
@@ -903,9 +1024,21 @@ app.get('/api/mongodb-settings', async (req, res) => {
 });
 
 // Test MongoDB connection
-app.post('/api/mongodb-settings/test', async (req, res) => {
+app.post('/api/mongodb-settings/test', proAdminAuth, async (req, res) => {
     try {
-        const { host, port, username, password, database, authSource } = req.body;
+        let { host, port, username, password, database, authSource } = req.body;
+
+        if (!password || password === '********') {
+            const uri = process.env.MONGODB_URI || '';
+            const uriMatch = uri.match(/mongodb:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/([^?]+)/);
+            if (uriMatch) {
+                username = username || decodeURIComponent(uriMatch[1]);
+                password = decodeURIComponent(uriMatch[2]);
+                host = host || uriMatch[3];
+                port = port || uriMatch[4];
+                database = database || uriMatch[5];
+            }
+        }
 
         let testUri;
         if (username && password) {
@@ -982,10 +1115,19 @@ app.post('/api/mongodb-settings/test', async (req, res) => {
     }
 });
 
-// Update MongoDB settings
-app.put('/api/mongodb-settings', async (req, res) => {
+// Update MongoDB settings (Docker: update .env on VPS and restart containers)
+app.put('/api/mongodb-settings', proAdminAuth, async (req, res) => {
     try {
-        const { host, port, username, password, database, authSource } = req.body;
+        let { host, port, username, password, database, authSource } = req.body;
+
+        if (!password || password === '********') {
+            const uri = process.env.MONGODB_URI || '';
+            const uriMatch = uri.match(/mongodb:\/\/([^:]+):([^@]+)@/);
+            if (uriMatch) {
+                password = decodeURIComponent(uriMatch[2]);
+                username = username || decodeURIComponent(uriMatch[1]);
+            }
+        }
 
         let newUri;
         if (username && password) {
@@ -1009,13 +1151,11 @@ app.put('/api/mongodb-settings', async (req, res) => {
         await writeFile(configPath, configContent, 'utf8');
 
         console.log('✅ MongoDB settings updated in config.env');
-        console.log('⚠️  Server restart required for changes to take effect');
 
         res.json({ 
             success: true, 
-            message: 'MongoDB settings updated successfully. Please restart the server for changes to take effect.',
-            requiresRestart: true,
-            newUri: newUri
+            message: 'Settings saved. On Docker VPS: update MONGODB_URI in .env and run docker-compose restart obe-app.',
+            requiresRestart: true
         });
 
     } catch (error) {
@@ -1029,10 +1169,118 @@ app.put('/api/mongodb-settings', async (req, res) => {
 });
 
 // ============================================
+// PLATFORM SETTINGS API
+// ============================================
+
+app.get('/api/platform-settings', proAdminAuth, async (req, res) => {
+    try {
+        const settings = await getDefaultPlatformSettings();
+        const obj = settings.toObject();
+        if (obj.smtpPassword) {
+            obj.smtpPassword = '********';
+        }
+        res.json(obj);
+    } catch (error) {
+        res.status(500).json({ message: 'Error loading settings', error: error.message });
+    }
+});
+
+app.post('/api/platform-settings', proAdminAuth, async (req, res) => {
+    try {
+        const update = { ...req.body };
+        if (update.smtpPassword === '********') {
+            delete update.smtpPassword;
+        }
+        const settings = await PlatformSettings.findOneAndUpdate({}, update, {
+            new: true,
+            upsert: true,
+            setDefaultsOnInsert: true
+        });
+        res.json({ message: 'Platform settings saved', settings });
+    } catch (error) {
+        res.status(500).json({ message: 'Error saving settings', error: error.message });
+    }
+});
+
+// ============================================
+// UNIVERSITY SUPER ADMINS API
+// ============================================
+
+app.get('/api/university-super-admins', proAdminAuth, async (req, res) => {
+    try {
+        const users = await PlatformUser.find({ role: 'university_superadmin' }, '-password')
+            .populate('university')
+            .sort({ createdAt: -1 });
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.post('/api/university-super-admins', proAdminAuth, async (req, res) => {
+    try {
+        const { universityId, email, name, password } = req.body;
+
+        if (!universityId || !email || !password) {
+            return res.status(400).json({ message: 'University, email, and password are required' });
+        }
+
+        const university = await University.findById(universityId);
+        if (!university) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+
+        const existing = await PlatformUser.findOne({ email: email.toLowerCase() });
+        if (existing) {
+            return res.status(400).json({ message: 'Email already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+        const user = await PlatformUser.create({
+            email: email.toLowerCase(),
+            password: hashedPassword,
+            name: name || `${university.universityName} Admin`,
+            role: 'university_superadmin',
+            university: university._id,
+            universityCode: university.universityCode,
+            permissions: ['all'],
+            isActive: true
+        });
+
+        const userObj = user.toObject();
+        delete userObj.password;
+        res.status(201).json({ message: 'University super admin created', user: userObj });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Reset platform user password
+app.post('/api/platform-users/:id/reset-password', proAdminAuth, async (req, res) => {
+    try {
+        const { newPassword } = req.body;
+        if (!newPassword || newPassword.length < 8) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters' });
+        }
+
+        const user = await PlatformUser.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.password = await bcrypt.hash(newPassword, 12);
+        await user.save();
+        res.json({ message: 'Password reset successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// ============================================
 // STATISTICS
 // ============================================
 
-app.get('/api/platform-stats', async (req, res) => {
+app.get('/api/platform-stats', proAdminAuth, async (req, res) => {
     try {
         const stats = {
             totalUniversities: await University.countDocuments(),
@@ -1064,20 +1312,12 @@ app.get('/api/test', (req, res) => {
 });
 
 // ============================================
-// ERROR HANDLING
-// ============================================
-
-app.use((req, res) => {
-    res.status(404).json({ error: 'Not Found', path: req.path });
-});
-
-// ============================================
 // UNIVERSITY-SPECIFIC API ENDPOINTS
 // ============================================
 
 // Helper function to get university database connection
 async function getUniversityDatabase(token) {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
+    const decoded = jwt.verify(token, JWT_SECRET);
     
     // Get user's university
     const user = await PlatformUser.findById(decoded.userId);
@@ -1279,7 +1519,7 @@ app.get('/api/my-university', async (req, res) => {
             console.error('Database error, trying fallback:', dbError);
             
             // Fallback: Get user info from token and find university by code
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
+            const decoded = jwt.verify(token, JWT_SECRET);
             const user = await PlatformUser.findById(decoded.userId);
             
             if (user && user.universityCode) {
@@ -1341,21 +1581,8 @@ app.get('/api/departments', async (req, res) => {
 });
 
 // Change university super admin password (for Pro Admin)
-app.post('/api/universities/:id/change-admin-password', async (req, res) => {
+app.post('/api/universities/:id/change-admin-password', proAdminAuth, async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ message: 'No token' });
-        }
-        
-        // Verify this is a pro admin
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024');
-        const proAdmin = await PlatformUser.findById(decoded.userId);
-        
-        if (!proAdmin || proAdmin.role !== 'pro_superadmin') {
-            return res.status(403).json({ message: 'Only Pro Admin can change university passwords' });
-        }
-        
         const { newPassword } = req.body;
         if (!newPassword || newPassword.length < 6) {
             return res.status(400).json({ message: 'Password must be at least 6 characters' });
@@ -1401,6 +1628,10 @@ app.post('/api/universities/:id/change-admin-password', async (req, res) => {
 // ============================================
 // ERROR HANDLING
 // ============================================
+
+app.use((req, res) => {
+    res.status(404).json({ error: 'Not Found', path: req.path });
+});
 
 app.use((err, req, res, next) => {
     console.error('❌ Error:', err);
