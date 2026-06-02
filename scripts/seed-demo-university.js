@@ -8,12 +8,20 @@ require('dotenv').config({ path: './.env', override: false });
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const UniversitySchema = require('../models/University');
-const PlatformUserSchema = require('../models/PlatformUser');
-const SubscriptionSchema = require('../models/Subscription');
+const universitySchema = require('../models/University');
+const platformUserSchema = require('../models/PlatformUser');
+const Subscription = require('../models/Subscription');
 const UserSchema = require('../models/User');
 const DepartmentSchema = require('../models/Department');
 const CourseSchema = require('../models/Course');
+
+function getPlatformModels() {
+    return {
+        University: mongoose.models.University || mongoose.model('University', universitySchema),
+        PlatformUser: mongoose.models.PlatformUser || mongoose.model('PlatformUser', platformUserSchema),
+        Subscription
+    };
+}
 
 const DEMO = {
     code: 'DEMO',
@@ -561,9 +569,7 @@ async function main() {
     const reset = process.argv.includes('--reset');
     try {
         await connect();
-        const University = mongoose.model('University', UniversitySchema);
-        const PlatformUser = mongoose.model('PlatformUser', PlatformUserSchema);
-        const Subscription = mongoose.model('Subscription', SubscriptionSchema);
+        const { University, PlatformUser, Subscription } = getPlatformModels();
 
         console.log('=== Seeding Demo University ===\n');
         const university = await ensurePlatformRecords(University, PlatformUser, Subscription);
