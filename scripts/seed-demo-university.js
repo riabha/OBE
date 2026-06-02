@@ -74,8 +74,10 @@ async function ensurePlatformRecords(University, PlatformUser, Subscription) {
         });
         console.log('Created DEMO university in platform DB');
     } else {
+        university.universityName = DEMO.name;
         university.databaseName = DEMO.dbName;
         university.isActive = true;
+        university.city = university.city || DEMO.city;
         await university.save();
         console.log('Updated existing DEMO university');
     }

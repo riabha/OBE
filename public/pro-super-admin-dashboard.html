@@ -3443,12 +3443,39 @@ Type "DELETE" to confirm:`;
             }
         }
 
+        // Filter universities based on search and filters
+        let allUniversitiesData = [];
+
+        function asArray(data) {
+            if (Array.isArray(data)) return data;
+            if (data && data._id) return [data];
+            return [];
+        }
+
+        function handleAuthFailure(response, containerId) {
+            if (response.status === 401 || response.status === 403) {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Session expired. Please <a href="/login.html">log in again</a>.
+                        </div>`;
+                }
+                return true;
+            }
+            return false;
+        }
+
         // Load initial data
         async function loadDashboardData() {
             try {
                 const token = localStorage.getItem('token');
-                
-                // Load all data in parallel for better performance
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
                 const [universitiesRes, statsRes, subscriptionsRes, databasesRes] = await Promise.all([
                     fetch('/api/universities', { headers: { 'Authorization': `Bearer ${token}` } }),
                     fetch('/api/platform-stats', { headers: { 'Authorization': `Bearer ${token}` } }),
@@ -3456,32 +3483,37 @@ Type "DELETE" to confirm:`;
                     fetch('/api/databases', { headers: { 'Authorization': `Bearer ${token}` } })
                 ]);
 
-                const universities = await universitiesRes.json();
-                const stats = await statsRes.json();
-                const subscriptions = await subscriptionsRes.json();
-                const databases = await databasesRes.json();
+                if (!universitiesRes.ok) {
+                    if (handleAuthFailure(universitiesRes, 'universitiesList')) return;
+                    throw new Error('Failed to load universities');
+                }
 
-                // Update dashboard with real data
+                const universities = asArray(await universitiesRes.json());
+                const stats = statsRes.ok ? await statsRes.json() : {};
+                const subscriptions = subscriptionsRes.ok ? asArray(await subscriptionsRes.json()) : [];
+                const databases = databasesRes.ok ? asArray(await databasesRes.json()) : [];
+
+                allUniversitiesData = universities;
                 displayUniversities(universities);
                 updateRealTimeStats(stats, universities, subscriptions);
                 createDashboardCharts(universities, subscriptions, stats);
 
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
-                // Show error message to user
                 const universitiesList = document.getElementById('universitiesList');
                 if (universitiesList) {
-                    universitiesList.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error loading data. Please refresh the page.</div>';
+                    universitiesList.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error loading data. Please refresh or log in again.</div>';
                 }
             }
         }
 
         // Update stats with real-time data from API
         function updateRealTimeStats(stats, universities, subscriptions) {
-            // Update stat cards
-            document.getElementById('totalUniversities').textContent = stats.totalUniversities || universities.length;
-            const totalUsers = universities.reduce((sum, uni) => sum + (uni.totalUsers || 0), 0);
-            const totalCourses = universities.reduce((sum, uni) => sum + (uni.totalCourses || 0), 0);
+            const uniList = asArray(universities);
+            const subList = asArray(subscriptions);
+            document.getElementById('totalUniversities').textContent = stats.totalUniversities ?? uniList.length;
+            const totalUsers = uniList.reduce((sum, uni) => sum + (uni.totalUsers || 0), 0);
+            const totalCourses = uniList.reduce((sum, uni) => sum + (uni.totalCourses || 0), 0);
             document.getElementById('totalUsers').textContent = totalUsers.toLocaleString();
             document.getElementById('totalCourses').textContent = totalCourses.toLocaleString();
             
@@ -3496,7 +3528,7 @@ Type "DELETE" to confirm:`;
             };
             
             let monthlyRevenue = 0;
-            subscriptions.forEach(sub => {
+            subList.forEach(sub => {
                 if (sub.status === 'Active') {
                     monthlyRevenue += planPrices[sub.planType] || 0;
                 }
@@ -3509,12 +3541,11 @@ Type "DELETE" to confirm:`;
         let revenueChart, subscriptionChart, growthChart, usersChart;
 
         function createDashboardCharts(universities, subscriptions, stats) {
-            // Only create charts if canvas elements exist
             if (!document.getElementById('revenueChart')) return;
+            const subList = asArray(subscriptions);
 
-            // 1. Subscription Plans Distribution
             const planCounts = {};
-            subscriptions.forEach(sub => {
+            subList.forEach(sub => {
                 planCounts[sub.planType] = (planCounts[sub.planType] || 0) + 1;
             });
 
@@ -3583,12 +3614,13 @@ Type "DELETE" to confirm:`;
         // Display universities in the list
         function displayUniversities(universities) {
             const container = document.getElementById('universitiesList');
-            if (!universities || universities.length === 0) {
+            const list = asArray(universities);
+            if (!list.length) {
                 container.innerHTML = '<div class="alert alert-info">No universities registered yet. Click "Add New" to create one.</div>';
                 return;
             }
 
-            container.innerHTML = universities.map(uni => {
+            container.innerHTML = list.map(uni => {
                 // Determine plan badge color
                 let planBadge = 'badge-warning';
                 if (uni.subscriptionPlan === 'Enterprise') planBadge = 'badge-enterprise';
@@ -3689,26 +3721,38 @@ Type "DELETE" to confirm:`;
             try {
                 const token = localStorage.getItem('token');
                 const response = await fetch('/api/universities', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
+                if (handleAuthFailure(response, 'allUniversitiesList')) return;
+
                 if (response.ok) {
-                    const universities = await response.json();
-                    allUniversitiesData = universities; // Store for filtering
+                    const universities = asArray(await response.json());
+                    allUniversitiesData = universities;
                     displayAllUniversities(universities);
+                } else {
+                    document.getElementById('allUniversitiesList').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Failed to load universities (${response.status}). Try refreshing or logging in again.
+                        </div>`;
                 }
             } catch (error) {
                 console.error('Error loading universities:', error);
+                document.getElementById('allUniversitiesList').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading universities. Please try again.
+                    </div>`;
             }
         }
 
         // Display universities in Universities section
         function displayAllUniversities(universities) {
             const container = document.getElementById('allUniversitiesList');
-            
-            if (!universities || universities.length === 0) {
+            const list = asArray(universities);
+
+            if (!list.length) {
                 container.innerHTML = `
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle me-2"></i>
@@ -3718,7 +3762,7 @@ Type "DELETE" to confirm:`;
                 return;
             }
 
-            container.innerHTML = universities.map(uni => {
+            container.innerHTML = list.map(uni => {
                 // Determine plan badge color
                 let planBadge = 'badge-warning';
                 if (uni.subscriptionPlan === 'Enterprise') planBadge = 'badge-enterprise';
@@ -4041,8 +4085,6 @@ Type "DELETE" to confirm:`;
         }
 
         // Filter universities based on search and filters
-        let allUniversitiesData = [];
-
         function filterUniversities() {
             const searchTerm = document.getElementById('universitySearch')?.value.toLowerCase() || '';
             const planFilter = document.getElementById('filterByPlan')?.value || '';
@@ -4074,6 +4116,7 @@ Type "DELETE" to confirm:`;
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboardData();
+            loadAllUniversities();
             
             // Auto-refresh every 5 minutes
             setInterval(() => {

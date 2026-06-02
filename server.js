@@ -420,17 +420,27 @@ app.post('/api/auth/logout', (req, res) => {
 // UNIVERSITIES API
 // ============================================
 
-// Get all universities
+// Get all universities (with live counts from each university database)
 app.get('/api/universities', proAdminAuth, async (req, res) => {
     try {
         const universities = await University.find({}, '-logo.data').sort({ createdAt: -1 });
-        const result = universities.map(uni => {
+        const result = await Promise.all(universities.map(async (uni) => {
             const obj = uni.toObject();
             if (uni.logo && uni.logo.contentType) {
                 obj.logoUrl = `/api/universities/${uni._id}/logo`;
             }
+            try {
+                const uniDb = mongoose.connection.useDb(uni.databaseName);
+                const User = uniDb.model('User', UserSchema);
+                const Course = uniDb.model('Course', CourseSchema);
+                obj.totalUsers = await User.countDocuments({ isActive: true });
+                obj.totalCourses = await Course.countDocuments({ isActive: true });
+            } catch (dbErr) {
+                obj.totalUsers = 0;
+                obj.totalCourses = 0;
+            }
             return obj;
-        });
+        }));
         res.json(result);
     } catch (error) {
         res.status(500).json({ message: 'Error', error: error.message });
