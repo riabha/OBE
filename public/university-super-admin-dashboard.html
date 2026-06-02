@@ -34,7 +34,7 @@
                     }
                     
                     if (dbEl && (dbEl.textContent === 'Loading database...' || dbEl.textContent.includes('Loading') || dbEl.textContent.trim() === '')) {
-                        dbEl.textContent = 'obe_demo';
+                        dbEl.textContent = 'obe_university_demo';
                         console.log('✅ Set database name fallback');
                     }
                     
@@ -1813,7 +1813,7 @@
                     document.getElementById('universityLogoPlaceholder').textContent = firstLetter;
                     
                     // Update database name display
-                    const dbName = user.universityCode === 'DEMO' ? 'obe_demo' : `obe_university_${user.universityCode.toLowerCase()}`;
+                    const dbName = user.universityCode === 'DEMO' ? 'obe_university_demo' : `obe_university_${user.universityCode.toLowerCase()}`;
                     const dbElement = document.getElementById('sidebarDatabaseName');
                     if (dbElement) {
                         dbElement.textContent = dbName;
@@ -1864,7 +1864,7 @@
                 document.getElementById('universityLogoPlaceholder').textContent = 'D';
                 const dbElement = document.getElementById('sidebarDatabaseName');
                 if (dbElement) {
-                    dbElement.textContent = 'obe_demo';
+                    dbElement.textContent = 'obe_university_demo';
                 }
             }
         }
@@ -1875,7 +1875,7 @@
             
             const universityName = university.universityName || 'Demo University';
             const universityCode = university.universityCode || 'DEMO';
-            const databaseName = university.databaseName || 'obe_demo';
+            const databaseName = university.databaseName || 'obe_university_demo';
             
             // Update all university name elements
             document.querySelectorAll('#universityName, .university-name').forEach(el => {
@@ -2140,9 +2140,42 @@
                     document.getElementById('totalProgramsDashboard').textContent = programs.length;
                 }
 
+                const plosRes = await fetch('/api/plos', { headers: getAPIHeaders() });
+                if (plosRes.ok) {
+                    const plos = await plosRes.json();
+                    document.getElementById('ploCount').textContent = plos.length;
+                }
+
+                const peosRes = await fetch('/api/peos', { headers: getAPIHeaders() });
+                if (peosRes.ok) {
+                    const peos = await peosRes.json();
+                    document.getElementById('peoCount').textContent = peos.length;
+                }
+
+                loadDatabaseStats();
             } catch (error) {
                 console.error('Error loading dashboard stats:', error);
             }
+        }
+
+        function userDisplayName(u) {
+            return u.name || `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email;
+        }
+
+        function userId(u) {
+            return u._id || u.id;
+        }
+
+        function courseId(c) {
+            return c.id || c._id;
+        }
+
+        function courseName(c) {
+            return c.title || c.name || '';
+        }
+
+        function courseDeptName(c) {
+            return c.departmentName || (typeof c.department === 'object' ? c.department?.name : c.department) || 'N/A';
         }
 
         // Create Users Distribution Chart
@@ -2321,18 +2354,18 @@
                                             <div class="bg-primary bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
                                                 <i class="fas fa-user"></i>
                                             </div>
-                                            <strong>${u.name}</strong>
+                                            <strong>${userDisplayName(u)}</strong>
                                         </div>
                                     </td>
                                     <td>${u.email}</td>
                                     <td><span class="badge ${roleColors[u.role] || 'bg-secondary'}">${u.role}</span></td>
-                                    <td>${u.department || 'N/A'}</td>
+                                    <td>${typeof u.department === 'object' ? (u.department?.name || 'N/A') : (u.department || 'N/A')}</td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-primary action-btn me-1" onclick="editUser(${u.id})" title="Edit">
+                                        <button class="btn btn-sm btn-outline-primary action-btn me-1" onclick="editUser('${userId(u)}')" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         ${u.role !== 'superadmin' ? 
-                                            `<button class="btn btn-sm btn-outline-danger action-btn" onclick="deleteUser(${u.id}, '${u.name}')" title="Delete">
+                                            `<button class="btn btn-sm btn-outline-danger action-btn" onclick="deleteUser('${userId(u)}', '${userDisplayName(u).replace(/'/g, "\\'")}')" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </button>` : 
                                             '<span class="badge badge-enterprise"><i class="fas fa-shield-alt me-1"></i>Protected</span>'
@@ -2355,9 +2388,11 @@
             const deptFilter = document.getElementById('userDeptFilter').value;
 
             filteredUsers = allUsers.filter(u => {
-                const matchesSearch = u.name.toLowerCase().includes(searchTerm) || u.email.toLowerCase().includes(searchTerm);
+                const name = userDisplayName(u).toLowerCase();
+                const matchesSearch = name.includes(searchTerm) || u.email.toLowerCase().includes(searchTerm);
+                const deptName = typeof u.department === 'object' ? (u.department?.name || '') : (u.department || '');
                 const matchesRole = roleFilter === 'all' || u.role === roleFilter;
-                const matchesDept = deptFilter === 'all' || u.department === deptFilter;
+                const matchesDept = deptFilter === 'all' || deptName === deptFilter;
                 return matchesSearch && matchesRole && matchesDept;
             });
 
@@ -2370,7 +2405,9 @@
 
         // Populate department filter dropdown
         function populateDepartmentFilter() {
-            const depts = [...new Set(allUsers.map(u => u.department).filter(d => d))];
+            const depts = [...new Set(allUsers.map(u => {
+                return typeof u.department === 'object' ? (u.department?.name || '') : (u.department || '');
+            }).filter(d => d))];
             const select = document.getElementById('userDeptFilter');
             select.innerHTML = '<option value="all">All Departments</option>';
             depts.forEach(dept => {
@@ -2385,7 +2422,8 @@
             // Create CSV content
             let csv = 'Name,Email,Role,Department\n';
             usersToExport.forEach(u => {
-                csv += `"${u.name}","${u.email}","${u.role}","${u.department || 'N/A'}"\n`;
+                const dept = typeof u.department === 'object' ? (u.department?.name || 'N/A') : (u.department || 'N/A');
+                csv += `"${userDisplayName(u)}","${u.email}","${u.role}","${dept}"\n`;
             });
 
             // Create download link
@@ -2412,6 +2450,12 @@
                 if (response.ok) {
                     allCourses = await response.json();
                     displayCourses(allCourses);
+                } else {
+                    document.getElementById('coursesList').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Failed to load courses. Please refresh the page.
+                        </div>`;
                 }
             } catch (error) {
                 console.error('Error loading courses:', error);
@@ -2441,18 +2485,18 @@
                                     <div class="d-flex justify-content-between align-items-start mb-3">
                                         <div>
                                             <h6 class="fw-bold text-primary mb-1">${c.code}</h6>
-                                            <p class="mb-0">${c.name}</p>
+                                            <p class="mb-0">${c.title || c.name}</p>
                                         </div>
                                         <span class="badge bg-primary">${c.creditHours || 3} CH</span>
                                     </div>
                                     <div class="d-flex gap-2 mt-3">
-                                        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="viewCourse(${c.id})">
+                                        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="viewCourse('${courseId(c)}')">
                                             <i class="fas fa-eye me-1"></i>View
                                         </button>
-                                        <button class="btn btn-sm btn-outline-warning" onclick="editCourse(${c.id})">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="editCourse('${courseId(c)}')">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCourse(${c.id})">
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCourse('${courseId(c)}')">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -2891,22 +2935,21 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
 
         // Course CRUD functions
         function viewCourse(id) { 
-            const course = allCourses.find(c => c.id === id);
+            const course = allCourses.find(c => String(courseId(c)) === String(id));
             if (course) {
-                alert(`📚 Course Details\n\nCode: ${course.code}\nName: ${course.name}\nCredit Hours: ${course.creditHours || 3}\nDepartment: ${course.department || 'N/A'}\nLevel: ${course.level || 'N/A'}\nPrerequisite: ${course.prerequisite || 'None'}\nDescription: ${course.description || 'N/A'}`);
+                alert(`📚 Course Details\n\nCode: ${course.code}\nName: ${courseName(course)}\nCredit Hours: ${course.creditHours || 3}\nDepartment: ${courseDeptName(course)}\nLevel: ${course.level || 'N/A'}\nPrerequisite: ${course.prerequisite || 'None'}\nDescription: ${course.description || 'N/A'}`);
             }
         }
         
         function editCourse(id) { 
-            const course = allCourses.find(c => c.id === id);
+            const course = allCourses.find(c => String(courseId(c)) === String(id));
             if (!course) return;
 
-            // Populate edit form
-            document.getElementById('editCourseId').value = course.id;
+            document.getElementById('editCourseId').value = courseId(course);
             document.getElementById('editCourseCode').value = course.code;
-            document.getElementById('editCourseName').value = course.name;
+            document.getElementById('editCourseName').value = courseName(course);
             document.getElementById('editCourseCreditHours').value = course.creditHours || 3;
-            document.getElementById('editCourseDepartment').value = course.department || '';
+            document.getElementById('editCourseDepartment').value = courseDeptName(course) === 'N/A' ? '' : courseDeptName(course);
             document.getElementById('editCourseLevel').value = course.level || '';
             document.getElementById('editCoursePrerequisite').value = course.prerequisite || '';
             document.getElementById('editCourseInstructor').value = course.instructor || '';
@@ -2957,8 +3000,8 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
         }
         
         async function deleteCourse(id) {
-            const course = allCourses.find(c => c.id === id);
-            if(!confirm(`⚠️ Delete Course?\n\nCode: ${course.code}\nName: ${course.name}\n\nThis action cannot be undone!`)) {
+            const course = allCourses.find(c => String(courseId(c)) === String(id));
+            if(!confirm(`⚠️ Delete Course?\n\nCode: ${course.code}\nName: ${courseName(course)}\n\nThis action cannot be undone!`)) {
                 return;
             }
 
@@ -2987,15 +3030,15 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
 
         // User edit function
         function editUser(id) {
-            const userToEdit = allUsers.find(u => u.id === id);
+            const userToEdit = allUsers.find(u => String(userId(u)) === String(id));
             if (!userToEdit) return;
 
-            // Populate edit form
-            document.getElementById('editUserId').value = userToEdit.id;
-            document.getElementById('editUserName').value = userToEdit.name;
+            document.getElementById('editUserId').value = userId(userToEdit);
+            document.getElementById('editUserName').value = userDisplayName(userToEdit);
             document.getElementById('editUserEmail').value = userToEdit.email;
             document.getElementById('editUserRole').value = userToEdit.role;
-            document.getElementById('editUserDepartment').value = userToEdit.department || '';
+            const dept = typeof userToEdit.department === 'object' ? (userToEdit.department?.name || '') : (userToEdit.department || '');
+            document.getElementById('editUserDepartment').value = dept;
             document.getElementById('editUserResetPassword').checked = false;
             document.getElementById('editPasswordFields').style.display = 'none';
 
@@ -3763,7 +3806,7 @@ FOBM,Faculty of Business Management,dean.biz@example.com,Faculty of business and
                 csv += `Course Details:\n`;
                 csv += `Code,Name,Credit Hours,Department\n`;
                 allCourses.forEach(c => {
-                    csv += `${c.code},"${c.name}",${c.creditHours || 3},"${c.department || 'N/A'}"\n`;
+                    csv += `${c.code},"${courseName(c)}",${c.creditHours || 3},"${courseDeptName(c)}"\n`;
                 });
 
                 const blob = new Blob([csv], { type: 'text/plain;charset=utf-8;' });
@@ -4226,7 +4269,10 @@ EE-101,Circuit Analysis,4,Electrical Engineering,1,,Basic electrical circuits an
             console.log('🚀 DOM Content Loaded - Initializing dashboard...');
             loadUniversityInfo();
             loadDashboardStats();
-            loadFaculties(); // Preload faculties for dropdowns
+            loadFaculties();
+            loadUsers();
+            loadCourses();
+            loadDepartments();
         });
 
         // IMMEDIATE FALLBACK - Run this right away to prevent "Loading..." state
@@ -4238,7 +4284,7 @@ EE-101,Circuit Analysis,4,Electrical Engineering,1,,Basic electrical circuits an
                     const universityName = user.universityCode === 'DEMO' ? 'Demo University' : 
                                          user.universityCode.replace(/_/g, ' ').toUpperCase();
                     const firstLetter = universityName.charAt(0).toUpperCase();
-                    const dbName = user.universityCode === 'DEMO' ? 'obe_demo' : `obe_university_${user.universityCode.toLowerCase()}`;
+                    const dbName = user.universityCode === 'DEMO' ? 'obe_university_demo' : `obe_university_${user.universityCode.toLowerCase()}`;
                     
                     // Set immediately
                     const nameEl = document.getElementById('universityName');
@@ -4260,7 +4306,7 @@ EE-101,Circuit Analysis,4,Electrical Engineering,1,,Basic electrical circuits an
                 
                 if (nameEl) nameEl.textContent = 'Demo University';
                 if (logoEl) logoEl.textContent = 'D';
-                if (dbEl) dbEl.textContent = 'obe_demo';
+                if (dbEl) dbEl.textContent = 'obe_university_demo';
             }
         })();
     </script>

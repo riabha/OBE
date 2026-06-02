@@ -189,11 +189,43 @@ const UserSchema = require('./models/User');
 const DepartmentSchema = require('./models/Department');
 const CourseSchema = require('./models/Course');
 
+function getUniModels(uniDb) {
+    const User = uniDb.models.User || uniDb.model('User', UserSchema);
+    const Department = uniDb.models.Department || uniDb.model('Department', DepartmentSchema);
+    const Course = uniDb.models.Course || uniDb.model('Course', CourseSchema);
+    return { User, Department, Course };
+}
+
+function formatUserResponse(user) {
+    const obj = user.toObject ? user.toObject() : user;
+    return {
+        ...obj,
+        id: obj._id,
+        name: `${obj.firstName || ''} ${obj.lastName || ''}`.trim(),
+        department: obj.department?.name || obj.department || null,
+        departmentId: obj.department?._id || obj.department
+    };
+}
+
+function formatCourseResponse(course) {
+    const obj = course.toObject ? course.toObject() : course;
+    const instructor = obj.instructor;
+    return {
+        ...obj,
+        id: obj._id,
+        name: obj.title || obj.name,
+        instructorName: instructor
+            ? `${instructor.firstName || ''} ${instructor.lastName || ''}`.trim()
+            : null,
+        departmentName: obj.department?.name || null
+    };
+}
+
 async function findUniversityUserByCredentials(email, password) {
     const universities = await University.find({ isActive: true });
     for (const university of universities) {
         const uniDb = mongoose.connection.useDb(university.databaseName);
-        const User = uniDb.model('User', UserSchema);
+        const { User } = getUniModels(uniDb);
         const uniUser = await User.findOne({ email: email.toLowerCase() });
         if (!uniUser || !uniUser.isActive) continue;
         const isValid = await uniUser.comparePassword(password);
@@ -431,8 +463,7 @@ app.get('/api/universities', proAdminAuth, async (req, res) => {
             }
             try {
                 const uniDb = mongoose.connection.useDb(uni.databaseName);
-                const User = uniDb.model('User', UserSchema);
-                const Course = uniDb.model('Course', CourseSchema);
+                const { User, Course } = getUniModels(uniDb);
                 obj.totalUsers = await User.countDocuments({ isActive: true });
                 obj.totalCourses = await Course.countDocuments({ isActive: true });
             } catch (dbErr) {
@@ -1412,14 +1443,14 @@ app.get('/api/users', async (req, res) => {
         }
         
         const { uniDb } = await getUniversityDatabase(token);
-        const User = uniDb.model('User', UserSchema);
+        const { User } = getUniModels(uniDb);
         
         const filter = {};
         if (req.query.role) filter.role = req.query.role;
         if (req.query.department) filter.department = req.query.department;
 
-        const users = await User.find(filter).select('-password').populate('department').sort({ role: 1, lastName: 1 });
-        res.json(users);
+        const users = await User.find(filter).select('-password').populate('department', 'name code').sort({ role: 1, lastName: 1 });
+        res.json(users.map(formatUserResponse));
         
     } catch (error) {
         console.error('Error fetching users:', error);
@@ -1436,8 +1467,7 @@ app.post('/api/users', async (req, res) => {
         }
         
         const { uniDb } = await getUniversityDatabase(token);
-        const User = uniDb.model('User', UserSchema);
-        const Department = uniDb.model('Department', DepartmentSchema);
+        const { User, Department } = getUniModels(uniDb);
         
         // Handle department - if it's a string, find or create the department
         if (req.body.department && typeof req.body.department === 'string') {
@@ -1499,10 +1529,24 @@ app.put('/api/users/:id', async (req, res) => {
         }
         
         const { uniDb } = await getUniversityDatabase(token);
-        const User = uniDb.model('User', UserSchema);
+        const { User, Department } = getUniModels(uniDb);
         
         // Don't allow password update through this endpoint
         delete req.body.password;
+
+        if (req.body.name) {
+            const parts = req.body.name.trim().split(/\s+/);
+            req.body.firstName = parts[0] || '';
+            req.body.lastName = parts.slice(1).join(' ') || parts[0];
+            delete req.body.name;
+        }
+
+        if (req.body.department && typeof req.body.department === 'string') {
+            const department = await Department.findOne({
+                name: { $regex: new RegExp(`^${req.body.department}$`, 'i') }
+            });
+            req.body.department = department ? department._id : undefined;
+        }
         
         const user = await User.findByIdAndUpdate(
             req.params.id,
@@ -1530,7 +1574,7 @@ app.delete('/api/users/:id', async (req, res) => {
         }
         
         const { uniDb } = await getUniversityDatabase(token);
-        const User = uniDb.model('User', UserSchema);
+        const { User } = getUniModels(uniDb);
         
         const user = await User.findByIdAndDelete(req.params.id);
         
@@ -1554,7 +1598,7 @@ app.get('/api/courses', async (req, res) => {
         }
         
         const { uniDb, decoded } = await getUniversityDatabase(token);
-        const Course = uniDb.model('Course', CourseSchema);
+        const { Course } = getUniModels(uniDb);
         const filter = { isActive: true };
 
         if (decoded.userType === 'university') {
@@ -1570,7 +1614,7 @@ app.get('/api/courses', async (req, res) => {
             .populate('department', 'name code')
             .populate('instructor', 'firstName lastName email employeeId')
             .sort({ code: 1 });
-        res.json(courses);
+        res.json(courses.map(formatCourseResponse));
         
     } catch (error) {
         console.error('Error fetching courses:', error);
@@ -1598,6 +1642,44 @@ app.get('/api/peos', (req, res) => getUniCollectionData(req, res, 'peos'));
 app.get('/api/programs', (req, res) => getUniCollectionData(req, res, 'programs'));
 app.get('/api/assessments', (req, res) => getUniCollectionData(req, res, 'assessments'));
 app.get('/api/results', (req, res) => getUniCollectionData(req, res, 'results'));
+
+// Faculties derived from department faculty groupings
+app.get('/api/faculties', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+
+        const { uniDb } = await getUniversityDatabase(token);
+        const { User, Department } = getUniModels(uniDb);
+
+        const departments = await Department.find({ isActive: true });
+        const deans = await User.find({ role: 'dean', isActive: true });
+
+        const facultyNames = [...new Set(departments.map(d => d.faculty).filter(Boolean))];
+        const faculties = facultyNames.map((name, idx) => {
+            const depts = departments.filter(d => d.faculty === name);
+            const deptIds = new Set(depts.map(d => d._id.toString()));
+            const dean = deans.find(d =>
+                Array.isArray(d.assignedFaculties) &&
+                d.assignedFaculties.some(af => deptIds.has(af.toString()))
+            );
+            return {
+                id: idx + 1,
+                name,
+                code: name.replace(/\s+/g, '').substring(0, 4).toUpperCase(),
+                deanName: dean ? `${dean.firstName} ${dean.lastName}` : null,
+                deanEmail: dean?.email || null,
+                departmentCount: depts.length,
+                description: `${name} faculty`
+            };
+        });
+
+        res.json(faculties);
+    } catch (error) {
+        console.error('Error fetching faculties:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
 
 // Get current user's university information
 app.get('/api/my-university', async (req, res) => {
@@ -1666,14 +1748,21 @@ app.get('/api/departments', async (req, res) => {
         }
         
         const { uniDb } = await getUniversityDatabase(token);
-        const Department = uniDb.model('Department', DepartmentSchema);
+        const { Department } = getUniModels(uniDb);
         
         const departments = await Department.find({ isActive: true })
-            .select('name code description faculty statistics')
+            .select('name code description faculty statistics contactInfo programs')
             .populate('chairman', 'firstName lastName email')
             .sort({ name: 1 });
         
-        res.json(departments);
+        res.json(departments.map(d => {
+            const obj = d.toObject();
+            return {
+                ...obj,
+                id: obj._id,
+                headName: obj.chairman ? `${obj.chairman.firstName} ${obj.chairman.lastName}` : null
+            };
+        }));
         
     } catch (error) {
         console.error('Error fetching departments:', error);
