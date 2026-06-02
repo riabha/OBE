@@ -185,6 +185,59 @@ async function getDefaultPlatformSettings() {
     return settings;
 }
 
+const UserSchema = require('./models/User');
+const DepartmentSchema = require('./models/Department');
+const CourseSchema = require('./models/Course');
+
+async function findUniversityUserByCredentials(email, password) {
+    const universities = await University.find({ isActive: true });
+    for (const university of universities) {
+        const uniDb = mongoose.connection.useDb(university.databaseName);
+        const User = uniDb.model('User', UserSchema);
+        const uniUser = await User.findOne({ email: email.toLowerCase() });
+        if (!uniUser || !uniUser.isActive) continue;
+        const isValid = await uniUser.comparePassword(password);
+        if (isValid) {
+            return { uniUser, university };
+        }
+    }
+    return null;
+}
+
+async function getUniversityDatabase(token) {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    let university;
+
+    if (decoded.userType === 'university') {
+        university = decoded.universityId
+            ? await University.findById(decoded.universityId)
+            : await University.findOne({ universityCode: decoded.universityCode });
+    } else {
+        const user = await PlatformUser.findById(decoded.userId);
+        if (!user || user.role !== 'university_superadmin') {
+            throw new Error('Not authorized');
+        }
+        university = await University.findById(user.university)
+            || await University.findOne({ universityCode: user.universityCode });
+    }
+
+    if (!university) {
+        throw new Error('University not found');
+    }
+
+    const uniDb = mongoose.connection.useDb(university.databaseName);
+    return { uniDb, university, decoded };
+}
+
+function buildAuthResponse(userPayload, tokenPayload) {
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '7d' });
+    return {
+        message: 'Login successful',
+        token,
+        user: userPayload
+    };
+}
+
 // ============================================
 // MONGODB CONNECTION
 // ============================================
@@ -249,58 +302,73 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(400).json({ message: 'Email and password required' });
         }
         
-        // Find user in platform database
-        const user = await PlatformUser.findOne({ email: email.toLowerCase() });
-        
-        if (!user) {
-            console.log(`❌ User not found: ${email}`);
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-        
-        if (!user.isActive) {
-            console.log(`❌ User inactive: ${email}`);
-            return res.status(401).json({ message: 'Account inactive' });
-        }
-        
-        const isValid = await user.comparePassword(password);
-        
-        if (!isValid) {
-            console.log(`❌ Wrong password: ${email}`);
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-        
-        // Update last login
-        user.lastLogin = new Date();
-        await user.save();
-        
-        console.log(`✅ Login successful: ${email} (${user.role})`);
-        
-        // Create token
-        const token = jwt.sign(
-            { 
-                userId: user._id, 
-                email: user.email, 
-                role: user.role,
-                universityId: user.university,
-                universityCode: user.universityCode
-            },
-            JWT_SECRET,
-            { expiresIn: '7d' }
-        );
-        
-        return res.json({
-            message: 'Login successful',
-            token,
-            user: {
-                id: user._id,
-                email: user.email,
-                name: user.name,
-                role: user.role,
-                universityCode: user.universityCode,
-                permissions: user.permissions,
-                isActive: user.isActive
+        const normalizedEmail = email.toLowerCase();
+        const platformUser = await PlatformUser.findOne({ email: normalizedEmail });
+
+        if (platformUser) {
+            if (!platformUser.isActive) {
+                return res.status(401).json({ message: 'Account inactive' });
             }
-        });
+            const isValid = await platformUser.comparePassword(password);
+            if (!isValid) {
+                return res.status(401).json({ message: 'Invalid credentials' });
+            }
+            platformUser.lastLogin = new Date();
+            await platformUser.save();
+            console.log(`✅ Login successful: ${email} (${platformUser.role})`);
+            return res.json(buildAuthResponse(
+                {
+                    id: platformUser._id,
+                    email: platformUser.email,
+                    name: platformUser.name,
+                    role: platformUser.role,
+                    universityCode: platformUser.universityCode,
+                    permissions: platformUser.permissions,
+                    isActive: platformUser.isActive
+                },
+                {
+                    userId: platformUser._id,
+                    email: platformUser.email,
+                    role: platformUser.role,
+                    universityId: platformUser.university,
+                    universityCode: platformUser.universityCode,
+                    userType: 'platform'
+                }
+            ));
+        }
+
+        const uniLogin = await findUniversityUserByCredentials(normalizedEmail, password);
+        if (!uniLogin) {
+            console.log(`❌ User not found or wrong password: ${email}`);
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const { uniUser, university } = uniLogin;
+        uniUser.lastLogin = new Date();
+        await uniUser.save();
+
+        const displayName = `${uniUser.firstName} ${uniUser.lastName}`;
+        console.log(`✅ Login successful: ${email} (${uniUser.role}) @ ${university.universityCode}`);
+
+        return res.json(buildAuthResponse(
+            {
+                id: uniUser._id,
+                email: uniUser.email,
+                name: displayName,
+                role: uniUser.role,
+                universityCode: university.universityCode,
+                isActive: uniUser.isActive
+            },
+            {
+                userId: uniUser._id,
+                email: uniUser.email,
+                name: displayName,
+                role: uniUser.role,
+                universityId: university._id,
+                universityCode: university.universityCode,
+                userType: 'university'
+            }
+        ));
         
     } catch (error) {
         console.error('❌ Login error:', error);
@@ -314,13 +382,23 @@ app.get('/api/auth/check', async (req, res) => {
     
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded.userType === 'university') {
+            return res.json({
+                authenticated: true,
+                user: {
+                    id: decoded.userId,
+                    email: decoded.email,
+                    name: decoded.name,
+                    role: decoded.role,
+                    universityCode: decoded.universityCode
+                }
+            });
+        }
         const user = await PlatformUser.findById(decoded.userId);
-        
         if (!user || !user.isActive) {
             return res.status(401).json({ authenticated: false });
         }
-        
-        res.json({ 
+        res.json({
             authenticated: true,
             user: {
                 id: user._id,
@@ -1315,26 +1393,6 @@ app.get('/api/test', (req, res) => {
 // UNIVERSITY-SPECIFIC API ENDPOINTS
 // ============================================
 
-// Helper function to get university database connection
-async function getUniversityDatabase(token) {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    
-    // Get user's university
-    const user = await PlatformUser.findById(decoded.userId);
-    if (!user || user.role !== 'university_superadmin') {
-        throw new Error('Not authorized');
-    }
-    
-    const university = await University.findById(user.university);
-    if (!university) {
-        throw new Error('University not found');
-    }
-    
-    // Return connection to university database
-    const uniDb = mongoose.connection.useDb(university.databaseName);
-    return { uniDb, university };
-}
-
 // Get all users from university database
 app.get('/api/users', async (req, res) => {
     try {
@@ -1344,10 +1402,13 @@ app.get('/api/users', async (req, res) => {
         }
         
         const { uniDb } = await getUniversityDatabase(token);
-        const UserSchema = require('./models/User');
         const User = uniDb.model('User', UserSchema);
         
-        const users = await User.find({}).select('-password').populate('department');
+        const filter = {};
+        if (req.query.role) filter.role = req.query.role;
+        if (req.query.department) filter.department = req.query.department;
+
+        const users = await User.find(filter).select('-password').populate('department').sort({ role: 1, lastName: 1 });
         res.json(users);
         
     } catch (error) {
@@ -1365,8 +1426,6 @@ app.post('/api/users', async (req, res) => {
         }
         
         const { uniDb } = await getUniversityDatabase(token);
-        const UserSchema = require('./models/User');
-        const DepartmentSchema = require('./models/Department');
         const User = uniDb.model('User', UserSchema);
         const Department = uniDb.model('Department', DepartmentSchema);
         
@@ -1430,7 +1489,6 @@ app.put('/api/users/:id', async (req, res) => {
         }
         
         const { uniDb } = await getUniversityDatabase(token);
-        const UserSchema = require('./models/User');
         const User = uniDb.model('User', UserSchema);
         
         // Don't allow password update through this endpoint
@@ -1462,7 +1520,6 @@ app.delete('/api/users/:id', async (req, res) => {
         }
         
         const { uniDb } = await getUniversityDatabase(token);
-        const UserSchema = require('./models/User');
         const User = uniDb.model('User', UserSchema);
         
         const user = await User.findByIdAndDelete(req.params.id);
@@ -1486,16 +1543,51 @@ app.get('/api/courses', async (req, res) => {
             return res.status(401).json({ message: 'No token' });
         }
         
-        const { uniDb } = await getUniversityDatabase(token);
-        
-        // For now, return empty array - courses functionality can be added later
-        res.json([]);
+        const { uniDb, decoded } = await getUniversityDatabase(token);
+        const Course = uniDb.model('Course', CourseSchema);
+        const filter = { isActive: true };
+
+        if (decoded.userType === 'university') {
+            if (decoded.role === 'teacher') {
+                filter.instructor = decoded.userId;
+            } else if (decoded.role === 'student') {
+                filter['enrolledStudents.student'] = decoded.userId;
+                filter['enrolledStudents.status'] = { $in: ['enrolled', 'completed'] };
+            }
+        }
+
+        const courses = await Course.find(filter)
+            .populate('department', 'name code')
+            .populate('instructor', 'firstName lastName email employeeId')
+            .sort({ code: 1 });
+        res.json(courses);
         
     } catch (error) {
         console.error('Error fetching courses:', error);
         res.status(500).json({ message: 'Error', error: error.message });
     }
 });
+
+// OBE data collections (CLOs, PLOs, PEOs, programs, assessments, results)
+async function getUniCollectionData(req, res, collectionName) {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const items = await uniDb.collection(collectionName).find({}).sort({ code: 1, createdAt: -1 }).toArray();
+        res.json(items);
+    } catch (error) {
+        console.error(`Error fetching ${collectionName}:`, error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+}
+
+app.get('/api/clos', (req, res) => getUniCollectionData(req, res, 'clos'));
+app.get('/api/plos', (req, res) => getUniCollectionData(req, res, 'plos'));
+app.get('/api/peos', (req, res) => getUniCollectionData(req, res, 'peos'));
+app.get('/api/programs', (req, res) => getUniCollectionData(req, res, 'programs'));
+app.get('/api/assessments', (req, res) => getUniCollectionData(req, res, 'assessments'));
+app.get('/api/results', (req, res) => getUniCollectionData(req, res, 'results'));
 
 // Get current user's university information
 app.get('/api/my-university', async (req, res) => {
@@ -1545,7 +1637,7 @@ app.get('/api/my-university', async (req, res) => {
             res.json({
                 universityName: user?.universityCode === 'DEMO' ? 'Demo University' : 'Unknown University',
                 universityCode: user?.universityCode || 'UNKNOWN',
-                databaseName: user?.universityCode === 'DEMO' ? 'obe_demo' : `obe_university_${user?.universityCode?.toLowerCase() || 'unknown'}`
+                databaseName: user?.universityCode === 'DEMO' ? 'obe_university_demo' : `obe_university_${user?.universityCode?.toLowerCase() || 'unknown'}`
             });
         }
         
@@ -1555,7 +1647,7 @@ app.get('/api/my-university', async (req, res) => {
     }
 });
 
-// Get all departments from university databaseGet all departments from university database
+// Get all departments from university database
 app.get('/api/departments', async (req, res) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
@@ -1564,7 +1656,6 @@ app.get('/api/departments', async (req, res) => {
         }
         
         const { uniDb } = await getUniversityDatabase(token);
-        const DepartmentSchema = require('./models/Department');
         const Department = uniDb.model('Department', DepartmentSchema);
         
         const departments = await Department.find({ isActive: true })

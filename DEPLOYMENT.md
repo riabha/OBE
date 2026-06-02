@@ -170,6 +170,30 @@ cd /www/wwwroot/obe-portal && docker-compose --profile tools up -d mongo-express
 
 Pattern for any university: `Admin@UNIVERSITYCODE2025` (code uppercase, e.g. `DEMO`).
 
+### Demo university roles (after seed)
+
+Run `npm run seed-demo` on the VPS (see below). All role accounts use password **`Demo@2025`**.
+
+| Role | Email |
+|------|-------|
+| Dean | `dean@demo.edu` |
+| Controller | `controller@demo.edu` |
+| Chairman (CS) | `chairman.cs@demo.edu` |
+| Focal (CS) | `focal.cs@demo.edu` |
+| Teacher | `ali.raza@demo.edu` |
+| Student | `hamza.akram@demo.edu` |
+
+More accounts are created (teachers, students, chairmen for SE/BA). The seed script prints the full list.
+
+**Seed on VPS:**
+
+```bash
+cd /www/wwwroot/obe-portal
+docker compose exec obe-app npm run seed-demo
+```
+
+Or after `git pull` and rebuild: `docker compose exec obe-app node scripts/seed-demo-university.js --reset`
+
 ---
 
 ## Database architecture
@@ -179,7 +203,7 @@ Each university has a **separate** MongoDB database:
 ```
 MongoDB
 ├── obe_platform      ← platform (universities, admins, subscriptions)
-├── obe_demo          ← demo university data
+├── obe_university_demo ← demo university (code DEMO)
 └── obe_university_*  ← one DB per university (auto-created)
 ```
 
@@ -195,7 +219,7 @@ mongodb://admin:SecureOBE2025MongoDBQuest@mongodb:27017/obe_platform?authSource=
 docker exec -it obe-mongodb mongosh -u admin -p SecureOBE2025MongoDBQuest --authenticationDatabase admin
 ```
 
-Then: `show dbs` → `use obe_demo` → `show collections`
+Then: `show dbs` → `use obe_university_demo` → `show collections`
 
 ---
 
