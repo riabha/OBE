@@ -1,10 +1,68 @@
 # OBE Portal — Deployment Guide
 
-Single reference for running and updating the OBE Portal on your Contabo VPS.
+**Read this before changing the live website.**
 
 ---
 
-## Live server
+## Deployment workflow (always follow this order)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  1. WINDOWS — Edit code locally                             │
+│  2. WINDOWS — Push to GitHub  ← ALWAYS DO THIS FIRST        │
+│  3. VPS     — Pull + rebuild  ← Only after step 2           │
+│  4. Browser — Hard refresh (Ctrl+Shift+R)                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 1 — Make changes on your PC
+
+Edit files in `d:\gitobe2June2026\OBE` (HTML, JS, server.js, etc.).
+
+### Step 2 — Push to GitHub (Windows)
+
+```powershell
+cd d:\gitobe2June2026\OBE
+.\deploy.ps1 "Describe what you changed"
+```
+
+Or:
+
+```powershell
+npm run deploy -- "Describe what you changed"
+```
+
+This commits and pushes to https://github.com/riabha/OBE (`main` branch).
+
+> **Note:** `.env` is **never** pushed to GitHub (secrets stay on the server only).
+
+### Step 3 — Update the live server (VPS)
+
+SSH in, then run **one** of these:
+
+```bash
+cd /www/wwwroot/obe-portal && ./update-server.sh
+```
+
+Or manually:
+
+```bash
+cd /www/wwwroot/obe-portal
+git fetch origin main && git reset --hard origin/main
+docker-compose up -d --build obe-app
+curl -s http://localhost:3200/api/health
+```
+
+Expected: `"database":"connected"`
+
+### Step 4 — Verify in browser
+
+- Hard refresh: **Ctrl + Shift + R**
+- App: http://194.60.87.212:3200
+
+---
+
+## Live server reference
 
 | Item | Value |
 |------|--------|
@@ -13,6 +71,7 @@ Single reference for running and updating the OBE Portal on your Contabo VPS.
 | **Login** | http://194.60.87.212:3200/login |
 | **Pro Super Admin** | http://194.60.87.212:3200/pro-super-admin-dashboard.html |
 | **University Super Admin** | http://194.60.87.212:3200/university-super-admin-dashboard.html |
+| **Mongo Express (DB UI)** | http://194.60.87.212:8081 |
 | **GitHub** | https://github.com/riabha/OBE |
 | **Server path** | `/www/wwwroot/obe-portal` |
 | **Branch** | `main` |
@@ -21,291 +80,201 @@ Single reference for running and updating the OBE Portal on your Contabo VPS.
 
 ## Ports
 
-| Service | Port | Notes |
-|---------|------|--------|
-| OBE App | **3200** | Public — main website |
-| MongoDB (external) | 27018 | Bound to localhost only on VPS |
-| Mongo Express (optional) | 8081 | Not started by default — see below |
+| Service | Port | Public? |
+|---------|------|---------|
+| OBE App | **3200** | Yes |
+| MongoDB | 27018 | No (localhost only on VPS) |
+| Mongo Express | **8081** | Yes (after firewall + `--profile tools`) |
 
-Inside Docker, the app runs on port `3000`; `docker-compose.yml` maps it to host port `3200`.
-
----
-
-## Stack
-
-- **Node.js 22** (Docker image `node:22-alpine`)
-- **MongoDB 7.0** (Docker)
-- **Express** + **Mongoose**
-- **Docker Compose** on Linux VPS
-
-### Root files that matter
-
-```
-OBE/
-├── server.js              # Main application
-├── Dockerfile
-├── docker-compose.yml
-├── mongo-init.js
-├── .env.docker            # Template — copy to .env on server
-├── config.env.example     # Template for local dev (non-Docker)
-├── DEPLOYMENT.md          # This file
-├── deploy.ps1             # Push changes from Windows
-├── update-server.sh       # Pull + rebuild on VPS
-├── public/                # Frontend HTML/JS/CSS
-├── models/
-├── routes/
-├── middleware/
-├── utils/
-└── scripts/
-```
-
-Old docs and fix scripts are in `_archive-to-delete/` (safe to remove later).
+Inside Docker the app listens on `3000`; host maps it to `3200`.
 
 ---
 
-## First-time VPS setup
+## Environment file (`.env`)
 
-SSH into the server:
+`.env` lives **only on the VPS** (and your local PC copy). It is in `.gitignore`.
 
-```bash
-ssh root@194.60.87.212
-```
+### Create / replace `.env` on VPS — one command
 
-### 1. Clone (if not already done)
+Run on the server **after SSH**:
 
 ```bash
-cd /www/wwwroot
-git clone https://github.com/riabha/OBE.git obe-portal
-cd obe-portal
-```
-
-### 2. Environment file
-
-```bash
-cp .env.docker .env
-nano .env
-```
-
-Set these values in `.env`:
-
-```env
+cat > /www/wwwroot/obe-portal/.env << 'EOF'
 APP_PORT=3200
+NODE_ENV=production
 MONGO_ROOT_USER=admin
-MONGO_ROOT_PASSWORD=your-secure-password
-JWT_SECRET=your-jwt-secret-min-32-chars
-SESSION_SECRET=your-session-secret-min-32-chars
+MONGO_ROOT_PASSWORD=SecureOBE2025MongoDBQuest
+JWT_SECRET=OBE2025SecureJWTSecretForQuestUniversityPortal123456789
+SESSION_SECRET=QuestOBESessionSecret2025SecureRandomString987654321
 MONGO_EXPRESS_PORT=8081
 MONGO_EXPRESS_USER=admin
-MONGO_EXPRESS_PASSWORD=your-mongo-express-password
+MONGO_EXPRESS_PASSWORD=OBEExpress2025Admin
+EOF
 ```
 
-Generate secrets:
+Then apply (does **not** delete database data):
 
 ```bash
-openssl rand -base64 32
+cd /www/wwwroot/obe-portal && docker-compose restart obe-app && docker-compose --profile tools up -d mongo-express && curl -s http://localhost:3200/api/health
 ```
 
-### 3. Start
+### `.env` variable reference
+
+| Variable | Purpose |
+|----------|---------|
+| `APP_PORT` | Public website port (3200) |
+| `NODE_ENV` | `production` |
+| `MONGO_ROOT_USER` | MongoDB admin username |
+| `MONGO_ROOT_PASSWORD` | MongoDB admin password — **do not change** after first deploy |
+| `JWT_SECRET` | App login tokens |
+| `SESSION_SECRET` | App sessions |
+| `MONGO_EXPRESS_PORT` | Web DB UI port (8081) |
+| `MONGO_EXPRESS_USER` | Login for http://IP:8081 |
+| `MONGO_EXPRESS_PASSWORD` | Password for http://IP:8081 |
+
+### Mongo Express login
+
+| User | Password |
+|------|----------|
+| `admin` | `OBEExpress2025Admin` |
+
+If port 8081 does not load in browser, open it in firewall:
 
 ```bash
-docker-compose up -d --build
-docker-compose ps
-curl http://localhost:3200/api/health
+ufw allow 8081/tcp && ufw reload
 ```
 
-Expected: `{"status":"OK","database":"connected",...}`
+Or **aaPanel → Security → port 8081 (TCP)**.
+
+Start Mongo Express:
+
+```bash
+cd /www/wwwroot/obe-portal && docker-compose --profile tools up -d mongo-express
+```
 
 ---
 
-## One-command updates
+## Default logins (website)
 
-### On your Windows PC (push to GitHub)
-
-```powershell
-cd d:\gitobe2June2026\OBE
-.\deploy.ps1 "Describe your change here"
-```
-
-Or with npm:
-
-```powershell
-npm run deploy -- "Describe your change here"
-```
-
-This stages, commits (if there are changes), and pushes to `origin main`.
-
-### On the VPS (pull and rebuild)
-
-```bash
-cd /www/wwwroot/obe-portal
-./update-server.sh
-```
-
-Or manually:
-
-```bash
-cd /www/wwwroot/obe-portal
-git pull origin main
-docker-compose up -d --build obe-app
-```
-
-**Important:** Use `--build` after HTML/JS changes. A plain `docker-compose restart` does not rebuild the image.
-
----
-
-## Default logins
-
-### Pro Super Admin (platform)
+### Pro Super Admin
 
 | Email | Password |
 |-------|----------|
 | `pro@obe.org.pk` | `proadmin123` |
 
-Change this password after first login.
-
-### University Super Admin
-
-Password pattern when a university is created:
-
-```
-Admin@UNIVERSITYCODE2025
-```
-
-Example — **demo** university:
+### University Super Admin (demo)
 
 | Email | Password |
 |-------|----------|
 | `demo@demo.com` | `Admin@DEMO2025` |
 
-(`DEMO` must be uppercase.)
-
-Reset via Pro Admin → Universities → Edit → Reset Super Admin Password.
+Pattern for any university: `Admin@UNIVERSITYCODE2025` (code uppercase, e.g. `DEMO`).
 
 ---
 
-## Database
+## Database architecture
 
-### Architecture
-
-- **`obe_platform`** — universities, platform users, subscriptions
-- **`obe_demo`**, **`obe_university_xxx`** — one database per university
-
-### Connection strings
-
-**Inside Docker (app container):**
+Each university has a **separate** MongoDB database:
 
 ```
-mongodb://admin:PASSWORD@mongodb:27017/obe_platform?authSource=admin
+MongoDB
+├── obe_platform      ← platform (universities, admins, subscriptions)
+├── obe_demo          ← demo university data
+└── obe_university_*  ← one DB per university (auto-created)
 ```
 
-**From VPS host (localhost only):**
+**Connection inside Docker:**
 
 ```
-mongodb://admin:PASSWORD@127.0.0.1:27018/obe_platform?authSource=admin
+mongodb://admin:SecureOBE2025MongoDBQuest@mongodb:27017/obe_platform?authSource=admin
 ```
 
-### Backup
+**Terminal access (no 8081 needed):**
 
 ```bash
-docker exec obe-mongodb mongodump \
-  -u admin -p YOUR_PASSWORD \
-  --authenticationDatabase admin \
-  --out /data/db/backup-$(date +%Y%m%d)
+docker exec -it obe-mongodb mongosh -u admin -p SecureOBE2025MongoDBQuest --authenticationDatabase admin
+```
+
+Then: `show dbs` → `use obe_demo` → `show collections`
+
+---
+
+## First-time VPS setup
+
+```bash
+ssh root@194.60.87.212
+cd /www/wwwroot
+git clone https://github.com/riabha/OBE.git obe-portal
+cd obe-portal
+# Create .env (use one-liner above)
+chmod +x update-server.sh
+docker-compose up -d --build
+docker-compose --profile tools up -d mongo-express
+curl http://localhost:3200/api/health
 ```
 
 ---
 
-## Mongo Express (optional web DB UI)
-
-Not started by default. To enable:
+## Useful VPS commands
 
 ```bash
 cd /www/wwwroot/obe-portal
-docker-compose --profile tools up -d mongo-express
+
+docker-compose ps                          # container status
+docker logs obe-portal --tail 50           # app logs
+docker logs obe-mongodb --tail 50          # database logs
+curl -s http://localhost:3200/api/health   # must say connected
+git log -1 --oneline                       # should match GitHub
 ```
 
-Then open http://194.60.87.212:8081 (open port 8081 in firewall if needed).
-
-Login: user/password from `.env` (`MONGO_EXPRESS_USER` / `MONGO_EXPRESS_PASSWORD`).
-
----
-
-## Useful commands
+### If `git pull` fails (local changes on server)
 
 ```bash
-# Container status
-docker-compose ps
-
-# App logs
-docker logs obe-portal --tail 50 -f
-
-# MongoDB logs
-docker logs obe-mongodb --tail 50
-
-# Health check
-curl http://localhost:3200/api/health
-
-# Restart app only (no code update)
-docker-compose restart obe-app
-
-# Full rebuild after git pull
+cd /www/wwwroot/obe-portal
+git fetch origin main && git reset --hard origin/main
 docker-compose up -d --build obe-app
-
-# Stop everything
-docker-compose down
 ```
 
 ---
 
 ## Troubleshooting
 
-### Dashboard clicks not working / stuck on "Loading..."
-
-1. Hard refresh browser: `Ctrl + Shift + R`
-2. Check browser console (F12) for JavaScript errors
-3. Ensure latest code is deployed: `git log -1 --oneline` on VPS should match GitHub
-4. Rebuild: `docker-compose up -d --build obe-app`
-
-### Login fails
-
-- Pro admin: `pro@obe.org.pk` / `proadmin123`
-- University admin: `Admin@CODE2025` (CODE = university code, uppercase)
-- Check API: `curl -X POST http://localhost:3200/api/auth/login -H "Content-Type: application/json" -d '{"email":"pro@obe.org.pk","password":"proadmin123"}'`
-
-### Database disconnected
-
-```bash
-docker-compose ps          # obe-mongodb should be Up (healthy)
-docker logs obe-mongodb
-docker-compose restart mongodb obe-app
-```
-
-### Port 8081 not accessible
-
-Mongo Express is optional and uses Docker profile `tools`. See [Mongo Express](#mongo-express-optional-web-db-ui) above.
+| Problem | Fix |
+|---------|-----|
+| `"database":"disconnected"` | Check `.env` password matches original; `docker-compose restart obe-app` |
+| Dashboard clicks dead / Loading… | Push latest code, rebuild: `docker-compose up -d --build obe-app`, hard refresh |
+| 8081 not reachable | `docker ps \| grep mongo-express`, open firewall port 8081 |
+| Login fails | See [Default logins](#default-logins-website) above |
+| Changes not on live site | Did you push to GitHub first? Then `./update-server.sh` on VPS |
 
 ---
 
-## Local development (without Docker)
+## Project files (root)
 
-```bash
-npm install
-cp config.env.example config.env
-# Edit config.env — set MONGODB_URI to local MongoDB
-npm start
+```
+OBE/
+├── server.js           # Main app
+├── Dockerfile
+├── docker-compose.yml
+├── mongo-init.js
+├── .env.docker         # Template (in Git)
+├── .env                # Secrets (NOT in Git — local + VPS only)
+├── DEPLOYMENT.md       # This file
+├── deploy.ps1          # Windows: push to GitHub
+├── update-server.sh    # VPS: pull + rebuild
+└── public/             # Website HTML/JS/CSS
 ```
 
-App runs at http://localhost:3000 (or PORT in config.env).
+Legacy files: `_archive-to-delete/` (delete when no longer needed).
 
 ---
 
 ## Security checklist
 
-- [ ] Change `MONGO_ROOT_PASSWORD` in `.env`
-- [ ] Set strong `JWT_SECRET` and `SESSION_SECRET`
+- [ ] `.env` only on VPS — never commit to Git
 - [ ] Change Pro Super Admin password after first login
-- [ ] Do not expose MongoDB port 27018 publicly (already bound to 127.0.0.1)
-- [ ] Open only ports 22, 3200, (optional 80/443/8081) in firewall
+- [ ] Port 27018 not public (already localhost-only)
+- [ ] Open only: 22, 3200, 8081 (optional)
 
 ---
 

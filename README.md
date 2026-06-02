@@ -16,22 +16,23 @@ Outcome-Based Education (OBE) management system for universities — CLOs, asses
 
 ---
 
-## Deploy in two steps
+## Deploy workflow (order matters)
 
-**1. Windows (after making changes):**
+**1. Windows — push to GitHub first:**
 
 ```powershell
 .\deploy.ps1 "Your change description"
 ```
 
-**2. VPS:**
+**2. VPS — pull and rebuild:**
 
 ```bash
-cd /www/wwwroot/obe-portal
-./update-server.sh
+cd /www/wwwroot/obe-portal && ./update-server.sh
 ```
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for full details.
+**3. Browser — hard refresh:** `Ctrl + Shift + R`
+
+Full guide (`.env`, logins, Mongo Express, troubleshooting): **[DEPLOYMENT.md](./DEPLOYMENT.md)**
 
 ---
 

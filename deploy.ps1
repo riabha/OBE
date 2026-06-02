@@ -27,5 +27,10 @@ git commit -m $Message
 git push origin main
 
 Write-Host ""
-Write-Host "Pushed to GitHub. On VPS run:" -ForegroundColor Green
+Write-Host "Done — pushed to GitHub." -ForegroundColor Green
+Write-Host ""
+Write-Host "NEXT STEP (on VPS, after SSH):" -ForegroundColor Yellow
 Write-Host "  cd /www/wwwroot/obe-portal && ./update-server.sh" -ForegroundColor White
+Write-Host ""
+Write-Host "Note: .env is NOT in Git — server secrets stay on VPS only." -ForegroundColor DarkGray
+Write-Host "See DEPLOYMENT.md for .env setup and full workflow." -ForegroundColor DarkGray
