@@ -1790,66 +1790,6 @@
 
             container.innerHTML = html;
         }
-                            </div>
-                            <div class="alert alert-info mt-2 mb-0">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <small>Main database storing: Platform Users, Universities, Subscriptions</small>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            // University Databases Section
-            if (universityDBs.length > 0) {
-                html += '<h6 class="fw-bold mb-3 mt-4 text-success"><i class="fas fa-university me-2"></i>University Databases</h6>';
-                html += universityDBs.map(db => {
-                    return `
-                        <div class="university-card">
-                            <div class="university-header">
-                                <div class="d-flex gap-3">
-                                    <div class="university-logo" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                        <i class="fas fa-database"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1 fw-bold">${db.name}</h6>
-                                        <small class="text-muted">Size: ${db.sizeMB} MB ${db.empty ? '(Empty)' : '(Has Data)'}</small>
-                                    </div>
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <span class="badge badge-success">Active</span>
-                                </div>
-                            </div>
-                            <div class="row g-3 mt-2">
-                                <div class="col-md-6">
-                                    <small class="text-muted d-block">Database Type</small>
-                                    <strong>University Database (MongoDB)</strong>
-                                </div>
-                                <div class="col-md-3">
-                                    <small class="text-muted d-block">Status</small>
-                                    <span class="badge bg-info"><i class="fas fa-check me-1"></i>Ready to Use</span>
-                                </div>
-                                <div class="col-md-3 text-end">
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-outline-primary" onclick="viewDatabaseDetails('${db.name}')" title="View Details">
-                                            <i class="fas fa-info-circle"></i>
-                                        </button>
-                                        <button class="btn btn-outline-success" onclick="viewCollections('${db.name}')" title="View Collections">
-                                            <i class="fas fa-list"></i>
-                                        </button>
-                                        <button class="btn btn-outline-danger" onclick="confirmDeleteDatabase('${db.name}')" title="Delete Database">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            container.innerHTML = html;
-        }
 
         // Test database connection
         async function testDatabaseConnection() {
