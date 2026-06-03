@@ -636,31 +636,35 @@
             `).join('');
         }
 
-        function loadMappings() {
-            const clos = window.__dashboardData?.clos || [];
+        let __mappingData = { mappings: [], plos: [] };
+
+        async function loadMappings() {
             const tbody = document.getElementById('mappingTable');
             if (!tbody) return;
-            const byCourse = {};
-            clos.forEach(c => {
-                if (!byCourse[c.courseCode]) byCourse[c.courseCode] = [];
-                byCourse[c.courseCode].push(c);
-            });
-            const rows = Object.keys(byCourse);
-            tbody.innerHTML = rows.length ? rows.map(code => {
-                const list = byCourse[code];
-                const pcts = list.map(c => Math.round(c.attainment || 0) + '%');
-                return `
+            try {
+                __mappingData = await ObeWrites.getCloMappings();
+                const rows = __mappingData.mappings || [];
+                tbody.innerHTML = rows.length ? rows.map(m => {
+                    const clos = m.clos || [];
+                    const cloCells = [0, 1, 2, 3].map(i => {
+                        const c = clos[i];
+                        if (!c) return '<td><span class="text-muted">—</span></td>';
+                        const pct = Math.round(c.attainment || 0);
+                        return `<td><small>${c.code}</small><br><span class="badge bg-${pct >= 60 ? 'success' : 'warning'}">${pct}%</span></td>`;
+                    }).join('');
+                    const allPlos = [...new Set(clos.flatMap(c => c.mappedPlos || []))];
+                    return `
                 <tr>
-                    <td>${code}</td>
-                    <td><span class="department-badge bg-primary">${list[0]?.department || '—'}</span></td>
-                    <td><span class="badge bg-success">${pcts[0] || '—'}</span></td>
-                    <td><span class="badge bg-success">${pcts[1] || '—'}</span></td>
-                    <td><span class="badge bg-success">${pcts[2] || '—'}</span></td>
-                    <td><span class="badge bg-success">${pcts[3] || '—'}</span></td>
-                    <td><small>${list.map(c => c.code).join(', ')}</small></td>
-                    <td><button class="btn btn-sm btn-outline-primary" onclick="editMapping('${code}')"><i class="fas fa-edit"></i></button></td>
+                    <td><strong>${m.courseCode}</strong><br><small class="text-muted">${m.courseTitle || ''}</small></td>
+                    <td><span class="department-badge bg-primary">${m.department || '—'}</span></td>
+                    ${cloCells}
+                    <td><small>${allPlos.join(', ') || '—'}</small></td>
+                    <td><button class="btn btn-sm btn-outline-primary" onclick="editMapping('${m.courseCode}')"><i class="fas fa-edit"></i></button></td>
                 </tr>`;
-            }).join('') : '<tr><td colspan="8" class="text-center text-muted">No CLO mappings</td></tr>';
+                }).join('') : '<tr><td colspan="8" class="text-center text-muted">No CLO mappings — seed OBE outcomes first</td></tr>';
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">${err.message}</tr>`;
+            }
         }
 
         // Load templates
@@ -782,8 +786,32 @@
             showAlert(`Viewing details for department: ${code}`, 'info');
         }
 
-        function editMapping(subject) {
-            showAlert(`Editing mapping for subject: ${subject}`, 'info');
+        async function editMapping(courseCode) {
+            const mapping = (__mappingData.mappings || []).find(m => m.courseCode === courseCode);
+            if (!mapping) {
+                showAlert('Course mapping not found', 'warning');
+                return;
+            }
+            const plos = (__mappingData.plos || []).map(p => p.code).join(', ');
+            const updates = [];
+            for (const clo of (mapping.clos || [])) {
+                const current = (clo.mappedPlos || []).join(', ');
+                const input = prompt(`Map PLOs for ${clo.code}\nAvailable: ${plos}`, current);
+                if (input === null) return;
+                updates.push({
+                    id: clo.id,
+                    mappedPlos: input.split(',').map(s => s.trim()).filter(Boolean)
+                });
+            }
+            if (!updates.length) return;
+            try {
+                await ObeWrites.saveCloMappings(updates, courseCode);
+                showAlert('CLO–PLO mappings saved.', 'success');
+                await ObeWrites.refreshDashboard();
+                loadMappings();
+            } catch (err) {
+                showAlert('Save failed: ' + err.message, 'danger');
+            }
         }
 
         function downloadTemplate(name) {

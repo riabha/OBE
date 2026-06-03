@@ -329,9 +329,108 @@ async function seedDatabase(dbName, payload, reset) {
     { ordered: false }
   ).catch(() => {});
 
+  const { seedObeForUniversity, recalculateAttainment } = require('../utils/obe-engine');
+  const deptDocs = await Department.find({ isActive: true }).lean();
+  const programs = await uniDb.collection('programs').find({}).toArray();
+  const obeStats = await seedObeForUniversity(uniDb, deptDocs, programs);
+  console.log(`  ✅ OBE outcomes: ${obeStats.plos} PLOs, ${obeStats.peos} PEOs, ${obeStats.clos} CLOs`);
+
+  await seedObeDemoSample(uniDb, User, Course, deptIdByCode, hashedPassword, recalculateAttainment);
+
   console.log(`\n✅ Seed complete for ${dbName}`);
   console.log(`   Login password for scraped staff: ${DEFAULT_PASSWORD}`);
   console.log('   Students: NOT scraped (private data). Import separately.');
+}
+
+/** Demo students + assessments + results for one course so attainment/CQI are visible after seed. */
+async function seedObeDemoSample(uniDb, User, Course, deptIdByCode, hashedPassword, recalculateAttainment) {
+  const deptCode = deptIdByCode.has('CSE') ? 'CSE' : [...deptIdByCode.keys()][0];
+  const deptId = deptIdByCode.get(deptCode);
+  if (!deptId) return;
+
+  const course = await Course.findOne({ department: deptId, isActive: true }).sort({ code: 1 });
+  if (!course) return;
+
+  const demoStudents = [
+    { firstName: 'Ali', lastName: 'Ahmed', studentId: 'QUEST-DEMO-001' },
+    { firstName: 'Sara', lastName: 'Khan', studentId: 'QUEST-DEMO-002' },
+    { firstName: 'Usman', lastName: 'Malik', studentId: 'QUEST-DEMO-003' },
+    { firstName: 'Fatima', lastName: 'Shah', studentId: 'QUEST-DEMO-004' },
+    { firstName: 'Hassan', lastName: 'Raza', studentId: 'QUEST-DEMO-005' }
+  ];
+
+  let studentCount = 0;
+  for (const s of demoStudents) {
+    const exists = await User.findOne({ studentId: s.studentId });
+    if (exists) continue;
+    await User.create({
+      firstName: s.firstName,
+      lastName: s.lastName,
+      email: `${s.studentId.toLowerCase()}@demo.quest.edu.pk`,
+      password: hashedPassword,
+      role: 'student',
+      department: deptId,
+      studentId: s.studentId,
+      semester: 4,
+      batch: '2024',
+      isActive: true
+    });
+    studentCount++;
+  }
+
+  const assessments = [
+    { name: 'Quiz 1', totalMarks: 10 },
+    { name: 'Midterm', totalMarks: 30 },
+    { name: 'Final Exam', totalMarks: 50 }
+  ];
+
+  for (const a of assessments) {
+    const exists = await uniDb.collection('assessments').findOne({ courseCode: course.code, name: a.name });
+    if (exists) continue;
+    await uniDb.collection('assessments').insertOne({
+      courseCode: course.code,
+      name: a.name,
+      title: a.name,
+      type: a.name.includes('Final') ? 'final' : a.name.includes('Mid') ? 'midterm' : 'quiz',
+      totalMarks: a.totalMarks,
+      maxMarks: a.totalMarks,
+      departmentCode: deptCode,
+      isActive: true,
+      createdAt: new Date()
+    });
+  }
+
+  const marksMatrix = {
+    'QUEST-DEMO-001': { 'Quiz 1': 8, 'Midterm': 24, 'Final Exam': 42 },
+    'QUEST-DEMO-002': { 'Quiz 1': 9, 'Midterm': 27, 'Final Exam': 45 },
+    'QUEST-DEMO-003': { 'Quiz 1': 5, 'Midterm': 15, 'Final Exam': 28 },
+    'QUEST-DEMO-004': { 'Quiz 1': 7, 'Midterm': 21, 'Final Exam': 38 },
+    'QUEST-DEMO-005': { 'Quiz 1': 6, 'Midterm': 18, 'Final Exam': 32 }
+  };
+
+  let resultCount = 0;
+  for (const [sid, marks] of Object.entries(marksMatrix)) {
+    for (const [assessmentName, obtained] of Object.entries(marks)) {
+      const exists = await uniDb.collection('results').findOne({ courseCode: course.code, studentId: sid, assessmentName });
+      if (exists) continue;
+      const maxMarks = assessments.find(a => a.name === assessmentName)?.totalMarks || 100;
+      await uniDb.collection('results').insertOne({
+        courseCode: course.code,
+        studentId: sid,
+        assessmentName,
+        marksObtained: obtained,
+        maxMarks,
+        percentage: Math.round((obtained / maxMarks) * 100),
+        createdAt: new Date()
+      });
+      resultCount++;
+    }
+  }
+
+  if (studentCount || resultCount) {
+    const summary = await recalculateAttainment(uniDb, { courseCode: course.code });
+    console.log(`  ✅ OBE demo: ${studentCount} students, ${resultCount} results on ${course.code} (CQI alerts: ${summary.cqiAlerts || 0})`);
+  }
 }
 
 async function main() {

@@ -94,6 +94,59 @@ const ObeWrites = {
         return this.importResults(courseCode, records);
     },
 
+    async updateClo(id, payload) {
+        return APIManager.put(`/api/clos/${id}`, payload);
+    },
+
+    async deleteClo(id) {
+        return APIManager.delete(`/api/clos/${id}`);
+    },
+
+    async bulkCreateClos(records) {
+        return APIManager.post('/api/clos/bulk', { records });
+    },
+
+    async getCloMappings() {
+        return APIManager.get('/api/clos/mappings');
+    },
+
+    async saveCloMappings(mappings, courseCode) {
+        return APIManager.put('/api/clos/mappings', { mappings, courseCode });
+    },
+
+    async createPlo(payload) {
+        return APIManager.post('/api/plos', payload);
+    },
+
+    async updatePlo(id, payload) {
+        return APIManager.put(`/api/plos/${id}`, payload);
+    },
+
+    async createPeo(payload) {
+        return APIManager.post('/api/peos', payload);
+    },
+
+    async updatePeo(id, payload) {
+        return APIManager.put(`/api/peos/${id}`, payload);
+    },
+
+    async recalculateAttainment(courseCode) {
+        return APIManager.post('/api/obe/recalculate-attainment', courseCode ? { courseCode } : {});
+    },
+
+    async seedOutcomes() {
+        return APIManager.post('/api/obe/seed-outcomes', {});
+    },
+
+    async getAttainments(params = {}) {
+        const q = new URLSearchParams(params).toString();
+        return APIManager.get(`/api/attainments${q ? '?' + q : ''}`);
+    },
+
+    async getCqiAlerts() {
+        return APIManager.get('/api/obe/cqi');
+    },
+
     async bulkImportUsers(records) {
         return APIManager.post('/api/users/bulk', { records });
     },

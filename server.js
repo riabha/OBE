@@ -376,6 +376,12 @@ const DepartmentSchema = require('./models/Department');
 const CourseSchema = require('./models/Course');
 const FacultySchema = require('./models/Faculty');
 const { facultyCodeFromName } = require('./utils/faculty-code');
+const {
+    recalculateAttainment,
+    seedObeForUniversity,
+    buildDefaultClosForCourse,
+    ATTAINMENT_THRESHOLD
+} = require('./utils/obe-engine');
 
 function getUniModels(uniDb) {
     const User = uniDb.models.User || uniDb.model('User', UserSchema);
@@ -2500,8 +2506,25 @@ app.get('/api/dashboard/overview', async (req, res) => {
             courseCodes.length ? { courseCode: { $in: courseCodes } } : {}
         ).toArray();
         const plos = await uniDb.collection('plos').find(
-            deptIds.length ? { department: { $in: deptIds } } : {}
+            deptIds.length ? {
+                $or: [
+                    { department: { $in: deptIds } },
+                    { departmentCode: { $in: departments.map(d => d.code) } }
+                ]
+            } : {}
         ).toArray();
+        const peos = await uniDb.collection('peos').find(
+            deptIds.length ? {
+                $or: [
+                    { department: { $in: deptIds } },
+                    { departmentCode: { $in: departments.map(d => d.code) } }
+                ]
+            } : {}
+        ).toArray();
+        const cqiAlerts = await uniDb.collection('reports').find({
+            type: { $in: ['clo_deficiency', 'plo_deficiency'] },
+            status: 'open'
+        }).limit(20).toArray();
         const programs = await uniDb.collection('programs').find(
             deptIds.length ? { department: { $in: deptIds } } : {}
         ).toArray();
@@ -2620,6 +2643,8 @@ app.get('/api/dashboard/overview', async (req, res) => {
             assessments,
             clos,
             plos,
+            peos,
+            cqiAlerts,
             programs,
             recentActivity,
             charts: {
@@ -3391,6 +3416,9 @@ app.post('/api/clos', async (req, res) => {
             description: description || title || '',
             bloomLevel: bloomLevel || 'Apply',
             assessmentMethod: assessmentMethod || 'Assignment',
+            mappedPlos: Array.isArray(req.body.mappedPlos) ? req.body.mappedPlos : (req.body.mappedPlos ? String(req.body.mappedPlos).split(',').map(s => s.trim()) : []),
+            targetAttainment: req.body.targetAttainment || ATTAINMENT_THRESHOLD,
+            weight: req.body.weight || 33,
             attainment: 0,
             isActive: true,
             createdAt: new Date()
@@ -3400,6 +3428,443 @@ app.post('/api/clos', async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error', error: error.message });
     }
+});
+
+app.put('/api/clos/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const updates = { ...req.body, updatedAt: new Date() };
+        delete updates._id;
+        delete updates.id;
+        if (updates.mappedPlos && typeof updates.mappedPlos === 'string') {
+            updates.mappedPlos = updates.mappedPlos.split(',').map(s => s.trim()).filter(Boolean);
+        }
+        const result = await uniDb.collection('clos').findOneAndUpdate(
+            { _id: new mongoose.Types.ObjectId(req.params.id) },
+            { $set: updates },
+            { returnDocument: 'after' }
+        );
+        if (!result) return res.status(404).json({ message: 'CLO not found' });
+        res.json({ message: 'CLO updated', clo: { ...result, id: result._id } });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.delete('/api/clos/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        await uniDb.collection('clos').updateOne(
+            { _id: new mongoose.Types.ObjectId(req.params.id) },
+            { $set: { isActive: false, updatedAt: new Date() } }
+        );
+        res.json({ message: 'CLO deactivated' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.post('/api/clos/bulk', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const rows = req.body.records || req.body.rows || [];
+        let imported = 0;
+        for (const row of rows) {
+            const courseCode = (row.courseCode || row.course_code || '').toUpperCase();
+            const code = (row.code || row.clo_code || '').toUpperCase();
+            if (!courseCode || !code) continue;
+            await uniDb.collection('clos').updateOne(
+                { courseCode, code },
+                {
+                    $set: {
+                        courseCode,
+                        code,
+                        title: row.title || row.description || code,
+                        description: row.description || row.title || '',
+                        bloomLevel: row.bloomLevel || row.bloom_level || 'Apply',
+                        mappedPlos: String(row.mappedPlos || row.mapped_plos || '').split(',').map(s => s.trim()).filter(Boolean),
+                        weight: Number(row.weight) || 33,
+                        targetAttainment: Number(row.targetAttainment) || ATTAINMENT_THRESHOLD,
+                        isActive: true,
+                        updatedAt: new Date()
+                    },
+                    $setOnInsert: { attainment: 0, createdAt: new Date() }
+                },
+                { upsert: true }
+            );
+            imported++;
+        }
+        res.json({ message: `Imported ${imported} CLO(s)`, imported });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.get('/api/clos/mappings', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { Department, Course } = getUniModels(uniDb);
+        const clos = await uniDb.collection('clos').find({ isActive: { $ne: false } }).sort({ courseCode: 1, code: 1 }).toArray();
+        const plos = await uniDb.collection('plos').find({ isActive: { $ne: false } }).toArray();
+        const courses = await Course.find({ isActive: true }).populate('department', 'name code');
+        const byCourse = {};
+        for (const c of clos) {
+            if (!byCourse[c.courseCode]) {
+                const course = courses.find(co => co.code === c.courseCode);
+                byCourse[c.courseCode] = {
+                    courseCode: c.courseCode,
+                    courseTitle: course?.title || c.courseCode,
+                    department: course?.department?.name || '—',
+                    departmentCode: course?.department?.code || null,
+                    clos: []
+                };
+            }
+            byCourse[c.courseCode].clos.push({
+                id: c._id,
+                code: c.code,
+                description: c.description,
+                attainment: c.attainment || 0,
+                mappedPlos: c.mappedPlos || [],
+                bloomLevel: c.bloomLevel
+            });
+        }
+        res.json({ mappings: Object.values(byCourse), plos: plos.map(p => ({ code: p.code, description: p.description })) });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.put('/api/clos/mappings', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const items = req.body.mappings || req.body.items || [];
+        for (const item of items) {
+            if (!item.id && !item._id) continue;
+            const id = item.id || item._id;
+            await uniDb.collection('clos').updateOne(
+                { _id: new mongoose.Types.ObjectId(id) },
+                { $set: { mappedPlos: item.mappedPlos || [], updatedAt: new Date() } }
+            );
+        }
+        await recalculateAttainment(uniDb, { courseCode: req.body.courseCode }).catch(() => {});
+        res.json({ message: 'CLO–PLO mappings saved' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// PLO CRUD
+app.post('/api/plos', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const doc = { ...req.body, isActive: true, attainment: 0, createdAt: new Date() };
+        const result = await uniDb.collection('plos').insertOne(doc);
+        res.status(201).json({ message: 'PLO created', plo: { ...doc, id: result.insertedId, _id: result.insertedId } });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.put('/api/plos/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const updates = { ...req.body, updatedAt: new Date() };
+        delete updates._id;
+        const result = await uniDb.collection('plos').findOneAndUpdate(
+            { _id: new mongoose.Types.ObjectId(req.params.id) },
+            { $set: updates },
+            { returnDocument: 'after' }
+        );
+        if (!result) return res.status(404).json({ message: 'PLO not found' });
+        res.json({ message: 'PLO updated', plo: result });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// PEO CRUD
+app.post('/api/peos', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const doc = { ...req.body, isActive: true, createdAt: new Date() };
+        const result = await uniDb.collection('peos').insertOne(doc);
+        res.status(201).json({ message: 'PEO created', peo: { ...doc, id: result.insertedId } });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.put('/api/peos/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const updates = { ...req.body, updatedAt: new Date() };
+        delete updates._id;
+        const result = await uniDb.collection('peos').findOneAndUpdate(
+            { _id: new mongoose.Types.ObjectId(req.params.id) },
+            { $set: updates },
+            { returnDocument: 'after' }
+        );
+        if (!result) return res.status(404).json({ message: 'PEO not found' });
+        res.json({ message: 'PEO updated', peo: result });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// OBE attainment recalculation & CQI
+app.post('/api/obe/recalculate-attainment', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const summary = await recalculateAttainment(uniDb, {
+            courseCode: req.body.courseCode,
+            threshold: req.body.threshold || ATTAINMENT_THRESHOLD
+        });
+        res.json({ message: 'Attainment recalculated', ...summary });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.post('/api/obe/seed-outcomes', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { Department, Course } = getUniModels(uniDb);
+        const departments = await Department.find({ isActive: true });
+        const programs = await uniDb.collection('programs').find({ isActive: { $ne: false } }).toArray();
+        const summary = await seedObeForUniversity(uniDb, departments, programs);
+        const courses = await Course.find({ isActive: true }).select('code title');
+        let closAdded = summary.clos;
+        for (const c of courses) {
+            const n = await uniDb.collection('clos').countDocuments({ courseCode: c.code });
+            if (n === 0) {
+                await uniDb.collection('clos').insertMany(buildDefaultClosForCourse(c));
+                closAdded += 3;
+            }
+        }
+        res.json({ message: 'OBE outcomes seeded', ...summary, clos: closAdded });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.get('/api/attainments', async (req, res) => getUniCollectionData(req, res, 'attainments'));
+
+app.get('/api/obe/cqi', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const items = await uniDb.collection('reports').find({
+            type: { $in: ['clo_deficiency', 'plo_deficiency'] },
+            status: 'open'
+        }).sort({ createdAt: -1 }).toArray();
+        res.json(items);
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Mongo-backed reports (replaces legacy MySQL routes/reports.js)
+async function reportsAuth(req, res) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        res.status(401).json({ message: 'No token' });
+        return null;
+    }
+    try {
+        return await getUniversityDatabase(token);
+    } catch (e) {
+        res.status(401).json({ message: e.message });
+        return null;
+    }
+}
+
+app.get('/api/reports/academic-years', async (req, res) => {
+    const ctx = await reportsAuth(req, res);
+    if (!ctx) return;
+    const { uniDb } = ctx;
+    const courses = await uniDb.collection('courses').find({}).project({ academicYear: 1 }).toArray().catch(() => []);
+    const years = [...new Set(courses.map(c => c.academicYear).filter(Boolean))];
+    if (!years.length) years.push('2024-25', '2023-24');
+    res.json(years.map(y => ({ value: y, text: y })));
+});
+
+app.get('/api/reports/courses', async (req, res) => {
+    const ctx = await reportsAuth(req, res);
+    if (!ctx) return;
+    const { Course } = getUniModels(ctx.uniDb);
+    const courses = await Course.find({ isActive: true }).select('code title').sort({ code: 1 });
+    res.json([{ value: 'all', text: 'All Courses' }, ...courses.map(c => ({ value: c.code, text: `${c.code} — ${c.title}`, id: c.code, name: `${c.code} — ${c.title}` }))]);
+});
+
+app.get('/api/reports/students', async (req, res) => {
+    const ctx = await reportsAuth(req, res);
+    if (!ctx) return;
+    const { User } = getUniModels(ctx.uniDb);
+    const students = await User.find({ role: 'student', isActive: true }).select('firstName lastName studentId email').limit(500);
+    res.json([{ value: 'all', text: 'All Students' }, ...students.map(s => ({
+        value: s.studentId || String(s._id),
+        text: `${s.firstName} ${s.lastName} (${s.studentId || '—'})`,
+        id: s.studentId || String(s._id),
+        name: `${s.firstName} ${s.lastName}`
+    }))]);
+});
+
+app.post('/api/reports/course-clo-attainment', async (req, res) => {
+    const ctx = await reportsAuth(req, res);
+    if (!ctx) return;
+    const { uniDb } = ctx;
+    const { courseCode, course } = req.body;
+    const code = (courseCode || course || '').toUpperCase();
+    if (!code || code === 'ALL') return res.status(400).json({ message: 'courseCode required' });
+
+    await recalculateAttainment(uniDb, { courseCode: code }).catch(() => {});
+    const { Course } = getUniModels(uniDb);
+    const courseDoc = await Course.findOne({ code, isActive: true }).populate('instructor', 'firstName lastName');
+    const clos = await uniDb.collection('clos').find({ courseCode: code, isActive: { $ne: false } }).toArray();
+    const results = await uniDb.collection('results').find({ courseCode: code }).toArray();
+    const studentIds = [...new Set(results.map(r => String(r.studentId || r.student)))];
+
+    res.json({
+        courseName: courseDoc?.title || code,
+        courseCode: code,
+        instructor: courseDoc?.instructor ? `${courseDoc.instructor.firstName} ${courseDoc.instructor.lastName}` : '—',
+        semester: req.body.semester || courseDoc?.semesterName || 'Fall',
+        totalStudents: studentIds.length,
+        clos: clos.map(c => ({
+            code: c.code,
+            description: c.description,
+            assessmentMethod: c.assessmentMethod || 'Mixed',
+            target: c.targetAttainment || ATTAINMENT_THRESHOLD,
+            actual: Math.round(c.attainment || 0),
+            studentsAchieved: c.studentsAchieved || 0
+        }))
+    });
+});
+
+app.post('/api/reports/obe-transcript', async (req, res) => {
+    const ctx = await reportsAuth(req, res);
+    if (!ctx) return;
+    const { uniDb } = ctx;
+    const { User } = getUniModels(uniDb);
+    const studentId = req.body.student || req.body.studentId;
+    const student = await User.findOne({
+        $or: [{ studentId }, { _id: mongoose.isValidObjectId(studentId) ? studentId : null }],
+        role: 'student'
+    });
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+
+    const results = await uniDb.collection('results').find({ studentId: student.studentId }).toArray();
+    const courseCodes = [...new Set(results.map(r => r.courseCode))];
+    const clos = await uniDb.collection('clos').find({ courseCode: { $in: courseCodes } }).toArray();
+    const plos = await uniDb.collection('plos').find({ isActive: { $ne: false } }).toArray();
+
+    res.json({
+        studentName: `${student.firstName} ${student.lastName}`,
+        clos: clos.map(c => ({ code: c.code, description: c.description, attainment: Math.round(c.attainment || 0) })),
+        plos: plos.map(p => ({ code: p.code, description: p.description, attainment: Math.round(p.attainment || 0) }))
+    });
+});
+
+app.post('/api/reports/clo-plo-mapping', async (req, res) => {
+    const ctx = await reportsAuth(req, res);
+    if (!ctx) return;
+    const { uniDb } = ctx;
+    const clos = await uniDb.collection('clos').find({ isActive: { $ne: false } }).toArray();
+    const plos = await uniDb.collection('plos').find({ isActive: { $ne: false } }).toArray();
+    res.json({
+        clos: clos.map(c => ({ code: c.code, courseCode: c.courseCode, mappedPlos: c.mappedPlos || [] })),
+        plos: plos.map(p => ({ code: p.code, description: p.description, attainment: p.attainment || 0 }))
+    });
+});
+
+app.post('/api/reports/gpa-transcript', async (req, res) => {
+    const ctx = await reportsAuth(req, res);
+    if (!ctx) return;
+    const { uniDb } = ctx;
+    const { User } = getUniModels(ctx.uniDb);
+    const studentId = req.body.student || req.body.studentId;
+    let student;
+    if (studentId && studentId !== 'all') {
+        student = await User.findOne({
+            $or: [{ studentId }, { _id: mongoose.isValidObjectId(studentId) ? studentId : null }],
+            role: 'student'
+        });
+    }
+    const query = student ? { studentId: student.studentId } : {};
+    const results = await uniDb.collection('results').find(query).toArray();
+    const byCourse = {};
+    for (const r of results) {
+        if (!byCourse[r.courseCode]) byCourse[r.courseCode] = { course: r.courseCode, marks: [], credits: 3 };
+        byCourse[r.courseCode].marks.push(r.percentage || 0);
+    }
+    const courses = Object.values(byCourse).map(c => {
+        const avg = c.marks.length ? c.marks.reduce((s, m) => s + m, 0) / c.marks.length : 0;
+        const gpa = Math.min(4, Math.max(0, (avg / 100) * 4));
+        return { course: c.course, credits: c.credits, grade: avg >= 80 ? 'A' : avg >= 70 ? 'B' : avg >= 60 ? 'C' : 'F', gpa: Math.round(gpa * 100) / 100 };
+    });
+    const cgpa = courses.length ? Math.round(courses.reduce((s, c) => s + c.gpa, 0) / courses.length * 100) / 100 : 0;
+    res.json({
+        studentName: student ? `${student.firstName} ${student.lastName}` : 'All Students',
+        studentId: student?.studentId || '—',
+        cgpa,
+        gpaHistory: courses.map((c, i) => ({ semester: `Sem ${i + 1}`, gpa: c.gpa })),
+        courses
+    });
+});
+
+app.post('/api/reports/vision-mission', async (req, res) => {
+    const ctx = await reportsAuth(req, res);
+    if (!ctx) return;
+    const { uniDb } = ctx;
+    const peos = await uniDb.collection('peos').find({ isActive: { $ne: false } }).limit(50).toArray();
+    const plos = await uniDb.collection('plos').find({ isActive: { $ne: false } }).limit(50).toArray();
+    res.json({
+        vision: 'To be a leading university in engineering education and research.',
+        mission: 'Provide quality education aligned with Washington Accord graduate attributes.',
+        peos: peos.map(p => ({ code: p.code, description: p.description, departmentCode: p.departmentCode })),
+        plos: plos.map(p => ({ code: p.code, description: p.description, attainment: Math.round(p.attainment || 0), departmentCode: p.departmentCode }))
+    });
+});
+
+app.post('/api/reports/semester', async (req, res) => {
+    const ctx = await reportsAuth(req, res);
+    if (!ctx) return;
+    const { uniDb } = ctx;
+    const results = await uniDb.collection('results').find({}).limit(500).toArray();
+    const byStudent = {};
+    for (const r of results) {
+        const sid = r.studentId || String(r.student);
+        if (!byStudent[sid]) byStudent[sid] = { id: sid, name: r.studentName, course: r.courseCode, midterm: 0, final: 0, total: 0, count: 0 };
+        const row = byStudent[sid];
+        if (/mid/i.test(r.assessmentName)) row.midterm = r.percentage || 0;
+        else if (/final/i.test(r.assessmentName)) row.final = r.percentage || 0;
+        row.total += r.percentage || 0;
+        row.count += 1;
+    }
+    res.json({ students: Object.values(byStudent).map(s => ({ ...s, average: s.count ? Math.round(s.total / s.count) : 0 })) });
 });
 
 // Assessments CRUD
@@ -3558,6 +4023,10 @@ app.post('/api/results/import', async (req, res) => {
         }
 
         if (inserted.length) await course.save();
+
+        await recalculateAttainment(uniDb, { courseCode: course.code }).catch(err =>
+            console.warn('Attainment recalc after import:', err.message)
+        );
 
         res.json({
             message: `Imported ${inserted.length} result record(s)`,

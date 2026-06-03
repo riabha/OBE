@@ -17,6 +17,27 @@ let reportFilters = {
 let performanceChart = null;
 let cloChart = null;
 
+function reportsFetchOptions(method = 'GET', body = null) {
+    const headers = (typeof APIManager !== 'undefined' && APIManager.getHeaders)
+        ? APIManager.getHeaders(body != null)
+        : { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token') || ''}` };
+    const opts = { method, headers };
+    if (body != null) opts.body = JSON.stringify(body);
+    return opts;
+}
+
+async function reportsApiGet(url) {
+    const response = await fetch(url, reportsFetchOptions('GET'));
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.json();
+}
+
+async function reportsApiPost(url, body) {
+    const response = await fetch(url, reportsFetchOptions('POST', body));
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.json();
+}
+
 // Initialize reports system
 function initializeReports() {
     console.log('Initializing comprehensive reports system...');
@@ -28,25 +49,14 @@ function initializeReports() {
 async function loadReportFilters() {
     try {
         // Load academic years
-        const yearsResponse = await fetch('/api/reports/academic-years');
-        if (yearsResponse.ok) {
-            const years = await yearsResponse.json();
-            populateSelect('academicYear', years);
-        }
+        const years = await reportsApiGet('/api/reports/academic-years');
+        populateSelect('academicYear', years);
 
-        // Load courses
-        const coursesResponse = await fetch('/api/reports/courses');
-        if (coursesResponse.ok) {
-            const courses = await coursesResponse.json();
-            populateSelect('courseFilter', courses);
-        }
+        const courses = await reportsApiGet('/api/reports/courses');
+        populateSelect('courseFilter', courses);
 
-        // Load students
-        const studentsResponse = await fetch('/api/reports/students');
-        if (studentsResponse.ok) {
-            const students = await studentsResponse.json();
-            populateSelect('studentFilter', students);
-        }
+        const students = await reportsApiGet('/api/reports/students');
+        populateSelect('studentFilter', students);
 
         // Set default dates
         const today = new Date();
@@ -126,18 +136,8 @@ async function generateSemesterReport() {
     try {
         showLoadingSpinner();
         
-        const response = await fetch('/api/reports/semester', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reportFilters)
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            displaySemesterReport(data);
-        } else {
-            throw new Error('Failed to generate semester report');
-        }
+        const data = await reportsApiPost('/api/reports/semester', reportFilters);
+        displaySemesterReport(data);
     } catch (error) {
         console.error('Error generating semester report:', error);
         showAlert('Error generating semester report: ' + error.message, 'error');
@@ -236,18 +236,8 @@ async function generateGPATranscript() {
     try {
         showLoadingSpinner();
         
-        const response = await fetch('/api/reports/gpa-transcript', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reportFilters)
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            displayGPATranscript(data);
-        } else {
-            throw new Error('Failed to generate GPA transcript');
-        }
+        const data = await reportsApiPost('/api/reports/gpa-transcript', reportFilters);
+        displayGPATranscript(data);
     } catch (error) {
         console.error('Error generating GPA transcript:', error);
         showAlert('Error generating GPA transcript: ' + error.message, 'error');
@@ -344,18 +334,8 @@ async function generateOBETranscript() {
     try {
         showLoadingSpinner();
         
-        const response = await fetch('/api/reports/obe-transcript', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reportFilters)
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            displayOBETranscript(data);
-        } else {
-            throw new Error('Failed to generate OBE transcript');
-        }
+        const data = await reportsApiPost('/api/reports/obe-transcript', reportFilters);
+        displayOBETranscript(data);
     } catch (error) {
         console.error('Error generating OBE transcript:', error);
         showAlert('Error generating OBE transcript: ' + error.message, 'error');
@@ -460,18 +440,8 @@ async function generateCourseCLOAttainment() {
     try {
         showLoadingSpinner();
         
-        const response = await fetch('/api/reports/course-clo-attainment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reportFilters)
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            displayCourseCLOAttainment(data);
-        } else {
-            throw new Error('Failed to generate course CLO attainment report');
-        }
+        const data = await reportsApiPost('/api/reports/course-clo-attainment', reportFilters);
+        displayCourseCLOAttainment(data);
     } catch (error) {
         console.error('Error generating course CLO attainment:', error);
         showAlert('Error generating course CLO attainment: ' + error.message, 'error');
@@ -564,18 +534,8 @@ async function generateVisionMissionReport() {
     try {
         showLoadingSpinner();
         
-        const response = await fetch('/api/reports/vision-mission', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reportFilters)
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            displayVisionMissionReport(data);
-        } else {
-            throw new Error('Failed to generate vision & mission report');
-        }
+        const data = await reportsApiPost('/api/reports/vision-mission', reportFilters);
+        displayVisionMissionReport(data);
     } catch (error) {
         console.error('Error generating vision & mission report:', error);
         showAlert('Error generating vision & mission report: ' + error.message, 'error');

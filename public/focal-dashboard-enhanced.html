@@ -1880,23 +1880,22 @@
         }
 
         function loadCLOs() {
-            const clos = [
-                { course: 'CS-301 Data Structures', code: 'CLO1', title: 'Analyze Data Structures', bloom: 'Analyze', assessment: 'Assignment', status: 'Active' },
-                { course: 'CS-301 Data Structures', code: 'CLO2', title: 'Implement Data Structures', bloom: 'Create', assessment: 'Project', status: 'Active' },
-                { course: 'CS-301 Data Structures', code: 'CLO3', title: 'Evaluate Algorithm Complexity', bloom: 'Evaluate', assessment: 'Final Exam', status: 'Active' },
-                { course: 'CS-302 Algorithms', code: 'CLO1', title: 'Design Efficient Algorithms', bloom: 'Create', assessment: 'Project', status: 'Active' },
-                { course: 'CS-302 Algorithms', code: 'CLO2', title: 'Analyze Algorithm Performance', bloom: 'Analyze', assessment: 'Midterm', status: 'Active' }
-            ];
-            
+            const clos = window.__dashboardData?.clos || [];
+            const courses = window.__dashboardData?.courses || [];
+            const courseTitle = (code) => {
+                const c = courses.find(x => x.code === code);
+                return c ? `${code} ${c.name || c.title || ''}`.trim() : code;
+            };
             const tbody = document.getElementById('closTable');
-            tbody.innerHTML = clos.map(clo => `
+            if (!tbody) return;
+            tbody.innerHTML = clos.length ? clos.map(clo => `
                 <tr>
-                    <td><strong>${clo.course}</strong></td>
+                    <td><strong>${courseTitle(clo.courseCode)}</strong></td>
                     <td><span class="badge bg-info">${clo.code}</span></td>
-                    <td>${clo.title}</td>
-                    <td><span class="badge bg-primary">${clo.bloom}</span></td>
-                    <td>${clo.assessment}</td>
-                    <td><span class="badge bg-success">${clo.status}</span></td>
+                    <td>${clo.title || clo.description || '—'}</td>
+                    <td><span class="badge bg-primary">${clo.bloomLevel || '—'}</span></td>
+                    <td>${clo.assessmentMethod || '—'}</td>
+                    <td><span class="badge bg-${(clo.attainment || 0) >= 60 ? 'success' : 'secondary'}">${Math.round(clo.attainment || 0)}%</span></td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary" onclick="editCLO('${clo.code}')">
                             <i class="fas fa-edit"></i>
@@ -1909,7 +1908,7 @@
                         </button>
                     </td>
                 </tr>
-            `).join('');
+            `).join('') : '<tr><td colspan="7" class="text-center text-muted">No CLOs — use Create CLO or run OBE seed</td></tr>';
         }
 
         async function createCLO() {
@@ -2576,12 +2575,14 @@
             tbody.innerHTML = clos.map(clo => {
                 const pct = Math.round(clo.attainment || 0);
                 const attained = pct >= 60;
+                const total = clo.studentsAssessed || 0;
+                const achieved = clo.studentsAchieved || 0;
                 return `
                     <tr>
                         <td>${clo.code}</td>
-                        <td>${clo.description || '—'}</td>
-                        <td>—</td>
-                        <td>—</td>
+                        <td>${clo.title || clo.description || '—'}</td>
+                        <td>${total}</td>
+                        <td>${achieved}</td>
                         <td class="${attained ? 'attainment-high' : 'attainment-low'}">${pct}%</td>
                         <td><span class="badge bg-${attained ? 'success' : 'danger'}">${attained ? 'Attained' : 'Not Attained'}</span></td>
                         <td><button class="btn btn-sm btn-outline-primary">Details</button></td>
@@ -2628,24 +2629,21 @@
 
         function loadCQIActionsData() {
             const tbody = document.getElementById('cqiActionsTable');
-            if (tbody) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td>CLO2</td>
-                        <td>Data Structures</td>
-                        <td><span class="badge bg-danger">Corrective</span></td>
-                        <td>Improve teaching methodology for algorithm design</td>
-                        <td>Dr. Muhammad Hassan</td>
-                        <td>2024-02-15</td>
-                        <td><span class="badge bg-warning">In Progress</span></td>
-                        <td><span class="badge bg-danger">High</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary">Edit</button>
-                            <button class="btn btn-sm btn-outline-danger">Delete</button>
-                        </td>
-                    </tr>
-                `;
-            }
+            if (!tbody) return;
+            const alerts = window.__dashboardData?.cqiAlerts || [];
+            tbody.innerHTML = alerts.length ? alerts.map(a => `
+                <tr>
+                    <td>${a.code || '—'}</td>
+                    <td>${a.courseCode || a.departmentCode || '—'}</td>
+                    <td><span class="badge bg-danger">${a.type === 'plo_deficiency' ? 'PLO' : 'CLO'}</span></td>
+                    <td>${a.message || 'Below target attainment'}</td>
+                    <td>—</td>
+                    <td>${a.createdAt ? new Date(a.createdAt).toLocaleDateString() : '—'}</td>
+                    <td><span class="badge bg-warning">Open</span></td>
+                    <td><span class="badge bg-danger">High</span></td>
+                    <td><button class="btn btn-sm btn-outline-primary" disabled>Review</button></td>
+                </tr>
+            `).join('') : '<tr><td colspan="9" class="text-center text-muted">No open CQI alerts</td></tr>';
         }
 
         function loadAttendanceFallback() {
@@ -2704,30 +2702,22 @@
         }
 
         function createCQICharts() {
-            // CLO Attainment Chart
+            const clos = (window.__dashboardData?.clos || []).slice(0, 8);
+            const labels = clos.length ? clos.map(c => c.code) : ['CLO1', 'CLO2', 'CLO3'];
+            const data = clos.length ? clos.map(c => Math.round(c.attainment || 0)) : [0, 0, 0];
+            const alerts = window.__dashboardData?.cqiAlerts || [];
+            const openCount = alerts.filter(a => a.status === 'open').length;
+
             const ctx1 = document.getElementById('cloAttainmentChart');
             if (ctx1) {
                 new Chart(ctx1, {
                     type: 'bar',
                     data: {
-                        labels: ['CLO1', 'CLO2', 'CLO3', 'CLO4', 'CLO5'],
+                        labels,
                         datasets: [{
                             label: 'Attainment %',
-                            data: [85, 56, 92, 78, 88],
-                            backgroundColor: [
-                                'rgba(40, 167, 69, 0.8)',
-                                'rgba(220, 53, 69, 0.8)',
-                                'rgba(40, 167, 69, 0.8)',
-                                'rgba(255, 193, 7, 0.8)',
-                                'rgba(40, 167, 69, 0.8)'
-                            ],
-                            borderColor: [
-                                'rgba(40, 167, 69, 1)',
-                                'rgba(220, 53, 69, 1)',
-                                'rgba(40, 167, 69, 1)',
-                                'rgba(255, 193, 7, 1)',
-                                'rgba(40, 167, 69, 1)'
-                            ],
+                            data,
+                            backgroundColor: data.map(v => v >= 60 ? 'rgba(40, 167, 69, 0.8)' : 'rgba(220, 53, 69, 0.8)'),
                             borderWidth: 1
                         }]
                     },
@@ -2750,9 +2740,9 @@
                 new Chart(ctx2, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Open', 'In Progress', 'Closed'],
+                        labels: ['Open CQI', 'Resolved'],
                         datasets: [{
-                            data: [3, 2, 3],
+                            data: [openCount || 0, Math.max(0, 5 - openCount)],
                             backgroundColor: [
                                 'rgba(220, 53, 69, 0.8)',
                                 'rgba(255, 193, 7, 0.8)',
@@ -2774,47 +2764,23 @@
             }
         }
 
-        // CQI Functions
-        function loadAssessmentDesign() {
-            // Load assessment design data
-            console.log('Loading assessment design...');
-        }
-
-        function loadCLOAttainment() {
-            // Load CLO attainment data
-            console.log('Loading CLO attainment...');
-        }
-
-        function loadCQIActions() {
-            // Load CQI actions
-            console.log('Loading CQI actions...');
-        }
-
-        function loadAttendanceFallback() {
-            // Load attendance fallback data
-            console.log('Loading attendance fallback...');
-        }
-
-        function loadReportsAnalytics() {
-            // Load reports and analytics
-            console.log('Loading reports and analytics...');
-        }
-
-        function createAssessment() {
-            showSection('assessment-design');
-        }
-
         async function calculateCLOAttainment() {
-            const courseId = document.getElementById('courseFilter').value;
-            const semester = document.getElementById('semesterFilter').value;
+            const courseId = document.getElementById('courseFilter')?.value;
+            const semester = document.getElementById('semesterFilter')?.value;
             if (!courseId || !semester) {
                 showAlert('Please select course and semester', 'warning');
                 return;
             }
-            showAlert('Loading CLO attainment from database...', 'info');
-            await ObeWrites.refreshDashboard();
-            loadCLOAttainmentData();
-            showAlert('CLO attainment updated from live data.', 'success');
+            showAlert('Recalculating CLO attainment…', 'info');
+            try {
+                await ObeWrites.recalculateAttainment(courseId === 'all' ? null : courseId);
+                await ObeWrites.refreshDashboard();
+                loadCLOAttainmentData();
+                loadCQIActionsData();
+                showAlert('CLO attainment updated from live data.', 'success');
+            } catch (err) {
+                showAlert('Recalculation failed: ' + err.message, 'danger');
+            }
         }
 
         function downloadAttendanceTemplate() {
