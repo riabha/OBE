@@ -227,14 +227,21 @@ function formatCourseResponse(course) {
 }
 
 const DEMO_CANONICAL_DB = 'obe_university_demo';
+const LEGACY_DEMO_DB_NAMES = new Set(['obe_demo', 'obe_university_DEMO', '']);
+
+const UNI_DB_COLLECTIONS = [
+    '_metadata', 'departments', 'users', 'courses', 'sections', 'enrollments',
+    'assessments', 'results', 'clos', 'plos', 'peos', 'programs', 'attainments', 'reports', 'settings'
+];
 
 function getCanonicalDatabaseName(university) {
     if (!university) return null;
+    const stored = (university.databaseName || '').trim();
     const code = (university.universityCode || '').toUpperCase();
-    if (code === 'DEMO') {
+    if (code === 'DEMO' && LEGACY_DEMO_DB_NAMES.has(stored)) {
         return DEMO_CANONICAL_DB;
     }
-    return (university.databaseName || '').trim() || null;
+    return stored || null;
 }
 
 async function syncUniversityDatabaseName(university) {
@@ -244,7 +251,33 @@ async function syncUniversityDatabaseName(university) {
         await university.save();
         console.log(`✅ Corrected university DB name → ${canonical}`);
     }
-    return canonical;
+    return canonical || university.databaseName;
+}
+
+async function ensureUniversityDbCollections(dbName, meta = {}) {
+    if (!dbName || !dbName.startsWith('obe_') || dbName === 'obe_platform') {
+        throw new Error('Invalid university database name');
+    }
+    const uniDb = mongoose.connection.useDb(dbName);
+    for (const collectionName of UNI_DB_COLLECTIONS) {
+        try {
+            await uniDb.createCollection(collectionName);
+        } catch (err) {
+            if (!String(err.message).includes('already exists')) {
+                console.log(`   ⚠️  ${collectionName}: ${err.message}`);
+            }
+        }
+    }
+    const existingMeta = await uniDb.collection('_metadata').findOne({});
+    if (!existingMeta) {
+        await uniDb.collection('_metadata').insertOne({
+            ...meta,
+            created: new Date(),
+            collections: UNI_DB_COLLECTIONS,
+            version: '1.0'
+        });
+    }
+    return uniDb;
 }
 
 async function findUniversityUserByCredentials(email, password) {
@@ -503,10 +536,12 @@ app.get('/api/universities', proAdminAuth, async (req, res) => {
                 obj.logoUrl = `/api/universities/${uni._id}/logo`;
             }
             try {
-                const uniDb = mongoose.connection.useDb(uni.databaseName);
+                const dbName = getCanonicalDatabaseName(uni) || uni.databaseName;
+                const uniDb = mongoose.connection.useDb(dbName);
                 const { User, Course } = getUniModels(uniDb);
                 obj.totalUsers = await User.countDocuments({ isActive: true });
                 obj.totalCourses = await Course.countDocuments({ isActive: true });
+                obj.databaseName = dbName;
             } catch (dbErr) {
                 obj.totalUsers = 0;
                 obj.totalCourses = 0;
@@ -582,7 +617,14 @@ app.post('/api/universities/create', proAdminAuth, upload.single('logo'), async 
         // Determine database name
         let dbName;
         if (databaseOption === 'manual' && databaseName) {
-            dbName = databaseName;
+            dbName = String(databaseName).trim();
+            if (!dbName.startsWith('obe_') || dbName === 'obe_platform') {
+                return res.status(400).json({ message: 'Invalid database name' });
+            }
+            const taken = await University.findOne({ databaseName: dbName });
+            if (taken) {
+                return res.status(400).json({ message: `Database "${dbName}" is already assigned to another university` });
+            }
         } else {
             dbName = `obe_university_${universityCode.toLowerCase()}`;
         }
@@ -611,53 +653,15 @@ app.post('/api/universities/create', proAdminAuth, upload.single('logo'), async 
         await university.save();
         console.log(`✅ University created in obe_platform`);
 
-        // Create university database with all collections
         try {
-            const uniDb = mongoose.connection.useDb(dbName);
-            
-            // List of collections to create
-            const collections = [
-                '_metadata',
-                'departments',
-                'users',
-                'courses',
-                'sections',
-                'enrollments',
-                'assessments',
-                'results',
-                'clos',
-                'plos',
-                'attainments',
-                'reports',
-                'settings'
-            ];
-
-            // Create all collections
-            for (const collectionName of collections) {
-                try {
-                    await uniDb.createCollection(collectionName);
-                    console.log(`   ✓ Created collection: ${collectionName}`);
-                } catch (err) {
-                    // Collection might already exist, ignore error
-                    if (!err.message.includes('already exists')) {
-                        console.log(`   ⚠️  ${collectionName}: ${err.message}`);
-                    }
-                }
-            }
-
-            // Insert metadata
-            await uniDb.collection('_metadata').insertOne({
+            await ensureUniversityDbCollections(dbName, {
                 universityId: university._id,
                 universityName: university.universityName,
-                universityCode: university.universityCode,
-                created: new Date(),
-                collections: collections,
-                version: '1.0'
+                universityCode: university.universityCode
             });
-
-            console.log(`✅ Database created: ${dbName} with ${collections.length} collections`);
+            console.log(`✅ Database ready: ${dbName}`);
         } catch (dbErr) {
-            console.log(`⚠️  Database creation: ${dbErr.message}`);
+            console.log(`⚠️  Database setup: ${dbErr.message}`);
         }
 
         // Create university super admin in PLATFORM database
@@ -726,8 +730,36 @@ app.put('/api/universities/:id', proAdminAuth, upload.single('logo'), async (req
             return res.status(404).json({ message: 'University not found' });
         }
 
-        Object.assign(university, req.body);
-        
+        const fields = [
+            'universityName', 'city', 'country', 'superAdminEmail', 'contactPhone',
+            'contactEmail', 'website', 'subscriptionPlan', 'address'
+        ];
+        fields.forEach(f => {
+            if (req.body[f] !== undefined && req.body[f] !== '') {
+                university[f] = req.body[f];
+            }
+        });
+        if (req.body.isActive !== undefined) {
+            university.isActive = req.body.isActive === '1' || req.body.isActive === true || req.body.isActive === 'true';
+        }
+
+        if (req.body.databaseName && req.body.databaseName !== university.databaseName) {
+            const newDb = String(req.body.databaseName).trim();
+            if (!newDb.startsWith('obe_') || newDb === 'obe_platform') {
+                return res.status(400).json({ message: 'Invalid database name' });
+            }
+            const taken = await University.findOne({ databaseName: newDb, _id: { $ne: university._id } });
+            if (taken) {
+                return res.status(400).json({ message: `Database already assigned to ${taken.universityName}` });
+            }
+            await ensureUniversityDbCollections(newDb, {
+                universityId: university._id,
+                universityName: university.universityName,
+                universityCode: university.universityCode
+            });
+            university.databaseName = newDb;
+        }
+
         if (req.file) {
             university.logo = {
                 data: req.file.buffer,
@@ -741,6 +773,55 @@ app.put('/api/universities/:id', proAdminAuth, upload.single('logo'), async (req
         delete obj.logo;
         res.json({ message: 'University updated', university: obj });
 
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Assign/reassign MongoDB database to a university (pro admin)
+app.put('/api/universities/:id/assign-database', proAdminAuth, async (req, res) => {
+    try {
+        const { databaseName } = req.body;
+        if (!databaseName || !String(databaseName).startsWith('obe_')) {
+            return res.status(400).json({ message: 'databaseName must start with obe_' });
+        }
+        if (databaseName === 'obe_platform') {
+            return res.status(400).json({ message: 'Cannot assign platform database' });
+        }
+
+        const university = await University.findById(req.params.id);
+        if (!university) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+
+        const taken = await University.findOne({
+            databaseName: String(databaseName).trim(),
+            _id: { $ne: university._id }
+        });
+        if (taken) {
+            return res.status(400).json({
+                message: `Database "${databaseName}" is already assigned to ${taken.universityName}`
+            });
+        }
+
+        await ensureUniversityDbCollections(databaseName, {
+            universityId: university._id,
+            universityName: university.universityName,
+            universityCode: university.universityCode
+        });
+
+        university.databaseName = String(databaseName).trim();
+        await university.save();
+
+        res.json({
+            message: 'Database assigned successfully',
+            university: {
+                id: university._id,
+                universityName: university.universityName,
+                universityCode: university.universityCode,
+                databaseName: university.databaseName
+            }
+        });
     } catch (error) {
         res.status(500).json({ message: 'Error', error: error.message });
     }
@@ -858,16 +939,29 @@ app.get('/api/databases', proAdminAuth, async (req, res) => {
         
         console.log(`Found ${databases.length} total databases`);
         
-        // Return ALL databases, not just obe_ ones
-        const allDatabases = databases.map(db => ({
-            name: db.name,
-            sizeOnDisk: db.sizeOnDisk,
-            sizeMB: (db.sizeOnDisk / 1024 / 1024).toFixed(2),
-            empty: db.empty,
-            type: db.name === 'obe_platform' ? 'Platform' : 
-                  db.name.startsWith('obe_') ? 'University' : 'Other',
-            canAssign: db.name !== 'admin' && db.name !== 'config' && db.name !== 'local'
-        }));
+        const universities = await University.find({}, 'universityName universityCode databaseName');
+        const assignmentByDb = {};
+        universities.forEach(u => {
+            if (u.databaseName) assignmentByDb[u.databaseName] = u;
+        });
+
+        const allDatabases = databases.map(db => {
+            const assigned = assignmentByDb[db.name];
+            return {
+                name: db.name,
+                sizeOnDisk: db.sizeOnDisk,
+                sizeMB: (db.sizeOnDisk / 1024 / 1024).toFixed(2),
+                empty: db.empty,
+                type: db.name === 'obe_platform' ? 'Platform' :
+                    db.name.startsWith('obe_') ? 'University' : 'Other',
+                canAssign: db.name !== 'admin' && db.name !== 'config' && db.name !== 'local' && db.name !== 'obe_platform',
+                assignedUniversity: assigned ? {
+                    id: assigned._id,
+                    name: assigned.universityName,
+                    code: assigned.universityCode
+                } : null
+            };
+        });
         
         console.log('📊 Database breakdown:');
         allDatabases.forEach(db => {
@@ -931,6 +1025,7 @@ app.get('/api/databases/available', proAdminAuth, async (req, res) => {
             .filter(db => db.name.startsWith('obe_') && db.name !== 'obe_platform' && !assigned.has(db.name))
             .map(db => ({
                 name: db.name,
+                databaseName: db.name,
                 sizeMB: (db.sizeOnDisk / 1024 / 1024).toFixed(2),
                 empty: db.empty
             }));
@@ -988,40 +1083,10 @@ app.post('/api/databases/create', proAdminAuth, async (req, res) => {
             return res.status(400).json({ message: 'Invalid database name' });
         }
         
-        const db = mongoose.connection.useDb(databaseName);
-        
-        // Create all necessary collections
-        const collections = [
-            '_metadata',
-            'departments',
-            'users',
-            'courses',
-            'sections',
-            'enrollments',
-            'assessments',
-            'results',
-            'clos',
-            'plos',
-            'attainments',
-            'reports',
-            'settings'
-        ];
-
-        for (const collectionName of collections) {
-            try {
-                await db.createCollection(collectionName);
-            } catch (err) {
-                // Ignore if collection already exists
-            }
-        }
-
-        await db.collection('_metadata').insertOne({
-            created: new Date(),
-            description: description || `Database: ${databaseName}`,
-            collections: collections
+        await ensureUniversityDbCollections(databaseName, {
+            description: description || `Database: ${databaseName}`
         });
-        
-        console.log(`✅ Database created: ${databaseName} with ${collections.length} collections`);
+        console.log(`✅ Database created: ${databaseName}`);
         
         res.json({ message: 'Database created successfully', database: { name: databaseName } });
         
@@ -1093,6 +1158,7 @@ app.get('/api/databases/:dbName/details', proAdminAuth, async (req, res) => {
 app.delete('/api/databases/:dbName', proAdminAuth, async (req, res) => {
     try {
         const { dbName } = req.params;
+        const force = req.query.force === 'true';
         
         // Prevent deleting platform database
         if (dbName === 'obe_platform') {
@@ -1101,6 +1167,15 @@ app.delete('/api/databases/:dbName', proAdminAuth, async (req, res) => {
 
         if (!dbName.startsWith('obe_')) {
             return res.status(400).json({ message: 'Invalid database name' });
+        }
+
+        const assignedUni = await University.findOne({ databaseName: dbName });
+        if (assignedUni && !force) {
+            return res.status(400).json({
+                message: `Database is assigned to ${assignedUni.universityName}. Unassign first or use force=true.`,
+                canForceDelete: true,
+                assignedUniversity: assignedUni.universityName
+            });
         }
 
         const db = mongoose.connection.useDb(dbName);

@@ -1060,8 +1060,10 @@
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">Assigned Database</label>
-                                <input type="text" class="form-control" id="editDatabaseName" disabled>
-                                <small class="text-muted">Database cannot be changed after university creation. Contains all university data.</small>
+                                <select class="form-select" id="editDatabaseSelect" name="databaseName">
+                                    <option value="">Loading databases...</option>
+                                </select>
+                                <small class="text-muted">Select any MongoDB database (obe_*). Data for this university is read from here.</small>
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">Current Logo</label>
@@ -1187,12 +1189,25 @@
                                             <small class="d-block text-muted">Automatically create database as: obe_university_<span id="autoDbName">xxx</span></small>
                                         </label>
                                     </div>
-                                    <div class="form-check">
+                                    <div class="form-check mb-2">
                                         <input class="form-check-input" type="radio" name="databaseOption" id="dbOptionManual" value="manual" onchange="toggleDatabaseOptions()">
                                         <label class="form-check-label" for="dbOptionManual">
                                             <strong>Manual Database Name</strong>
-                                            <small class="d-block text-muted">Specify custom database name</small>
+                                            <small class="d-block text-muted">Specify custom database name (created if missing)</small>
                                         </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="databaseOption" id="dbOptionExisting" value="existing" onchange="toggleDatabaseOptions()">
+                                        <label class="form-check-label" for="dbOptionExisting">
+                                            <strong>Use Existing Database</strong>
+                                            <small class="d-block text-muted">Assign an unassigned database already on MongoDB</small>
+                                        </label>
+                                    </div>
+                                    <div id="existingDbField" style="display: none;" class="mt-3">
+                                        <label class="form-label fw-bold">Select Database</label>
+                                        <select class="form-select" id="existingDatabaseSelect">
+                                            <option value="">Loading...</option>
+                                        </select>
                                     </div>
                                     <div id="manualDbNameField" style="display: none;" class="mt-3">
                                         <label class="form-label fw-bold">Database Name</label>
@@ -1626,8 +1641,7 @@
                                 <table class="table table-sm table-bordered">
                                     <tr><th>Host:</th><td><code>${info.externalHost}</code></td></tr>
                                     <tr><th>Port:</th><td><code>${info.externalPort}</code></td></tr>
-                                    <tr><th>Username:</th><td><code>${info.credentials.username}</code></td></tr>
-                                    <tr><th>Auth DB:</th><td><code>${info.credentials.authDatabase}</code></td></tr>
+                                    <tr><th>Auth:</th><td><code>${info.credentials?.authDatabase || 'admin'}</code></td></tr>
                                 </table>
                             </div>
                             <div class="col-12">
@@ -1763,14 +1777,14 @@
                                     </div>
                                     <div>
                                         <h6 class="mb-1 fw-bold">${db.name} <span class="badge badge-success ms-2">UNIVERSITY</span></h6>
-                                        <small class="text-muted">Size: ${db.sizeMB} MB | ${db.empty ? 'Empty' : 'Has Data'}</small>
+                                        <small class="text-muted">Size: ${db.sizeMB} MB | ${db.empty ? 'Empty' : 'Has Data'}${db.assignedUniversity ? ` | Assigned: <strong>${db.assignedUniversity.name}</strong>` : ' | <span class="text-success">Unassigned</span>'}</small>
                                     </div>
                                 </div>
                                 <div class="d-flex gap-2">
                                     <button class="btn btn-sm btn-outline-primary" onclick="viewDatabaseDetails('${db.name}')">
                                         <i class="fas fa-eye me-1"></i>View
                                     </button>
-                                    ${db.canAssign ? `
+                                    ${db.canAssign && !db.assignedUniversity ? `
                                         <button class="btn btn-sm btn-primary" onclick="assignDatabaseToUniversity('${db.name}')">
                                             <i class="fas fa-link me-1"></i>Assign
                                         </button>
@@ -2045,14 +2059,14 @@
                 return;
             }
 
-            await deleteDatabase(dbName);
+            await deleteMongoDatabase(dbName);
         }
 
-        // Delete database
-        async function deleteDatabase(dbName) {
+        // Delete MongoDB database by name
+        async function deleteMongoDatabase(dbName) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`/api/databases/${dbName}`, {
+                const response = await fetch(`/api/databases/${encodeURIComponent(dbName)}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -2061,7 +2075,15 @@
 
                 if (response.ok) {
                     alert(`✅ ${result.message}\n\nDatabase "${dbName}" has been deleted.`);
-                    loadDatabases(); // Refresh the list
+                    loadDatabases();
+                } else if (result.canForceDelete && confirm(`${result.message}\n\nForce delete anyway?`)) {
+                    const forceRes = await fetch(`/api/databases/${encodeURIComponent(dbName)}?force=true`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const forceData = await forceRes.json();
+                    alert(forceRes.ok ? `✅ ${forceData.message}` : `❌ ${forceData.message}`);
+                    loadDatabases();
                 } else {
                     alert(`❌ Error: ${result.message}`);
                 }
@@ -2070,7 +2092,54 @@
             }
         }
 
-        // Edit database connection
+        // Assign a MongoDB database to a university
+        async function assignDatabaseToUniversity(dbName) {
+            try {
+                const token = localStorage.getItem('token');
+                const uniRes = await fetch('/api/universities', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!uniRes.ok) {
+                    alert('Failed to load universities');
+                    return;
+                }
+                const universities = asArray(await uniRes.json());
+                if (!universities.length) {
+                    alert('No universities found. Create a university first.');
+                    return;
+                }
+                const list = universities.map((u, i) =>
+                    `${i + 1}. ${u.universityName} (${u.universityCode}) — current DB: ${u.databaseName || 'none'}`
+                ).join('\n');
+                const pick = prompt(`Assign database "${dbName}" to which university?\n\n${list}\n\nEnter number (1-${universities.length}):`);
+                const idx = parseInt(pick, 10) - 1;
+                if (Number.isNaN(idx) || idx < 0 || idx >= universities.length) {
+                    return;
+                }
+                const uni = universities[idx];
+                const assignRes = await fetch(`/api/universities/${uni._id || uni.id}/assign-database`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ databaseName: dbName })
+                });
+                const data = await assignRes.json();
+                if (assignRes.ok) {
+                    alert(`✅ Database "${dbName}" assigned to ${data.university.universityName}`);
+                    loadDatabases();
+                    loadAllUniversities();
+                    loadDashboardData();
+                } else {
+                    alert(`❌ ${data.message || 'Assignment failed'}`);
+                }
+            } catch (err) {
+                alert(`❌ Error: ${err.message}`);
+            }
+        }
+
+        // Edit database connection (legacy UI — not used for same-server MongoDB list)
         async function editDatabaseConnection(id) {
             try {
                 const token = localStorage.getItem('token');
@@ -2268,46 +2337,69 @@
             }
         }
 
-        // Load available databases for university form (only University type)
+        // Load unassigned databases for "use existing" option
         async function loadAvailableDatabases() {
             try {
                 const token = localStorage.getItem('token');
                 const response = await fetch('/api/databases/available', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
+                const select = document.getElementById('existingDatabaseSelect');
+                if (!select) return;
                 if (response.ok) {
-                    const databases = await response.json();
-                    const select = document.getElementById('databaseConnectionId');
-                    
-                    select.innerHTML = '<option value="">Select Database...</option>';
-                    
-                    if (databases.length === 0) {
-                        select.innerHTML += '<option value="" disabled>No databases available - Go to Databases section to add one</option>';
-                    } else {
-                        databases.forEach(db => {
-                            const label = db.isOrphaned 
-                                ? `${db.databaseName} ♻️ (Recycled - Available)`
-                                : `${db.databaseName} (${db.host}:${db.port})`;
-                            select.innerHTML += `<option value="${db.id}">${label}</option>`;
-                        });
-                    }
-                    
-                    console.log(`✅ Loaded ${databases.length} available databases`, databases);
+                    const databases = asArray(await response.json());
+                    select.innerHTML = databases.length
+                        ? '<option value="">Select database...</option>' + databases.map(db =>
+                            `<option value="${db.name}">${db.name} (${db.sizeMB} MB)</option>`
+                        ).join('')
+                        : '<option value="" disabled>No unassigned databases — create one in Databases tab</option>';
                 } else {
-                    const select = document.getElementById('databaseConnectionId');
                     select.innerHTML = '<option value="" disabled>Error loading databases</option>';
                 }
             } catch (error) {
                 console.error('Error loading available databases:', error);
-                const select = document.getElementById('databaseConnectionId');
-                select.innerHTML = '<option value="" disabled>Error loading databases</option>';
+                const select = document.getElementById('existingDatabaseSelect');
+                if (select) select.innerHTML = '<option value="" disabled>Error loading databases</option>';
+            }
+        }
+
+        async function loadDatabaseOptionsForEdit(currentDb) {
+            const select = document.getElementById('editDatabaseSelect');
+            if (!select) return;
+            try {
+                const token = localStorage.getItem('token');
+                const [dbRes, uniRes] = await Promise.all([
+                    fetch('/api/databases', { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch('/api/universities', { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+                const databases = dbRes.ok ? asArray(await dbRes.json()) : [];
+                const universities = uniRes.ok ? asArray(await uniRes.json()) : [];
+                const assignedMap = {};
+                universities.forEach(u => { if (u.databaseName) assignedMap[u.databaseName] = u; });
+                const uniId = document.getElementById('editUniversityId').value;
+                const currentUni = universities.find(u => String(u._id || u.id) === String(uniId));
+
+                const options = databases
+                    .filter(db => db.name.startsWith('obe_') && db.name !== 'obe_platform')
+                    .filter(db => !db.assignedUniversity || String(db.assignedUniversity.id) === String(uniId))
+                    .map(db => {
+                        const selected = db.name === currentDb ? 'selected' : '';
+                        const tag = db.assignedUniversity && String(db.assignedUniversity.id) !== String(uniId)
+                            ? ' (assigned elsewhere)' : '';
+                        return `<option value="${db.name}" ${selected}>${db.name}${tag}</option>`;
+                    });
+                select.innerHTML = options.join('') || `<option value="${currentDb}">${currentDb}</option>`;
+                if (currentDb && !options.some(o => o.includes(`value="${currentDb}"`))) {
+                    select.innerHTML = `<option value="${currentDb}" selected>${currentDb} (current)</option>` + select.innerHTML;
+                }
+            } catch (e) {
+                select.innerHTML = `<option value="${currentDb}">${currentDb}</option>`;
             }
         }
 
         // Show add university modal
         function showAddUniversityModal() {
-            loadAvailableDatabases(); // Load database dropdown
+            loadAvailableDatabases();
             const modal = new bootstrap.Modal(document.getElementById('addUniversityModal'));
             modal.show();
         }
@@ -2327,9 +2419,15 @@
             let databaseName = '';
             
             if (databaseOption === 'manual') {
-                databaseName = document.getElementById('manualDatabaseName').value;
+                databaseName = document.getElementById('manualDatabaseName').value.trim();
                 if (!databaseName) {
                     alert('❌ Please enter a database name!');
+                    return;
+                }
+            } else if (databaseOption === 'existing') {
+                databaseName = document.getElementById('existingDatabaseSelect').value;
+                if (!databaseName) {
+                    alert('❌ Please select an existing database!');
                     return;
                 }
             }
@@ -2344,8 +2442,11 @@
             formData.append('contactPhone', document.getElementById('contactPhone').value);
             formData.append('contactEmail', document.getElementById('contactEmail').value);
             formData.append('subscriptionPlan', document.getElementById('subscriptionPlan').value);
-            formData.append('databaseOption', databaseOption);
-            formData.append('databaseName', databaseName);
+            const apiDbOption = databaseName ? 'manual' : databaseOption;
+            formData.append('databaseOption', apiDbOption);
+            if (databaseName) {
+                formData.append('databaseName', databaseName);
+            }
             formData.append('address', document.getElementById('address').value);
             
             // Add logo file
@@ -2477,7 +2578,7 @@
                     document.getElementById('editSubscriptionPlan').value = uni.subscriptionPlan || 'Premium';
                     document.getElementById('editIsActive').value = uni.isActive ? '1' : '0';
                     document.getElementById('editAddress').value = uni.address || '';
-                    document.getElementById('editDatabaseName').value = uni.databaseName || 'N/A';
+                    await loadDatabaseOptionsForEdit(uni.databaseName || '');
                     
                     // Show current logo
                     if (uni.logoUrl) {
@@ -2596,6 +2697,10 @@
             formData.append('subscriptionPlan', document.getElementById('editSubscriptionPlan').value);
             formData.append('isActive', document.getElementById('editIsActive').value);
             formData.append('address', document.getElementById('editAddress').value);
+            const newDb = document.getElementById('editDatabaseSelect')?.value;
+            if (newDb) {
+                formData.append('databaseName', newDb);
+            }
             
             // Add logo file if changed
             const logoFile = document.getElementById('editUniversityLogo').files[0];
@@ -2742,15 +2847,13 @@ Type "DELETE" to confirm:`;
         // Toggle database options
         function toggleDatabaseOptions() {
             const isManual = document.getElementById('dbOptionManual').checked;
+            const isExisting = document.getElementById('dbOptionExisting').checked;
             const manualField = document.getElementById('manualDbNameField');
-            
-            if (isManual) {
-                manualField.style.display = 'block';
-                document.getElementById('manualDatabaseName').required = true;
-            } else {
-                manualField.style.display = 'none';
-                document.getElementById('manualDatabaseName').required = false;
-            }
+            const existingField = document.getElementById('existingDbField');
+            manualField.style.display = isManual ? 'block' : 'none';
+            existingField.style.display = isExisting ? 'block' : 'none';
+            document.getElementById('manualDatabaseName').required = isManual;
+            if (isExisting) loadAvailableDatabases();
         }
 
         // Preview logo
@@ -3811,6 +3914,10 @@ Type "DELETE" to confirm:`;
                             <div class="col-md-2">
                                 <small class="text-muted d-block">Courses</small>
                                 <strong>${uni.totalCourses || 0}</strong>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Database</small>
+                                <strong><code>${uni.databaseName || '—'}</code></strong>
                             </div>
                             <div class="col-md-2">
                                 <small class="text-muted d-block">Contact</small>
