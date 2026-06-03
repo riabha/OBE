@@ -178,6 +178,23 @@
             margin-bottom: 1rem;
         }
 
+        .modal-body-scroll {
+            max-height: min(70vh, 600px);
+            overflow-y: auto;
+        }
+
+        .logo-upload-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 1rem;
+            background: #f8fafc;
+        }
+
+        .logo-upload-box:focus-within {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+        }
+
         .university-logo {
             width: 60px;
             height: 60px;
@@ -421,7 +438,7 @@
                             <button class="btn btn-outline-success" onclick="showSection('analytics', event)">
                                 <i class="fas fa-chart-bar me-2"></i>View Analytics
                             </button>
-                            <button class="btn btn-outline-info" onclick="refreshDashboard()">
+                            <button class="btn btn-outline-info" onclick="refreshDashboard(this)">
                                 <i class="fas fa-sync me-2"></i>Refresh Data
                             </button>
                         </div>
@@ -1120,7 +1137,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary-gradient" onclick="saveUniversityChanges()">
+                    <button type="button" class="btn btn-primary-gradient" id="saveUniversityChangesBtn" onclick="saveUniversityChanges(this)">
                         <i class="fas fa-save me-2"></i>Save Changes
                     </button>
                 </div>
@@ -1136,7 +1153,7 @@
                     <h5 class="modal-title"><i class="fas fa-university me-2"></i>Add New University</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body modal-body-scroll">
                     <form id="addUniversityForm">
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -1217,9 +1234,11 @@
                                 </div>
                             </div>
                             <div class="col-md-12">
-                                <label class="form-label fw-bold">University Logo *</label>
-                                <input type="file" class="form-control" id="universityLogo" name="universityLogo" accept=".png,.jpg,.jpeg" required onchange="previewLogo(event)">
-                                <small class="text-muted">PNG or JPG format (Max 2MB) - Will be displayed in university list</small>
+                                <label class="form-label fw-bold"><i class="fas fa-image me-1"></i>University Logo</label>
+                                <div class="logo-upload-box">
+                                    <input type="file" class="form-control" id="universityLogo" name="universityLogo" accept=".png,.jpg,.jpeg,.svg,image/*" onchange="previewLogo(event)">
+                                    <small class="text-muted d-block mt-2">PNG or JPG (max 2MB). Optional — a default letter logo is created if you skip this.</small>
+                                </div>
                             </div>
                             <div class="col-12" id="logoPreview" style="display: none;">
                                 <label class="form-label fw-bold">Logo Preview</label>
@@ -1236,7 +1255,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary-gradient" onclick="addUniversity()">
+                    <button type="button" class="btn btn-primary-gradient" id="addUniversitySubmitBtn" onclick="addUniversity(this)">
                         <i class="fas fa-plus me-2"></i>Add University
                     </button>
                 </div>
@@ -2399,22 +2418,34 @@
 
         // Show add university modal
         function showAddUniversityModal() {
+            const form = document.getElementById('addUniversityForm');
+            if (form) form.reset();
+            document.getElementById('dbOptionAuto').checked = true;
+            toggleDatabaseOptions();
+            document.getElementById('logoPreview').style.display = 'none';
+            document.getElementById('autoDbName').textContent = 'xxx';
+            document.getElementById('country').value = 'Pakistan';
             loadAvailableDatabases();
             const modal = new bootstrap.Modal(document.getElementById('addUniversityModal'));
             modal.show();
         }
 
         // Add university
-        async function addUniversity() {
+        async function addUniversity(submitBtn) {
             const form = document.getElementById('addUniversityForm');
+            const btn = submitBtn || document.getElementById('addUniversitySubmitBtn');
             
-            // Validate form
             if (!form.checkValidity()) {
                 form.reportValidity();
                 return;
             }
 
-            // Get database option
+            const slug = document.getElementById('universitySlug').value.trim().toLowerCase();
+            if (!/^[a-z0-9_]+$/.test(slug)) {
+                alert('❌ University slug must use only lowercase letters, numbers, and underscores.');
+                return;
+            }
+
             const databaseOption = document.querySelector('input[name="databaseOption"]:checked').value;
             let databaseName = '';
             
@@ -2432,34 +2463,34 @@
                 }
             }
 
-            // Get form data
             const formData = new FormData();
-            formData.append('universityName', document.getElementById('universityName').value);
-            formData.append('universityCode', document.getElementById('universitySlug').value.toUpperCase());
-            formData.append('city', document.getElementById('city').value);
-            formData.append('country', document.getElementById('country').value);
-            formData.append('superAdminEmail', document.getElementById('superAdminEmail').value);
-            formData.append('contactPhone', document.getElementById('contactPhone').value);
-            formData.append('contactEmail', document.getElementById('contactEmail').value);
+            formData.append('universityName', document.getElementById('universityName').value.trim());
+            formData.append('universityCode', slug.toUpperCase());
+            formData.append('city', document.getElementById('city').value.trim());
+            formData.append('country', document.getElementById('country').value.trim());
+            formData.append('superAdminEmail', document.getElementById('superAdminEmail').value.trim());
+            formData.append('contactPhone', document.getElementById('contactPhone').value.trim());
+            formData.append('contactEmail', document.getElementById('contactEmail').value.trim());
             formData.append('subscriptionPlan', document.getElementById('subscriptionPlan').value);
-            const apiDbOption = databaseName ? 'manual' : databaseOption;
-            formData.append('databaseOption', apiDbOption);
+            formData.append('databaseOption', databaseName ? databaseOption : databaseOption);
             if (databaseName) {
                 formData.append('databaseName', databaseName);
             }
-            formData.append('address', document.getElementById('address').value);
+            formData.append('address', document.getElementById('address').value.trim());
             
-            // Add logo file
             const logoFile = document.getElementById('universityLogo').files[0];
             if (logoFile) {
                 formData.append('logo', logoFile);
             }
 
-            // Show loading
-            const submitBtn = event.target;
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating University...';
-            submitBtn.disabled = true;
+            if (!btn) {
+                alert('❌ Submit button not found. Please refresh the page.');
+                return;
+            }
+
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating University...';
+            btn.disabled = true;
 
             try {
                 const token = localStorage.getItem('token');
@@ -2471,7 +2502,7 @@
                     body: formData
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (response.ok) {
                     // Success
@@ -2498,16 +2529,14 @@
                         location.reload();
                     }, 1000);
                 } else {
-                    // Error
-                    alert(`❌ Error: ${data.message || 'Failed to create university'}`);
+                    alert(`❌ Error: ${data.error || data.message || 'Failed to create university'} (${response.status})`);
                 }
             } catch (error) {
                 console.error('Error:', error);
                 alert(`❌ Network Error: ${error.message}\n\nPlease check your connection and try again.`);
             } finally {
-                // Reset button
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
 
@@ -2657,7 +2686,7 @@
         }
 
         // Save university changes
-        async function saveUniversityChanges() {
+        async function saveUniversityChanges(btn) {
             const form = document.getElementById('editUniversityForm');
             
             // Validate form
@@ -2714,11 +2743,14 @@
                 formData.append('newPassword', document.getElementById('editNewPassword').value);
             }
 
-            // Show loading
-            const submitBtn = event.target;
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving Changes...';
-            submitBtn.disabled = true;
+            const btn = arguments[0] || document.getElementById('saveUniversityChangesBtn');
+            if (!btn) {
+                alert('❌ Save button not found. Please refresh the page.');
+                return;
+            }
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving Changes...';
+            btn.disabled = true;
 
             try {
                 const token = localStorage.getItem('token');
@@ -2757,9 +2789,8 @@
                 console.error('Error:', error);
                 alert(`❌ Network Error: ${error.message}`);
             } finally {
-                // Reset button
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
 
@@ -4045,15 +4076,22 @@ Type "DELETE" to confirm:`;
         // ============================================
 
         // Refresh dashboard
-        async function refreshDashboard() {
-            const btn = event.target;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
-            btn.disabled = true;
-            
-            await loadDashboardData();
-            
-            btn.innerHTML = '<i class="fas fa-sync me-2"></i>Refresh Data';
-            btn.disabled = false;
+        async function refreshDashboard(btn) {
+            const el = btn || document.querySelector('[onclick*="refreshDashboard"]');
+            if (!el) {
+                await loadDashboardData();
+                return;
+            }
+            const original = el.innerHTML;
+            el.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+            el.disabled = true;
+            try {
+                await loadDashboardData();
+                await loadAllUniversities();
+            } finally {
+                el.innerHTML = original;
+                el.disabled = false;
+            }
         }
 
         // Export universities data to CSV
@@ -4064,7 +4102,8 @@ Type "DELETE" to confirm:`;
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             .then(res => res.json())
-            .then(universities => {
+            .then(data => {
+                const universities = asArray(data);
                 if (universities.length === 0) {
                     alert('No universities to export');
                     return;

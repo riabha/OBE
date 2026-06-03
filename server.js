@@ -40,7 +40,7 @@ const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
+        if (file.mimetype.startsWith('image/') || file.mimetype === 'image/svg+xml') {
             cb(null, true);
         } else {
             cb(new Error('Only images allowed'), false);
@@ -251,6 +251,16 @@ function formatCourseListItem(course, deptMap, instMap) {
         semesterName: course.semesterName,
         statistics: course.statistics
     };
+}
+
+function buildDefaultUniversityLogo(letter) {
+    const ch = String(letter || 'U').charAt(0).toUpperCase();
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="24" fill="#2563eb"/>
+  <text x="64" y="82" font-family="Arial,sans-serif" font-size="56" font-weight="700" fill="#ffffff" text-anchor="middle">${ch}</text>
+</svg>`;
+    return { data: Buffer.from(svg), contentType: 'image/svg+xml' };
 }
 
 const DEMO_CANONICAL_DB = 'obe_university_demo';
@@ -559,7 +569,7 @@ app.get('/api/universities', proAdminAuth, async (req, res) => {
         const universities = await University.find({}, '-logo.data').sort({ createdAt: -1 });
         const result = await Promise.all(universities.map(async (uni) => {
             const obj = uni.toObject();
-            if (uni.logo && uni.logo.contentType) {
+            if (uni.logo && uni.logo.data) {
                 obj.logoUrl = `/api/universities/${uni._id}/logo`;
             }
             try {
@@ -663,7 +673,7 @@ app.post('/api/universities/create', proAdminAuth, upload.single('logo'), async 
 
         // Determine database name
         let dbName;
-        if (databaseOption === 'manual' && databaseName) {
+        if ((databaseOption === 'manual' || databaseOption === 'existing') && databaseName) {
             dbName = String(databaseName).trim();
             if (!dbName.startsWith('obe_') || dbName === 'obe_platform') {
                 return res.status(400).json({ message: 'Invalid database name' });
@@ -676,15 +686,16 @@ app.post('/api/universities/create', proAdminAuth, upload.single('logo'), async 
             dbName = `obe_university_${universityCode.toLowerCase()}`;
         }
 
+        const logoPayload = req.file
+            ? { data: req.file.buffer, contentType: req.file.mimetype }
+            : buildDefaultUniversityLogo(universityName);
+
         // Create university
         const university = new University({
             universityName,
             universityCode: universityCode.toUpperCase(),
             databaseName: dbName,
-            logo: req.file ? {
-                data: req.file.buffer,
-                contentType: req.file.mimetype
-            } : undefined,
+            logo: logoPayload,
             address,
             city,
             country: country || 'Pakistan',
@@ -2891,6 +2902,21 @@ async function startServer() {
         process.exit(1);
     }
 }
+
+// Multer / upload errors
+app.use((err, req, res, next) => {
+    if (err && err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ message: 'Logo file too large (max 5MB)' });
+    }
+    if (err && err.message === 'Only images allowed') {
+        return res.status(400).json({ message: 'Only PNG, JPG, or SVG images are allowed for logos' });
+    }
+    if (err) {
+        console.error('Unhandled error:', err);
+        return res.status(500).json({ message: err.message || 'Server error' });
+    }
+    next();
+});
 
 process.on('SIGINT', async () => {
     console.log('\n🛑 Shutting down...');
