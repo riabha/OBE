@@ -1173,7 +1173,7 @@
         // Load platform stats
         async function loadPlatformStats() {
             try {
-                const response = await fetch('/api/platform-stats');
+                const response = await fetch('/api/platform-stats/public');
                 
                 if (response.ok) {
                     const stats = await response.json();

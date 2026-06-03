@@ -1329,6 +1329,14 @@
     <script src="/js/dashboard-common.js"></script>
     
     <script>
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!AuthManager.requireRole('chairman')) return;
+            currentUser = AuthManager.getUser();
+            loadOverviewCharts();
+        });
+
         // Navigation functionality
         function showSection(sectionName) {
             // Hide all sections

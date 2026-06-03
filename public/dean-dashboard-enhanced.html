@@ -443,18 +443,7 @@
             
             const user = AuthManager.getUser();
             if (user.role !== 'dean') {
-                // Redirect to appropriate dashboard
-                const dashboardMap = {
-                    'university_superadmin': '/university-super-admin-dashboard.html',
-                    'student': '/student-dashboard-enhanced.html',
-                    'teacher': '/teacher-dashboard-enhanced.html',
-                    'focal': '/focal-dashboard-enhanced.html',
-                    'chairman': '/chairman-dashboard-enhanced.html',
-                    'controller': '/controller-dashboard-enhanced.html'
-                };
-                
-                const dashboardFile = dashboardMap[user.role] || '/student-dashboard-enhanced.html';
-                window.location.href = dashboardFile;
+                window.location.href = getDashboardForRole(user.role);
                 return;
             }
             

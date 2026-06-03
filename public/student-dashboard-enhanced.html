@@ -512,18 +512,7 @@
             
             const user = AuthManager.getUser();
             if (user.role !== 'student') {
-                // Redirect to appropriate dashboard
-                const dashboardMap = {
-                    'university_superadmin': '/university-super-admin-dashboard.html',
-                    'teacher': '/teacher-dashboard-enhanced.html',
-                    'focal': '/focal-dashboard-enhanced.html',
-                    'chairman': '/chairman-dashboard-enhanced.html',
-                    'dean': '/dean-dashboard-enhanced.html',
-                    'controller': '/controller-dashboard-enhanced.html'
-                };
-                
-                const dashboardFile = dashboardMap[user.role] || '/student-dashboard-enhanced.html';
-                window.location.href = dashboardFile;
+                window.location.href = getDashboardForRole(user.role);
                 return;
             }
             
@@ -601,17 +590,30 @@
             `).join('');
         }
 
-        // Load courses
-        function loadCourses() {
-            const courses = [
-                { name: 'Data Structures', code: 'CS-201', credits: 3, instructor: 'Dr. Sarah Khan', grade: 'A', status: 'Completed' },
-                { name: 'Algorithms', code: 'CS-301', credits: 3, instructor: 'Dr. Sarah Khan', grade: 'A+', status: 'Completed' },
-                { name: 'Database Systems', code: 'CS-302', credits: 3, instructor: 'Dr. Ali Raza', grade: 'B+', status: 'Completed' },
-                { name: 'Software Engineering', code: 'CS-401', credits: 3, instructor: 'Prof. Muhammad Hassan', grade: 'A', status: 'Completed' },
-                { name: 'Computer Networks', code: 'CS-402', credits: 3, instructor: 'Dr. Fatima Sheikh', grade: 'A-', status: 'Completed' },
-                { name: 'Machine Learning', code: 'CS-501', credits: 3, instructor: 'Dr. Usman Malik', grade: 'B+', status: 'Completed' }
-            ];
-            
+        // Load courses (API with demo fallback)
+        async function loadCourses() {
+            let courses = [];
+            try {
+                const data = await APIManager.get('/api/courses');
+                if (data && data.length) {
+                    courses = data.map(c => ({
+                        name: c.name || c.title,
+                        code: c.code,
+                        credits: c.creditHours || c.credits || 3,
+                        instructor: c.instructorName || 'Faculty',
+                        grade: '—',
+                        status: 'Enrolled'
+                    }));
+                }
+            } catch (e) {
+                console.warn('Courses API fallback:', e.message);
+            }
+            if (!courses.length) {
+                courses = [
+                    { name: 'Data Structures', code: 'CS-201', credits: 3, instructor: 'Faculty', grade: 'A', status: 'Enrolled' }
+                ];
+            }
+
             const container = document.getElementById('coursesGrid');
             container.innerHTML = courses.map(course => `
                 <div class="col-md-4 mb-3">
@@ -633,17 +635,31 @@
             `).join('');
         }
 
-        // Load results
-        function loadResults() {
-            const results = [
-                { subject: 'Data Structures', code: 'CS-201', credits: 3, marks: 86, grade: 'A', gpa: 4.0, semester: '7th' },
-                { subject: 'Algorithms', code: 'CS-301', credits: 3, marks: 94, grade: 'A+', gpa: 4.0, semester: '7th' },
-                { subject: 'Database Systems', code: 'CS-302', credits: 3, marks: 82, grade: 'B+', gpa: 3.3, semester: '7th' },
-                { subject: 'Software Engineering', code: 'CS-401', credits: 3, marks: 88, grade: 'A', gpa: 4.0, semester: '6th' },
-                { subject: 'Computer Networks', code: 'CS-402', credits: 3, marks: 81, grade: 'A-', gpa: 3.7, semester: '6th' },
-                { subject: 'Machine Learning', code: 'CS-501', credits: 3, marks: 78, grade: 'B+', gpa: 3.3, semester: '5th' }
-            ];
-            
+        // Load results (API with demo fallback)
+        async function loadResults() {
+            let results = [];
+            try {
+                const data = await APIManager.get('/api/results');
+                if (data && data.length) {
+                    results = data.map(r => ({
+                        subject: r.courseName || r.subject || r.courseCode,
+                        code: r.courseCode || r.code,
+                        credits: r.credits || 3,
+                        marks: r.marks || r.score || 0,
+                        grade: r.grade || '—',
+                        gpa: r.gpa || '—',
+                        semester: r.semester || currentUser.semester || '—'
+                    }));
+                }
+            } catch (e) {
+                console.warn('Results API fallback:', e.message);
+            }
+            if (!results.length) {
+                results = [
+                    { subject: 'Sample Course', code: 'CS-201', credits: 3, marks: 86, grade: 'A', gpa: 4.0, semester: currentUser.semester || '—' }
+                ];
+            }
+
             const tbody = document.getElementById('resultsTableBody');
             tbody.innerHTML = results.map(result => `
                 <tr>

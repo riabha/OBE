@@ -172,20 +172,18 @@
                     
                     // Redirect to appropriate dashboard
                     setTimeout(() => {
-                        const dashboardMap = {
-                            'pro_superadmin': '/pro-super-admin-dashboard.html',
-                            'university_superadmin': '/university-super-admin-dashboard.html',
-                            'platform_admin': '/pro-super-admin-dashboard.html',
-                            'superadmin': '/university-super-admin-dashboard.html',
-                            'controller': '/controller-dashboard-enhanced.html',
-                            'dean': '/dean-dashboard-enhanced.html',
-                            'chairman': '/chairman-dashboard-enhanced.html',
-                            'focal': '/focal-dashboard-enhanced.html',
-                            'teacher': '/teacher-dashboard-enhanced.html',
-                            'student': '/student-dashboard-enhanced.html'
-                        };
-                        
-                        const dashboardFile = dashboardMap[data.user.role];
+                        const dashboardFile = {
+                            pro_superadmin: '/pro-super-admin-dashboard.html',
+                            platform_admin: '/pro-super-admin-dashboard.html',
+                            university_superadmin: '/university-super-admin-dashboard.html',
+                            superadmin: '/university-super-admin-dashboard.html',
+                            controller: '/controller-dashboard-enhanced.html',
+                            dean: '/dean-dashboard-enhanced.html',
+                            chairman: '/chairman-dashboard-enhanced.html',
+                            focal: '/focal-dashboard-enhanced.html',
+                            teacher: '/teacher-dashboard-enhanced.html',
+                            student: '/student-dashboard-enhanced.html'
+                        }[data.user.role];
                         
                         if (dashboardFile) {
                             console.log(`✅ Redirecting to ${dashboardFile} for role: ${data.user.role}`);

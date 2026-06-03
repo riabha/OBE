@@ -1473,41 +1473,9 @@
 
         // Check authentication on page load
         document.addEventListener('DOMContentLoaded', function() {
-            const token = localStorage.getItem('token');
-            const user = localStorage.getItem('user');
-            
-            if (!token || !user) {
-                window.location.href = '/';
-                return;
-            }
-            
-            try {
-                const userData = JSON.parse(user);
-                if (userData.role !== 'focal') {
-                    // Redirect to appropriate dashboard
-                    const dashboardMap = {
-                        'superadmin': '/admin',
-                        'student': '/student-dashboard-enhanced.html',
-                        'teacher': '/teacher-dashboard.html',
-                        'chairman': '/chairman-dashboard.html',
-                        'dean': '/dean-dashboard.html',
-                        'controller': '/controller-dashboard-enhanced.html'
-                    };
-                    
-                    const dashboardFile = dashboardMap[userData.role] || '/student-dashboard-enhanced.html';
-                    window.location.href = dashboardFile;
-                    return;
-                }
-                
-                currentUser = userData;
-                loadDashboardData();
-                
-            } catch (error) {
-                console.error('Error parsing user data:', error);
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = '/';
-            }
+            if (!AuthManager.requireRole('focal')) return;
+            currentUser = AuthManager.getUser();
+            loadDashboardData();
         });
 
         // Navigation functions
@@ -2540,7 +2508,7 @@
         // CQI Functions
         function loadAssessmentDesign() {
             // Load courses for assessment creation
-            fetch('/api/courses')
+            authFetch('/api/courses')
                 .then(response => response.json())
                 .then(data => {
                     const select = document.querySelector('#assessmentForm select[name="courseId"]');
@@ -2591,7 +2559,7 @@
 
         function loadCLOAttainment() {
             // Load courses for filtering
-            fetch('/api/courses')
+            authFetch('/api/courses')
                 .then(response => response.json())
                 .then(data => {
                     const select = document.getElementById('courseFilter');
@@ -2644,8 +2612,8 @@
         function loadCQIActions() {
             // Load CLOs and courses for CQI action creation
             Promise.all([
-                fetch('/api/clos').then(response => response.json()),
-                fetch('/api/courses').then(response => response.json())
+                authFetch('/api/clos').then(response => response.json()),
+                authFetch('/api/courses').then(response => response.json())
             ])
             .then(([clos, courses]) => {
                 // Load CLOs
@@ -2702,7 +2670,7 @@
 
         function loadAttendanceFallback() {
             // Load courses for attendance upload
-            fetch('/api/courses')
+            authFetch('/api/courses')
                 .then(response => response.json())
                 .then(data => {
                     const select = document.querySelector('#attendanceUploadForm select[name="courseId"]');

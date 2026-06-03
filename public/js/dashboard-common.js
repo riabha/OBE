@@ -3,6 +3,34 @@
  * Shared functions for all OBE Portal dashboards
  */
 
+// Role → dashboard path (keep in sync with login.html)
+const DASHBOARD_BY_ROLE = {
+    pro_superadmin: '/pro-super-admin-dashboard.html',
+    platform_admin: '/pro-super-admin-dashboard.html',
+    university_superadmin: '/university-super-admin-dashboard.html',
+    superadmin: '/university-super-admin-dashboard.html',
+    controller: '/controller-dashboard-enhanced.html',
+    dean: '/dean-dashboard-enhanced.html',
+    chairman: '/chairman-dashboard-enhanced.html',
+    focal: '/focal-dashboard-enhanced.html',
+    teacher: '/teacher-dashboard-enhanced.html',
+    student: '/student-dashboard-enhanced.html'
+};
+
+function getDashboardForRole(role) {
+    return DASHBOARD_BY_ROLE[role] || '/login.html';
+}
+
+function getAPIHeaders(includeContentType = false) {
+    const headers = APIManager.getHeaders(includeContentType);
+    return headers;
+}
+
+function authFetch(url, options = {}) {
+    const headers = { ...getAPIHeaders(!!options.body), ...(options.headers || {}) };
+    return fetch(url, { ...options, headers });
+}
+
 // API Configuration
 const API_BASE = '';
 const API_ENDPOINTS = {
@@ -72,6 +100,16 @@ class AuthManager {
     static checkAuth() {
         if (!this.isAuthenticated()) {
             this.redirectToLogin();
+            return false;
+        }
+        return true;
+    }
+
+    static requireRole(expectedRole) {
+        if (!this.checkAuth()) return false;
+        const user = this.getUser();
+        if (user.role !== expectedRole) {
+            window.location.href = getDashboardForRole(user.role);
             return false;
         }
         return true;
@@ -161,16 +199,14 @@ class UniversityManager {
         try {
             const user = AuthManager.getUser();
             
-            // For university super admins, load their university info
-            if (user && user.role === 'university_superadmin') {
+            if (user && (user.role === 'university_superadmin' || user.universityCode)) {
                 const university = await APIManager.get(API_ENDPOINTS.MY_UNIVERSITY);
                 if (university) {
                     this.updateUniversityUI(university);
                     return university;
                 }
             }
-            
-            // For other roles, show generic university info
+
             this.showGenericUniversityInfo(user);
             return null;
         } catch (error) {
@@ -211,7 +247,9 @@ class UniversityManager {
     }
     
     static showGenericUniversityInfo(user) {
-        const universityName = user?.university || 'University';
+        const universityName = user?.universityCode === 'DEMO'
+            ? 'Quest Demo University'
+            : (user?.universityCode || user?.university || 'University').replace(/_/g, ' ');
         const firstLetter = universityName.charAt(0).toUpperCase();
         
         document.querySelectorAll('.university-name, #universityName').forEach(el => {
@@ -345,3 +383,7 @@ window.UniversityManager = UniversityManager;
 window.LoadingManager = LoadingManager;
 window.NotificationManager = NotificationManager;
 window.API_ENDPOINTS = API_ENDPOINTS;
+window.DASHBOARD_BY_ROLE = DASHBOARD_BY_ROLE;
+window.getDashboardForRole = getDashboardForRole;
+window.getAPIHeaders = getAPIHeaders;
+window.authFetch = authFetch;

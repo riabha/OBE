@@ -493,41 +493,9 @@
 
         // Check authentication on page load
         document.addEventListener('DOMContentLoaded', function() {
-            const token = localStorage.getItem('token');
-            const user = localStorage.getItem('user');
-            
-            if (!token || !user) {
-                window.location.href = '/';
-                return;
-            }
-            
-            try {
-                const userData = JSON.parse(user);
-                if (userData.role !== 'controller') {
-                    // Redirect to appropriate dashboard
-                    const dashboardMap = {
-                        'superadmin': '/admin',
-                        'student': '/student-dashboard-enhanced.html',
-                        'teacher': '/teacher-dashboard.html',
-                        'focal': '/focal-dashboard.html',
-                        'chairman': '/chairman-dashboard.html',
-                        'dean': '/dean-dashboard.html'
-                    };
-                    
-                    const dashboardFile = dashboardMap[userData.role] || '/student-dashboard-enhanced.html';
-                    window.location.href = dashboardFile;
-                    return;
-                }
-                
-                currentUser = userData;
-                loadDashboardData();
-                
-            } catch (error) {
-                console.error('Error parsing user data:', error);
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = '/';
-            }
+            if (!AuthManager.requireRole('controller')) return;
+            currentUser = AuthManager.getUser();
+            loadDashboardData();
         });
 
         // Navigation functions

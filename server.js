@@ -210,11 +210,12 @@ function formatUserResponse(user) {
 function formatCourseResponse(course) {
     const obj = course.toObject ? course.toObject() : course;
     const instructor = obj.instructor;
-    return {
-        ...obj,
-        id: obj._id,
-        name: obj.title || obj.name,
-        instructorName: instructor
+        return {
+            ...obj,
+            id: obj._id,
+            name: obj.title || obj.name,
+            creditHours: obj.credits || obj.creditHours || 3,
+            instructorName: instructor
             ? `${instructor.firstName || ''} ${instructor.lastName || ''}`.trim()
             : null,
         departmentName: obj.department?.name || null
@@ -389,6 +390,11 @@ app.post('/api/auth/login', async (req, res) => {
                 name: displayName,
                 role: uniUser.role,
                 universityCode: university.universityCode,
+                studentId: uniUser.studentId,
+                semester: uniUser.semester,
+                batch: uniUser.batch,
+                employeeId: uniUser.employeeId,
+                department: uniUser.department,
                 isActive: uniUser.isActive
             },
             {
@@ -1399,12 +1405,60 @@ app.post('/api/platform-users/:id/reset-password', proAdminAuth, async (req, res
 // STATISTICS
 // ============================================
 
+async function aggregatePlatformCounts() {
+    const universities = await University.find({ isActive: true });
+    let totalUsers = 0;
+    let totalCourses = 0;
+    for (const university of universities) {
+        try {
+            const uniDb = mongoose.connection.useDb(university.databaseName);
+            const { User, Course } = getUniModels(uniDb);
+            totalUsers += await User.countDocuments({ isActive: true });
+            totalCourses += await Course.countDocuments({ isActive: true });
+        } catch (err) {
+            console.warn(`Stats skip ${university.databaseName}:`, err.message);
+        }
+    }
+    return { totalUsers, totalCourses };
+}
+
+app.get('/api/platform-stats/public', async (req, res) => {
+    try {
+        const { totalUsers, totalCourses } = await aggregatePlatformCounts();
+        res.json({
+            totalUniversities: await University.countDocuments({ isActive: true }),
+            totalUsers,
+            totalCourses
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.get('/api/universities/public', async (req, res) => {
+    try {
+        const universities = await University.find({ isActive: true })
+            .select('universityName universityCode primaryColor')
+            .sort({ universityName: 1 });
+        res.json(universities.map(u => ({
+            universityName: u.universityName,
+            universityCode: u.universityCode,
+            logo: `/api/universities/${u._id}/logo`
+        })));
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
 app.get('/api/platform-stats', proAdminAuth, async (req, res) => {
     try {
+        const { totalUsers, totalCourses } = await aggregatePlatformCounts();
         const stats = {
             totalUniversities: await University.countDocuments(),
             activeUniversities: await University.countDocuments({ isActive: true }),
             platformUsers: await PlatformUser.countDocuments(),
+            totalUsers,
+            totalCourses,
             totalSubscriptions: await Subscription.countDocuments(),
             activeSubscriptions: await Subscription.countDocuments({ status: 'Active' }),
             trialSubscriptions: await Subscription.countDocuments({ status: 'Trial' })
@@ -1814,6 +1868,301 @@ app.post('/api/universities/:id/change-admin-password', proAdminAuth, async (req
         res.status(500).json({ message: 'Error', error: error.message });
     }
 });
+
+const UNI_COLLECTIONS = ['clos', 'plos', 'peos', 'programs', 'assessments', 'results', 'enrollments', 'university_settings'];
+
+async function ensureUniCollections(uniDb) {
+    const existing = (await uniDb.db.listCollections().toArray()).map(c => c.name);
+    for (const name of UNI_COLLECTIONS) {
+        if (!existing.includes(name)) {
+            await uniDb.createCollection(name).catch(() => {});
+        }
+    }
+}
+
+// Run migrations (ensure OBE collections exist)
+app.post('/api/run-migrations', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        await ensureUniCollections(uniDb);
+        res.json({ message: 'Migrations completed successfully', collections: UNI_COLLECTIONS });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// University settings
+app.get('/api/university-settings', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb, university } = await getUniversityDatabase(token);
+        const settings = await uniDb.collection('university_settings').findOne({ universityCode: university.universityCode })
+            || { universityCode: university.universityCode, academicYear: '2024-25', gradingScale: 'percentage' };
+        res.json(settings);
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.put('/api/university-settings', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb, university } = await getUniversityDatabase(token);
+        await uniDb.collection('university_settings').updateOne(
+            { universityCode: university.universityCode },
+            { $set: { ...req.body, universityCode: university.universityCode, updatedAt: new Date() } },
+            { upsert: true }
+        );
+        res.json({ message: 'Settings saved' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Database debug info
+app.get('/api/debug/database-info', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb, university } = await getUniversityDatabase(token);
+        const cols = await uniDb.db.listCollections().toArray();
+        const collections = {};
+        for (const c of cols) {
+            collections[c.name] = await uniDb.collection(c.name).countDocuments();
+        }
+        res.json({
+            databaseName: university.databaseName,
+            universityCode: university.universityCode,
+            collections,
+            totalDocuments: Object.values(collections).reduce((a, b) => a + b, 0)
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Departments CRUD
+app.post('/api/departments', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { Department } = getUniModels(uniDb);
+        const faculty = ['Engineering', 'Sciences', 'Management', 'Arts', 'Medicine'].includes(req.body.faculty)
+            ? req.body.faculty : 'Engineering';
+        const dept = new Department({ ...req.body, faculty, isActive: true });
+        await dept.save();
+        res.status(201).json({ message: 'Department created', department: dept });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.put('/api/departments/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { Department } = getUniModels(uniDb);
+        const dept = await Department.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        if (!dept) return res.status(404).json({ message: 'Department not found' });
+        res.json({ message: 'Department updated', department: dept });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.delete('/api/departments/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { Department } = getUniModels(uniDb);
+        const dept = await Department.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+        if (!dept) return res.status(404).json({ message: 'Department not found' });
+        res.json({ message: 'Department deactivated' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Courses update/delete
+app.put('/api/courses/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { Course, Department } = getUniModels(uniDb);
+        const updates = { ...req.body };
+        if (updates.name) {
+            updates.title = updates.name;
+            delete updates.name;
+        }
+        if (updates.creditHours) {
+            updates.credits = Number(updates.creditHours);
+            delete updates.creditHours;
+        }
+        if (updates.department && typeof updates.department === 'string') {
+            const dept = await Department.findOne({ name: { $regex: new RegExp(`^${updates.department}$`, 'i') } });
+            if (dept) updates.department = dept._id;
+            else delete updates.department;
+        }
+        const course = await Course.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
+        if (!course) return res.status(404).json({ message: 'Course not found' });
+        res.json({ message: 'Course updated', course: formatCourseResponse(course) });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.delete('/api/courses/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { Course } = getUniModels(uniDb);
+        const course = await Course.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+        if (!course) return res.status(404).json({ message: 'Course not found' });
+        res.json({ message: 'Course deactivated' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Programs delete
+app.delete('/api/programs/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const result = await uniDb.collection('programs').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
+        if (result.deletedCount === 0) return res.status(404).json({ message: 'Program not found' });
+        res.json({ message: 'Program deleted' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Faculties create/delete (faculty = department grouping field)
+app.post('/api/faculties', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { name, code, description } = req.body;
+        if (!name) return res.status(400).json({ message: 'Faculty name required' });
+        res.status(201).json({
+            message: 'Faculty registered. Assign departments to this faculty when creating departments.',
+            faculty: { name, code: code || name.substring(0, 4).toUpperCase(), description }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.delete('/api/faculties/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { Department } = getUniModels(uniDb);
+        const facultiesRes = await Department.find({ isActive: true });
+        const facultyNames = [...new Set(facultiesRes.map(d => d.faculty).filter(Boolean))];
+        const idx = parseInt(req.params.id, 10) - 1;
+        const facultyName = facultyNames[idx];
+        if (!facultyName) return res.status(404).json({ message: 'Faculty not found' });
+        await Department.updateMany({ faculty: facultyName }, { $set: { faculty: 'Engineering' } });
+        res.json({ message: `Faculty "${facultyName}" removed; departments reassigned to Engineering` });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Bulk import endpoints
+async function handleBulkImport(req, res, type) {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const records = req.body.records || req.body.data || req.body;
+        const items = Array.isArray(records) ? records : [];
+        let imported = 0;
+
+        if (type === 'users') {
+            const { User, Department } = getUniModels(uniDb);
+            for (const row of items) {
+                try {
+                    const parts = (row.name || row.Name || 'New User').trim().split(/\s+/);
+                    const payload = {
+                        firstName: parts[0],
+                        lastName: parts.slice(1).join(' ') || parts[0],
+                        email: (row.email || row.Email).toLowerCase(),
+                        password: await bcrypt.hash(row.password || 'Demo@2025', 12),
+                        role: (row.role || row.Role || 'student').toLowerCase(),
+                        phone: row.phone || '923000000000',
+                        isActive: true
+                    };
+                    if (payload.role === 'student') {
+                        payload.studentId = row.studentId || `STU${Date.now()}${imported}`;
+                        payload.semester = Number(row.semester) || 1;
+                        payload.batch = row.batch || '2024';
+                    }
+                    if (['teacher', 'focal', 'chairman'].includes(payload.role)) {
+                        payload.employeeId = row.employeeId || `EMP${Date.now()}${imported}`;
+                        payload.designation = row.designation || 'Faculty';
+                        payload.qualification = row.qualification || 'MSc';
+                    }
+                    if (row.department) {
+                        const dept = await Department.findOne({ name: { $regex: new RegExp(row.department, 'i') } });
+                        if (dept) payload.department = dept._id;
+                    }
+                    await User.create(payload);
+                    imported++;
+                } catch (e) { /* skip duplicate/invalid rows */ }
+            }
+        } else if (type === 'courses') {
+            const { Course, Department, User } = getUniModels(uniDb);
+            const teacher = await User.findOne({ role: 'teacher', isActive: true });
+            for (const row of items) {
+                try {
+                    const dept = await Department.findOne({ name: { $regex: new RegExp(row.department || 'Computer', 'i') } });
+                    if (!dept || !teacher) continue;
+                    await Course.create({
+                        title: row.name || row.title || row.Name,
+                        code: (row.code || row.Code).toUpperCase(),
+                        department: dept._id,
+                        program: row.program || 'BS',
+                        semester: Number(row.semester) || 1,
+                        credits: Number(row.creditHours || row.credits) || 3,
+                        hours: { theory: 3, practical: 0, total: 3 },
+                        instructor: teacher._id,
+                        isActive: true
+                    });
+                    imported++;
+                } catch (e) { /* skip */ }
+            }
+        } else {
+            const col = type === 'programs' ? 'programs' : type;
+            if (items.length) {
+                await uniDb.collection(col).insertMany(items.map(r => ({ ...r, createdAt: new Date(), isActive: true })));
+                imported = items.length;
+            }
+        }
+
+        res.json({ message: `Imported ${imported} ${type}`, imported, total: items.length });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+}
+
+app.post('/api/users/bulk', (req, res) => handleBulkImport(req, res, 'users'));
+app.post('/api/courses/bulk', (req, res) => handleBulkImport(req, res, 'courses'));
+app.post('/api/departments/bulk', (req, res) => handleBulkImport(req, res, 'departments'));
+app.post('/api/faculties/bulk', (req, res) => handleBulkImport(req, res, 'faculties'));
+app.post('/api/programs/bulk', (req, res) => handleBulkImport(req, res, 'programs'));
 
 // ============================================
 // ERROR HANDLING
