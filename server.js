@@ -197,7 +197,7 @@ function getUniModels(uniDb) {
 }
 
 function formatUserResponse(user) {
-    const obj = user.toObject ? user.toObject() : user;
+    const obj = user.toObject ? user.toObject({ virtuals: false }) : user;
     return {
         ...obj,
         id: obj._id,
@@ -212,7 +212,7 @@ function formatUserResponse(user) {
 }
 
 function formatCourseResponse(course) {
-    const obj = course.toObject ? course.toObject() : course;
+    const obj = course.toObject ? course.toObject({ virtuals: false }) : course;
     const instructor = obj.instructor;
         return {
             ...obj,
@@ -223,6 +223,33 @@ function formatCourseResponse(course) {
             ? `${instructor.firstName || ''} ${instructor.lastName || ''}`.trim()
             : null,
         departmentName: obj.department?.name || null
+    };
+}
+
+function formatCourseListItem(course, deptMap, instMap) {
+    const dept = deptMap.get(String(course.department));
+    const inst = instMap.get(String(course.instructor));
+    return {
+        _id: course._id,
+        id: course._id,
+        code: course.code,
+        title: course.title,
+        name: course.title,
+        description: course.description,
+        program: course.program,
+        semester: course.semester,
+        credits: course.credits,
+        creditHours: course.credits || 3,
+        department: dept ? { _id: dept._id, name: dept.name, code: dept.code } : course.department,
+        departmentName: dept?.name || null,
+        instructor: inst || course.instructor,
+        instructorName: inst
+            ? `${inst.firstName || ''} ${inst.lastName || ''}`.trim()
+            : null,
+        isActive: course.isActive !== false,
+        academicYear: course.academicYear,
+        semesterName: course.semesterName,
+        statistics: course.statistics
     };
 }
 
@@ -574,7 +601,7 @@ app.get('/api/universities/:id', proAdminAuth, async (req, res) => {
     }
 });
 
-// Get university logo
+// Get university logo (public by id — used by Pro Admin listings)
 app.get('/api/universities/:id/logo', async (req, res) => {
     try {
         const university = await University.findById(req.params.id);
@@ -584,6 +611,26 @@ app.get('/api/universities/:id/logo', async (req, res) => {
         res.contentType(university.logo.contentType);
         res.send(university.logo.data);
     } catch (error) {
+        res.status(500).send('Error');
+    }
+});
+
+// Authenticated logo for current user's university (dashboards use Bearer token)
+app.get('/api/my-university/logo', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).send('Unauthorized');
+        }
+        const { university } = await getUniversityDatabase(token);
+        if (!university?.logo?.data) {
+            return res.status(404).send('Logo not found');
+        }
+        res.set('Cache-Control', 'private, max-age=3600');
+        res.contentType(university.logo.contentType || 'image/png');
+        res.send(university.logo.data);
+    } catch (error) {
+        console.error('Error fetching university logo:', error);
         res.status(500).send('Error');
     }
 });
@@ -1762,10 +1809,12 @@ app.get('/api/courses', async (req, res) => {
         }
         
         const { uniDb, decoded } = await getUniversityDatabase(token);
-        const { Course } = getUniModels(uniDb);
-        const filter = { isActive: true };
+        const { Course, User, Department } = getUniModels(uniDb);
+        const filter = { $or: [{ isActive: true }, { isActive: { $exists: false } }] };
 
         if (decoded.userType === 'university') {
+            delete filter.$or;
+            filter.isActive = true;
             if (decoded.role === 'teacher') {
                 filter.instructor = decoded.userId;
             } else if (decoded.role === 'student') {
@@ -1774,14 +1823,28 @@ app.get('/api/courses', async (req, res) => {
         }
 
         const courses = await Course.find(filter)
-            .populate('department', 'name code')
-            .populate('instructor', 'firstName lastName email employeeId')
-            .sort({ code: 1 });
-        res.json(courses.map(formatCourseResponse));
+            .select('title code description department instructor credits semester program isActive academicYear semesterName statistics')
+            .sort({ code: 1 })
+            .lean();
+
+        const deptIds = [...new Set(courses.map(c => c.department).filter(Boolean))];
+        const instIds = [...new Set(courses.map(c => c.instructor).filter(Boolean))];
+        const [depts, instructors] = await Promise.all([
+            deptIds.length
+                ? Department.find({ _id: { $in: deptIds } }).select('name code').lean()
+                : [],
+            instIds.length
+                ? User.find({ _id: { $in: instIds } }).select('firstName lastName email employeeId').lean()
+                : []
+        ]);
+        const deptMap = new Map(depts.map(d => [String(d._id), d]));
+        const instMap = new Map(instructors.map(u => [String(u._id), u]));
+
+        res.json(courses.map(c => formatCourseListItem(c, deptMap, instMap)));
         
     } catch (error) {
         console.error('Error fetching courses:', error);
-        res.status(500).json({ message: 'Error', error: error.message });
+        res.status(500).json({ message: 'Failed to load courses', error: error.message });
     }
 });
 
@@ -2067,8 +2130,8 @@ app.get('/api/my-university', async (req, res) => {
             const { university } = await getUniversityDatabase(token);
             
             const uniObj = university.toObject();
-            if (university.logo && university.logo.contentType) {
-                uniObj.logoUrl = `/api/universities/${university._id}/logo`;
+            if (university.logo && university.logo.data) {
+                uniObj.logoUrl = '/api/my-university/logo';
             }
             delete uniObj.logo;
             
@@ -2084,8 +2147,8 @@ app.get('/api/my-university', async (req, res) => {
                 const university = await University.findOne({ universityCode: user.universityCode });
                 if (university) {
                     const uniObj = university.toObject();
-                    if (university.logo && university.logo.contentType) {
-                        uniObj.logoUrl = `/api/universities/${university._id}/logo`;
+                    if (university.logo && university.logo.data) {
+                        uniObj.logoUrl = '/api/my-university/logo';
                     }
                     delete uniObj.logo;
                     

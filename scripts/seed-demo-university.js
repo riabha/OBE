@@ -47,6 +47,15 @@ function splitName(full) {
     };
 }
 
+function buildDemoLogo() {
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="24" fill="#2563eb"/>
+  <text x="64" y="82" font-family="Arial,sans-serif" font-size="56" font-weight="700" fill="#ffffff" text-anchor="middle">D</text>
+</svg>`;
+    return { data: Buffer.from(svg), contentType: 'image/svg+xml' };
+}
+
 async function connect() {
     const uri = process.env.MONGODB_URI;
     if (!uri) throw new Error('MONGODB_URI not set in config.env');
@@ -80,6 +89,11 @@ async function ensurePlatformRecords(University, PlatformUser, Subscription) {
         university.city = university.city || DEMO.city;
         await university.save();
         console.log(`Updated existing DEMO university (database: ${DEMO.dbName})`);
+    }
+    if (!university.logo?.data) {
+        university.logo = buildDemoLogo();
+        await university.save();
+        console.log('Set DEMO university logo');
     }
     if (university.databaseName !== DEMO.dbName) {
         university.databaseName = DEMO.dbName;

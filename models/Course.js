@@ -261,14 +261,14 @@ const courseSchema = new mongoose.Schema({
 
 // Virtual for total assessment weight
 courseSchema.virtual('totalAssessmentWeight').get(function() {
-    return this.assessments
+    return (this.assessments || [])
         .filter(assessment => assessment.isActive)
         .reduce((total, assessment) => total + assessment.weight, 0);
 });
 
 // Virtual for enrolled students count
 courseSchema.virtual('enrolledCount').get(function() {
-    return this.enrolledStudents.filter(student => student.status === 'enrolled').length;
+    return (this.enrolledStudents || []).filter(student => student.status === 'enrolled').length;
 });
 
 // Index for better query performance

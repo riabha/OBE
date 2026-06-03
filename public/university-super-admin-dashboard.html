@@ -38,9 +38,8 @@
                         console.log('✅ Set database name fallback');
                     }
                     
-                    // Hide actual logo if placeholder is shown
                     const actualLogo = document.getElementById('universityLogo');
-                    if (actualLogo) {
+                    if (actualLogo && actualLogo.dataset.logoLoaded !== '1') {
                         actualLogo.style.display = 'none';
                     }
                 };
@@ -1890,10 +1889,8 @@
             const logoElement = document.getElementById('universityLogo');
             const placeholderElement = document.getElementById('universityLogoPlaceholder');
             
-            if (university.logoUrl && logoElement) {
-                logoElement.src = university.logoUrl;
-                logoElement.style.display = 'block';
-                if (placeholderElement) placeholderElement.style.display = 'none';
+            if (university.logoUrl && window.UniversityManager) {
+                UniversityManager.applyUniversityLogo(university.logoUrl);
             } else if (placeholderElement) {
                 const firstLetter = universityName.charAt(0).toUpperCase();
                 placeholderElement.textContent = firstLetter;
@@ -2090,7 +2087,7 @@
                 } else {
                     const err = await usersRes.json().catch(() => ({}));
                     console.error('❌ Failed to load users', err);
-                    showApiLoadError('users', err.message || err.error || usersRes.status);
+                    showApiLoadError('users', err.error || err.message || usersRes.status);
                 }
 
                 // Load courses
@@ -2109,7 +2106,7 @@
                 } else {
                     const err = await coursesRes.json().catch(() => ({}));
                     console.error('❌ Failed to load courses', err);
-                    showApiLoadError('courses', err.message || err.error || coursesRes.status);
+                    showApiLoadError('courses', err.error || err.message || coursesRes.status);
                 }
 
                 // Load faculties
@@ -2486,7 +2483,7 @@
                     document.getElementById('coursesList').innerHTML = `
                         <div class="alert alert-danger">
                             <i class="fas fa-exclamation-triangle me-2"></i>
-                            Failed to load courses: ${err.message || err.error || response.status}. Run <code>npm run seed-demo</code> on the server if this is a fresh deploy.
+                            Failed to load courses: ${err.error || err.message || response.status}. Run <code>npm run seed-demo</code> on the server if this is a fresh deploy.
                         </div>`;
                 }
             } catch (error) {

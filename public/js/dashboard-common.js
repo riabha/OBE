@@ -74,6 +74,7 @@ const API_ENDPOINTS = {
     // Universities
     UNIVERSITIES: '/api/universities',
     MY_UNIVERSITY: '/api/my-university',
+    MY_UNIVERSITY_LOGO: '/api/my-university/logo',
     
     // Users
     USERS: '/api/users',
@@ -227,14 +228,16 @@ class APIManager {
 
 // University Info Manager
 class UniversityManager {
+    static _logoObjectUrl = null;
+
     static async loadUniversityInfo() {
         try {
             const user = AuthManager.getUser();
             
-            if (user && (user.role === 'university_superadmin' || user.universityCode)) {
+            if (user && (user.role === 'university_superadmin' || user.universityCode || user.userType === 'university')) {
                 const university = await APIManager.get(API_ENDPOINTS.MY_UNIVERSITY);
                 if (university) {
-                    this.updateUniversityUI(university);
+                    await this.updateUniversityUI(university);
                     return university;
                 }
             }
@@ -247,25 +250,63 @@ class UniversityManager {
             return null;
         }
     }
+
+    /** Load logo with Authorization header (img src cannot send JWT). */
+    static async applyUniversityLogo(logoUrl) {
+        const logoElement = document.getElementById('universityLogo');
+        const placeholderElement = document.getElementById('universityLogoPlaceholder');
+        if (!logoUrl || !logoElement) {
+            if (placeholderElement) placeholderElement.style.display = 'flex';
+            if (logoElement) logoElement.style.display = 'none';
+            return false;
+        }
+        try {
+            if (this._logoObjectUrl) {
+                URL.revokeObjectURL(this._logoObjectUrl);
+                this._logoObjectUrl = null;
+            }
+            const headers = { Authorization: `Bearer ${AuthManager.getToken()}` };
+            const user = AuthManager.getUser();
+            if (user?.email) headers['X-User-Email'] = user.email;
+            const res = await fetch(logoUrl, { headers });
+            if (!res.ok) throw new Error(`Logo HTTP ${res.status}`);
+            const blob = await res.blob();
+            this._logoObjectUrl = URL.createObjectURL(blob);
+            logoElement.src = this._logoObjectUrl;
+            logoElement.dataset.logoLoaded = '1';
+            logoElement.style.display = 'block';
+            if (placeholderElement) placeholderElement.style.display = 'none';
+            return true;
+        } catch (err) {
+            console.warn('University logo failed to load:', err);
+            logoElement.style.display = 'none';
+            logoElement.removeAttribute('data-logo-loaded');
+            const name = document.querySelector('#universityName, .university-name')?.textContent?.trim() || 'U';
+            if (placeholderElement) {
+                placeholderElement.textContent = name.charAt(0).toUpperCase();
+                placeholderElement.style.display = 'flex';
+            }
+            return false;
+        }
+    }
     
-    static updateUniversityUI(university) {
+    static async updateUniversityUI(university) {
         // Update university name
         document.querySelectorAll('.university-name, #universityName').forEach(el => {
             if (el) el.textContent = university.universityName;
         });
         
-        // Update university logo
-        const logoElement = document.getElementById('universityLogo');
-        const placeholderElement = document.getElementById('universityLogoPlaceholder');
-        
-        if (university.logoUrl && logoElement) {
-            logoElement.src = university.logoUrl;
-            logoElement.style.display = 'block';
-            if (placeholderElement) placeholderElement.style.display = 'none';
-        } else if (placeholderElement) {
-            const firstLetter = university.universityName.charAt(0).toUpperCase();
-            placeholderElement.textContent = firstLetter;
-            placeholderElement.style.display = 'flex';
+        const logoUrl = university.logoUrl || API_ENDPOINTS.MY_UNIVERSITY_LOGO;
+        if (university.logoUrl || (university.logo && university.logo.contentType)) {
+            await this.applyUniversityLogo(logoUrl);
+        } else {
+            const logoElement = document.getElementById('universityLogo');
+            const placeholderElement = document.getElementById('universityLogoPlaceholder');
+            const firstLetter = (university.universityName || 'U').charAt(0).toUpperCase();
+            if (placeholderElement) {
+                placeholderElement.textContent = firstLetter;
+                placeholderElement.style.display = 'flex';
+            }
             if (logoElement) logoElement.style.display = 'none';
         }
         
@@ -412,6 +453,7 @@ function logout() {
 window.AuthManager = AuthManager;
 window.APIManager = APIManager;
 window.UniversityManager = UniversityManager;
+window.applyUniversityLogo = (url) => UniversityManager.applyUniversityLogo(url);
 window.LoadingManager = LoadingManager;
 window.NotificationManager = NotificationManager;
 window.API_ENDPOINTS = API_ENDPOINTS;

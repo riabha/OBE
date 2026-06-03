@@ -201,12 +201,13 @@ const departmentSchema = new mongoose.Schema({
 
 // Virtual for department strength
 departmentSchema.virtual('totalStrength').get(function() {
-    return this.statistics.totalStudents + this.statistics.totalTeachers;
+    const stats = this.statistics || {};
+    return (stats.totalStudents || 0) + (stats.totalTeachers || 0);
 });
 
 // Virtual for active programs count
 departmentSchema.virtual('activeProgramsCount').get(function() {
-    return this.programs.filter(program => program.isActive).length;
+    return (this.programs || []).filter(program => program.isActive).length;
 });
 
 // Index for better query performance
@@ -219,7 +220,7 @@ departmentSchema.index({ isActive: 1 });
 // Pre-save middleware to update statistics
 departmentSchema.pre('save', async function(next) {
     if (this.isModified('programs')) {
-        this.statistics.activePrograms = this.programs.filter(p => p.isActive).length;
+        this.statistics.activePrograms = (this.programs || []).filter(p => p.isActive).length;
     }
     next();
 });
