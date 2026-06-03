@@ -2686,7 +2686,7 @@
         }
 
         // Save university changes
-        async function saveUniversityChanges(btn) {
+        async function saveUniversityChanges(saveBtn) {
             const form = document.getElementById('editUniversityForm');
             
             // Validate form
@@ -2743,14 +2743,14 @@
                 formData.append('newPassword', document.getElementById('editNewPassword').value);
             }
 
-            const btn = arguments[0] || document.getElementById('saveUniversityChangesBtn');
-            if (!btn) {
+            const saveButton = saveBtn || document.getElementById('saveUniversityChangesBtn');
+            if (!saveButton) {
                 alert('❌ Save button not found. Please refresh the page.');
                 return;
             }
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving Changes...';
-            btn.disabled = true;
+            const originalText = saveButton.innerHTML;
+            saveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving Changes...';
+            saveButton.disabled = true;
 
             try {
                 const token = localStorage.getItem('token');
@@ -2789,8 +2789,8 @@
                 console.error('Error:', error);
                 alert(`❌ Network Error: ${error.message}`);
             } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+                saveButton.innerHTML = originalText;
+                saveButton.disabled = false;
             }
         }
 
@@ -3586,6 +3586,13 @@ Type "DELETE" to confirm:`;
             return [];
         }
 
+        function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            return fetch(url, { ...options, signal: controller.signal })
+                .finally(() => clearTimeout(timer));
+        }
+
         function handleAuthFailure(response, containerId) {
             if (response.status === 401 || response.status === 403) {
                 const container = document.getElementById(containerId);
@@ -3601,20 +3608,20 @@ Type "DELETE" to confirm:`;
             return false;
         }
 
-        // Load initial data
+        // Load initial data (fast list first; databases load only on Databases tab)
         async function loadDashboardData() {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    window.location.href = '/login.html';
-                    return;
-                }
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            const headers = { 'Authorization': `Bearer ${token}` };
 
-                const [universitiesRes, statsRes, subscriptionsRes, databasesRes] = await Promise.all([
-                    fetch('/api/universities', { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch('/api/platform-stats', { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch('/api/subscriptions', { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch('/api/databases', { headers: { 'Authorization': `Bearer ${token}` } })
+            try {
+                const [universitiesRes, statsRes, subscriptionsRes] = await Promise.all([
+                    fetchWithTimeout('/api/universities?quick=1', { headers }, 15000),
+                    fetchWithTimeout('/api/platform-stats', { headers }, 15000),
+                    fetchWithTimeout('/api/subscriptions', { headers }, 15000)
                 ]);
 
                 if (!universitiesRes.ok) {
@@ -3625,19 +3632,40 @@ Type "DELETE" to confirm:`;
                 const universities = asArray(await universitiesRes.json());
                 const stats = statsRes.ok ? await statsRes.json() : {};
                 const subscriptions = subscriptionsRes.ok ? asArray(await subscriptionsRes.json()) : [];
-                const databases = databasesRes.ok ? asArray(await databasesRes.json()) : [];
 
                 allUniversitiesData = universities;
                 displayUniversities(universities);
+                displayAllUniversities(universities);
                 updateRealTimeStats(stats, universities, subscriptions);
-                createDashboardCharts(universities, subscriptions, stats);
+                try {
+                    createDashboardCharts(universities, subscriptions, stats);
+                } catch (chartErr) {
+                    console.warn('Charts skipped:', chartErr);
+                }
+
+                // Refresh user/course counts in background (non-blocking)
+                fetchWithTimeout('/api/universities', { headers }, 25000)
+                    .then(async (fullRes) => {
+                        if (!fullRes.ok) return;
+                        const full = asArray(await fullRes.json());
+                        allUniversitiesData = full;
+                        displayUniversities(full);
+                        displayAllUniversities(full);
+                        updateRealTimeStats(stats, full, subscriptions);
+                    })
+                    .catch((err) => console.warn('Full university counts:', err));
 
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
-                const universitiesList = document.getElementById('universitiesList');
-                if (universitiesList) {
-                    universitiesList.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error loading data. Please refresh or log in again.</div>';
-                }
+                const msg = error.name === 'AbortError'
+                    ? 'Request timed out. Click Refresh Data or check the server.'
+                    : (error.message || 'Error loading data');
+                ['universitiesList', 'allUniversitiesList'].forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>${msg}</div>`;
+                    }
+                });
             }
         }
 
@@ -3795,11 +3823,15 @@ Type "DELETE" to confirm:`;
                             </div>
                             <div class="col-md-2">
                                 <small class="text-muted d-block">Users</small>
-                                <strong>${uni.totalUsers || 0}</strong>
+                                <strong>${uni.totalUsers ?? '—'}</strong>
                             </div>
                             <div class="col-md-2">
                                 <small class="text-muted d-block">Courses</small>
-                                <strong>${uni.totalCourses || 0}</strong>
+                                <strong>${uni.totalCourses ?? '—'}</strong>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">MongoDB database (separate)</small>
+                                <strong class="text-primary"><code>${uni.databaseName || '—'}</code></strong>
                             </div>
                             <div class="col-md-2">
                                 <small class="text-muted d-block">Plan</small>
@@ -3852,11 +3884,15 @@ Type "DELETE" to confirm:`;
 
         // Load all universities for Universities section
         async function loadAllUniversities() {
+            if (allUniversitiesData.length) {
+                displayAllUniversities(allUniversitiesData);
+                return;
+            }
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('/api/universities', {
+                const response = await fetchWithTimeout('/api/universities?quick=1', {
                     headers: { 'Authorization': `Bearer ${token}` }
-                });
+                }, 15000);
 
                 if (handleAuthFailure(response, 'allUniversitiesList')) return;
 
@@ -3940,14 +3976,14 @@ Type "DELETE" to confirm:`;
                             </div>
                             <div class="col-md-2">
                                 <small class="text-muted d-block">Users</small>
-                                <strong>${uni.totalUsers || 0}</strong>
+                                <strong>${uni.totalUsers ?? '—'}</strong>
                             </div>
                             <div class="col-md-2">
                                 <small class="text-muted d-block">Courses</small>
-                                <strong>${uni.totalCourses || 0}</strong>
+                                <strong>${uni.totalCourses ?? '—'}</strong>
                             </div>
-                            <div class="col-md-2">
-                                <small class="text-muted d-block">Database</small>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">MongoDB database (separate)</small>
                                 <strong><code>${uni.databaseName || '—'}</code></strong>
                             </div>
                             <div class="col-md-2">
@@ -4259,16 +4295,10 @@ Type "DELETE" to confirm:`;
             displayAllUniversities(allUniversitiesData);
         }
 
-        // Initialize dashboard
+        // Initialize dashboard (pro page only — avoid duplicate loads)
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboardData();
-            loadAllUniversities();
-            
-            // Auto-refresh every 5 minutes
-            setInterval(() => {
-                loadDashboardData();
-                console.log('Dashboard data refreshed');
-            }, 5 * 60 * 1000);
+            setInterval(() => loadDashboardData(), 5 * 60 * 1000);
         });
     </script>
 </body>

@@ -566,22 +566,22 @@ app.post('/api/auth/logout', (req, res) => {
 // Get all universities (with live counts from each university database)
 app.get('/api/universities', proAdminAuth, async (req, res) => {
     try {
+        const skipCounts = req.query.quick === '1' || req.query.quick === 'true';
         const universities = await University.find({}, '-logo.data').sort({ createdAt: -1 });
         const result = await Promise.all(universities.map(async (uni) => {
             const obj = uni.toObject();
             if (uni.logo && uni.logo.data) {
                 obj.logoUrl = `/api/universities/${uni._id}/logo`;
             }
-            try {
-                const dbName = getCanonicalDatabaseName(uni) || uni.databaseName;
-                const uniDb = mongoose.connection.useDb(dbName);
-                const { User, Course } = getUniModels(uniDb);
-                obj.totalUsers = await User.countDocuments({ isActive: true });
-                obj.totalCourses = await Course.countDocuments({ isActive: true });
-                obj.databaseName = dbName;
-            } catch (dbErr) {
-                obj.totalUsers = 0;
-                obj.totalCourses = 0;
+            const dbName = getCanonicalDatabaseName(uni) || uni.databaseName;
+            obj.databaseName = dbName;
+            if (skipCounts) {
+                obj.totalUsers = null;
+                obj.totalCourses = null;
+            } else {
+                const counts = await getUniversityDbCounts(dbName);
+                obj.totalUsers = counts.totalUsers;
+                obj.totalCourses = counts.totalCourses;
             }
             return obj;
         }));
@@ -680,7 +680,9 @@ app.post('/api/universities/create', proAdminAuth, upload.single('logo'), async 
             }
             const taken = await University.findOne({ databaseName: dbName });
             if (taken) {
-                return res.status(400).json({ message: `Database "${dbName}" is already assigned to another university` });
+                return res.status(400).json({
+                    message: `Database "${dbName}" is already assigned to ${taken.universityName} (${taken.universityCode}). Each university must have its own database.`
+                });
             }
         } else {
             dbName = `obe_university_${universityCode.toLowerCase()}`;
@@ -1573,19 +1575,37 @@ app.post('/api/platform-users/:id/reset-password', proAdminAuth, async (req, res
 // STATISTICS
 // ============================================
 
+async function getUniversityDbCounts(dbName, timeoutMs = 4000) {
+    if (!dbName) return { totalUsers: 0, totalCourses: 0 };
+    const work = (async () => {
+        const uniDb = mongoose.connection.useDb(dbName);
+        const { User, Course } = getUniModels(uniDb);
+        const [totalUsers, totalCourses] = await Promise.all([
+            User.countDocuments({ isActive: true }).maxTimeMS(3000),
+            Course.countDocuments({ isActive: true }).maxTimeMS(3000)
+        ]);
+        return { totalUsers, totalCourses };
+    })();
+    const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('count timeout')), timeoutMs)
+    );
+    try {
+        return await Promise.race([work, timeout]);
+    } catch (err) {
+        console.warn(`Count skip ${dbName}:`, err.message);
+        return { totalUsers: 0, totalCourses: 0 };
+    }
+}
+
 async function aggregatePlatformCounts() {
     const universities = await University.find({ isActive: true });
     let totalUsers = 0;
     let totalCourses = 0;
     for (const university of universities) {
-        try {
-            const uniDb = mongoose.connection.useDb(university.databaseName);
-            const { User, Course } = getUniModels(uniDb);
-            totalUsers += await User.countDocuments({ isActive: true });
-            totalCourses += await Course.countDocuments({ isActive: true });
-        } catch (err) {
-            console.warn(`Stats skip ${university.databaseName}:`, err.message);
-        }
+        const dbName = getCanonicalDatabaseName(university) || university.databaseName;
+        const counts = await getUniversityDbCounts(dbName);
+        totalUsers += counts.totalUsers;
+        totalCourses += counts.totalCourses;
     }
     return { totalUsers, totalCourses };
 }

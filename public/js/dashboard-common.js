@@ -417,8 +417,11 @@ class NotificationManager {
     }
 }
 
-// Initialize common functionality
+// Initialize common functionality (skip on Pro Super Admin dashboard — it has its own loader)
 document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.pathname.includes('pro-super-admin-dashboard')) {
+        return;
+    }
     // Check authentication
     if (!AuthManager.checkAuth()) {
         return;
