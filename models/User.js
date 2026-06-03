@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
         minlength: [6, 'Password must be at least 6 characters']
     },
     
-    // Role and Access Control
+    // Role and Access Control (role = primary/active; roles = all assigned roles)
     role: {
         type: String,
         required: [true, 'Role is required'],
@@ -38,13 +38,19 @@ const userSchema = new mongoose.Schema({
             message: 'Role must be one of: student, teacher, focal, chairman, dean, controller'
         }
     },
+    roles: {
+        type: [String],
+        enum: ['student', 'teacher', 'focal', 'chairman', 'dean', 'controller'],
+        default: undefined
+    },
     
     // Department Information
     department: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Department',
         required: function() {
-            return this.role !== 'controller' && this.role !== 'dean';
+            const roles = this.getRoles();
+            return !roles.some(r => ['controller', 'dean'].includes(r));
         }
     },
     
@@ -54,7 +60,7 @@ const userSchema = new mongoose.Schema({
         unique: true,
         sparse: true,
         required: function() {
-            return this.role === 'student';
+            return this.getRoles().includes('student');
         }
     },
     semester: {
@@ -62,13 +68,13 @@ const userSchema = new mongoose.Schema({
         min: 1,
         max: 8,
         required: function() {
-            return this.role === 'student';
+            return this.getRoles().includes('student');
         }
     },
     batch: {
         type: String,
         required: function() {
-            return this.role === 'student';
+            return this.getRoles().includes('student');
         }
     },
     
@@ -78,19 +84,19 @@ const userSchema = new mongoose.Schema({
         unique: true,
         sparse: true,
         required: function() {
-            return ['teacher', 'focal', 'chairman'].includes(this.role);
+            return this.getRoles().some(r => ['teacher', 'focal', 'chairman'].includes(r));
         }
     },
     designation: {
         type: String,
         required: function() {
-            return ['teacher', 'focal', 'chairman'].includes(this.role);
+            return this.getRoles().some(r => ['teacher', 'focal', 'chairman'].includes(r));
         }
     },
     qualification: {
         type: String,
         required: function() {
-            return ['teacher', 'focal', 'chairman'].includes(this.role);
+            return this.getRoles().some(r => ['teacher', 'focal', 'chairman'].includes(r));
         }
     },
     
@@ -176,8 +182,24 @@ userSchema.index({ department: 1 });
 userSchema.index({ studentId: 1 });
 userSchema.index({ employeeId: 1 });
 
-// Pre-save middleware to hash password
+// Resolve all roles assigned to this user
+userSchema.methods.getRoles = function() {
+    if (Array.isArray(this.roles) && this.roles.length) {
+        return [...new Set(this.roles.filter(Boolean))];
+    }
+    return this.role ? [this.role] : [];
+};
+
+// Pre-save middleware to hash password and sync roles
 userSchema.pre('save', async function(next) {
+    if (Array.isArray(this.roles) && this.roles.length) {
+        if (!this.role || !this.roles.includes(this.role)) {
+            this.role = this.roles[0];
+        }
+    } else if (this.role) {
+        this.roles = [this.role];
+    }
+
     if (!this.isModified('password')) return next();
     
     try {
@@ -194,8 +216,9 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Method to get user permissions based on role
-userSchema.methods.getPermissions = function() {
+// Method to get user permissions based on active role
+userSchema.methods.getPermissions = function(activeRole) {
+    const role = activeRole || this.role;
     const rolePermissions = {
         student: ['read'],
         teacher: ['read', 'write'],
@@ -205,19 +228,20 @@ userSchema.methods.getPermissions = function() {
         controller: ['read', 'write', 'delete', 'admin']
     };
     
-    return rolePermissions[this.role] || [];
+    return rolePermissions[role] || [];
 };
 
-// Method to check if user can access department
-userSchema.methods.canAccessDepartment = function(departmentId) {
-    if (this.role === 'controller') return true;
-    if (this.role === 'dean') {
+// Method to check if user can access department for a given active role
+userSchema.methods.canAccessDepartment = function(departmentId, activeRole) {
+    const role = activeRole || this.role;
+    if (role === 'controller') return true;
+    if (role === 'dean') {
         return this.assignedFaculties.some(faculty => faculty.toString() === departmentId.toString());
     }
-    if (this.role === 'chairman') {
+    if (role === 'chairman') {
         return this.managedDepartments.some(dept => dept.toString() === departmentId.toString());
     }
-    if (this.role === 'focal') {
+    if (role === 'focal') {
         return this.assignedDepartments.some(dept => dept.toString() === departmentId.toString());
     }
     return this.department.toString() === departmentId.toString();

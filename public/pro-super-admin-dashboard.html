@@ -2869,8 +2869,8 @@ Type "DELETE" to confirm:`;
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, '_')
                 .replace(/^_+|_+$/g, '')
-                .substring(0, 30);
-            document.getElementById('universitySlug').value = slug;
+                .substring(0, 24);
+            document.getElementById('universitySlug').value = slug.toUpperCase();
             
             // Update auto database name preview
             document.getElementById('autoDbName').textContent = slug || 'xxx';

@@ -69,7 +69,7 @@ const API_ENDPOINTS = {
     // Authentication
     LOGIN: '/api/auth/login',
     CHECK: '/api/auth/check',
-    LOGOUT: '/api/auth/logout',
+    SELECT_ROLE: '/api/auth/select-role',
     
     // Universities
     UNIVERSITIES: '/api/universities',
@@ -138,14 +138,142 @@ class AuthManager {
         return true;
     }
 
-    static requireRole(expectedRole) {
-        if (!this.checkAuth()) return false;
+    static getActiveRole() {
         const user = this.getUser();
-        if (user.role !== expectedRole) {
-            window.location.href = getDashboardForRole(user.role);
+        return user?.activeRole || user?.role;
+    }
+
+    static getAvailableRoles() {
+        const user = this.getUser();
+        if (Array.isArray(user?.availableRoles) && user.availableRoles.length) {
+            return user.availableRoles;
+        }
+        if (Array.isArray(user?.roles) && user.roles.length) {
+            return user.roles;
+        }
+        return user?.role ? [user.role] : [];
+    }
+
+    static hasRole(role) {
+        return this.getAvailableRoles().includes(role);
+    }
+
+    static requireDashboardAccess(allowedRoles) {
+        if (!this.checkAuth()) return false;
+        const active = this.getActiveRole();
+        if (!allowedRoles.includes(active)) {
+            window.location.href = getDashboardForRole(active);
+            return false;
+        }
+        if (!this.hasRole(active)) {
+            this.redirectToLogin();
             return false;
         }
         return true;
+    }
+
+    static requireRole(expectedRole) {
+        return this.requireDashboardAccess([expectedRole]);
+    }
+}
+
+const ROLE_META = {
+    pro_superadmin: { label: 'Pro Super Admin', icon: 'fa-crown', color: '#7c3aed', description: 'Manage all universities on the platform' },
+    platform_admin: { label: 'Platform Admin', icon: 'fa-shield-halved', color: '#6366f1', description: 'Platform administration and support' },
+    university_superadmin: { label: 'University Super Admin', icon: 'fa-university', color: '#2563eb', description: 'Full university administration and OBE setup' },
+    superadmin: { label: 'University Super Admin', icon: 'fa-university', color: '#2563eb', description: 'Full university administration and OBE setup' },
+    controller: { label: 'Controller of Examinations', icon: 'fa-clipboard-check', color: '#0ea5e9', description: 'Exams, results, and academic records' },
+    dean: { label: 'Dean', icon: 'fa-user-tie', color: '#0891b2', description: 'Faculty-level oversight and approvals' },
+    chairman: { label: 'Chairman', icon: 'fa-sitemap', color: '#059669', description: 'Department management and OBE coordination' },
+    focal: { label: 'Focal Person', icon: 'fa-bullseye', color: '#d97706', description: 'OBE focal duties and department reporting' },
+    teacher: { label: 'Teacher', icon: 'fa-chalkboard-teacher', color: '#4f46e5', description: 'Courses, assessments, and student grading' },
+    student: { label: 'Student', icon: 'fa-user-graduate', color: '#db2777', description: 'Courses, results, and learning outcomes' },
+    support: { label: 'Support', icon: 'fa-life-ring', color: '#64748b', description: 'Platform support access' }
+};
+
+class RoleManager {
+    static getMeta(role) {
+        return ROLE_META[role] || {
+            label: (role || 'User').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+            icon: 'fa-user',
+            color: '#475569',
+            description: 'Open this workspace'
+        };
+    }
+
+    static redirectAfterLogin(data) {
+        localStorage.removeItem('universityInfo');
+        AuthManager.setAuth(data.token, data.user);
+        const roles = AuthManager.getAvailableRoles();
+        if (data.needsRoleSelection || roles.length > 1) {
+            window.location.href = '/select-role.html';
+            return;
+        }
+        window.location.href = getDashboardForRole(AuthManager.getActiveRole());
+    }
+
+    static async switchRole(role, options = { redirect: true }) {
+        const res = await fetch(API_ENDPOINTS.SELECT_ROLE, {
+            method: 'POST',
+            headers: APIManager.getHeaders(true),
+            body: JSON.stringify({ role })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to switch role');
+        AuthManager.setAuth(data.token, data.user);
+        localStorage.setItem(`lastActiveRole_${data.user.email}`, role);
+        if (options.redirect !== false) {
+            window.location.href = getDashboardForRole(role);
+        }
+        return data;
+    }
+
+    static mountSwitcher() {
+        const roles = AuthManager.getAvailableRoles();
+        if (roles.length <= 1 || document.getElementById('obeRoleSwitcher')) return;
+
+        const active = AuthManager.getActiveRole();
+        const meta = this.getMeta(active);
+        const mount = document.getElementById('roleSwitcherMount') || document.body;
+
+        const wrap = document.createElement('div');
+        wrap.id = 'obeRoleSwitcher';
+        if (mount === document.body) {
+            wrap.style.cssText = 'position:fixed;top:12px;right:12px;z-index:9999;';
+        } else {
+            wrap.className = 'ms-auto';
+        }
+
+        wrap.innerHTML = `
+            <div class="dropdown">
+                <button class="btn btn-sm btn-light shadow-sm dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="obeRoleSwitcherBtn">
+                    <span class="rounded-circle d-inline-flex align-items-center justify-content-center text-white" style="width:28px;height:28px;background:${meta.color};font-size:11px;">
+                        <i class="fas ${meta.icon}"></i>
+                    </span>
+                    <span class="d-none d-md-inline">${meta.label}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow" id="obeRoleSwitcherMenu"></ul>
+            </div>`;
+
+        mount.appendChild(wrap);
+
+        const menu = wrap.querySelector('#obeRoleSwitcherMenu');
+        roles.forEach(role => {
+            const m = this.getMeta(role);
+            const li = document.createElement('li');
+            const isActive = role === active;
+            li.innerHTML = `<button class="dropdown-item d-flex align-items-center ${isActive ? 'active' : ''}" type="button">
+                <i class="fas ${m.icon} me-2" style="color:${m.color};width:18px;"></i>
+                <span>${m.label}${isActive ? ' <small class="text-muted">(current)</small>' : ''}</span>
+            </button>`;
+            if (!isActive) {
+                li.querySelector('button').addEventListener('click', () => {
+                    li.querySelector('button').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Switching...';
+                    this.switchRole(role).catch(err => alert(err.message || 'Could not switch role'));
+                });
+            }
+            menu.appendChild(li);
+        });
     }
 }
 
@@ -251,13 +379,30 @@ class UniversityManager {
         }
     }
 
+    /** Show real logo image or letter placeholder — never both at once. */
+    static syncUniversityLogoDisplay(mode) {
+        const logoElement = document.getElementById('universityLogo');
+        const placeholderElement = document.getElementById('universityLogoPlaceholder');
+        if (!logoElement || !placeholderElement) return;
+        const showImage = mode === 'image' && logoElement.dataset.logoLoaded === '1';
+        if (showImage) {
+            logoElement.style.display = 'block';
+            placeholderElement.style.display = 'none';
+            placeholderElement.setAttribute('aria-hidden', 'true');
+        } else {
+            logoElement.style.display = 'none';
+            logoElement.removeAttribute('data-logo-loaded');
+            placeholderElement.style.display = 'flex';
+            placeholderElement.setAttribute('aria-hidden', 'false');
+        }
+    }
+
     /** Load logo with Authorization header (img src cannot send JWT). */
     static async applyUniversityLogo(logoUrl) {
         const logoElement = document.getElementById('universityLogo');
         const placeholderElement = document.getElementById('universityLogoPlaceholder');
         if (!logoUrl || !logoElement) {
-            if (placeholderElement) placeholderElement.style.display = 'flex';
-            if (logoElement) logoElement.style.display = 'none';
+            this.syncUniversityLogoDisplay('placeholder');
             return false;
         }
         try {
@@ -274,18 +419,16 @@ class UniversityManager {
             this._logoObjectUrl = URL.createObjectURL(blob);
             logoElement.src = this._logoObjectUrl;
             logoElement.dataset.logoLoaded = '1';
-            logoElement.style.display = 'block';
-            if (placeholderElement) placeholderElement.style.display = 'none';
+            this.syncUniversityLogoDisplay('image');
             return true;
         } catch (err) {
             console.warn('University logo failed to load:', err);
-            logoElement.style.display = 'none';
             logoElement.removeAttribute('data-logo-loaded');
             const name = document.querySelector('#universityName, .university-name')?.textContent?.trim() || 'U';
             if (placeholderElement) {
                 placeholderElement.textContent = name.charAt(0).toUpperCase();
-                placeholderElement.style.display = 'flex';
             }
+            this.syncUniversityLogoDisplay('placeholder');
             return false;
         }
     }
@@ -417,13 +560,16 @@ class NotificationManager {
     }
 }
 
-// Initialize common functionality (skip on Pro Super Admin dashboard — it has its own loader)
+// Initialize common functionality
 document.addEventListener('DOMContentLoaded', function() {
-    if (window.location.pathname.includes('pro-super-admin-dashboard')) {
-        return;
-    }
-    // Check authentication
-    if (!AuthManager.checkAuth()) {
+    const path = window.location.pathname;
+    if (path.includes('login.html') || path.includes('select-role')) return;
+
+    if (!AuthManager.checkAuth()) return;
+
+    RoleManager.mountSwitcher();
+
+    if (path.includes('pro-super-admin-dashboard') || path.includes('university-super-admin-dashboard')) {
         return;
     }
     
@@ -442,7 +588,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         document.querySelectorAll('#userRole, .user-role').forEach(el => {
-            if (el) el.textContent = user.role?.replace('_', ' ').toUpperCase();
+            if (el) el.textContent = RoleManager.getMeta(AuthManager.getActiveRole()).label;
         });
     }
 });
@@ -454,6 +600,8 @@ function logout() {
 
 // Export for use in other scripts
 window.AuthManager = AuthManager;
+window.RoleManager = RoleManager;
+window.ROLE_META = ROLE_META;
 window.APIManager = APIManager;
 window.UniversityManager = UniversityManager;
 window.applyUniversityLogo = (url) => UniversityManager.applyUniversityLogo(url);

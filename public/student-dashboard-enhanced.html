@@ -513,8 +513,7 @@
             }
             
             const user = AuthManager.getUser();
-            if (user.role !== 'student') {
-                window.location.href = getDashboardForRole(user.role);
+            if (!AuthManager.requireDashboardAccess(['student'])) {
                 return;
             }
             

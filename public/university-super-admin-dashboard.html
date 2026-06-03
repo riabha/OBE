@@ -8,58 +8,41 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- 🔧 DIRECT LOADING FIX - Prevents "Loading..." state -->
+    <!-- Bootstrap UI from logged-in user only (never hardcode Demo) -->
     <script>
-        // 🔧 DIRECT LOADING FIX - Runs immediately to prevent "Loading..." state
-        console.log('🔧 Direct loading fix executing...');
+        (function bootstrapUniversityShell() {
+            function applyFromSessionUser() {
+                let user = {};
+                try {
+                    user = JSON.parse(localStorage.getItem('user') || '{}');
+                } catch (e) { return; }
+                if (!user.universityCode && user.role !== 'university_superadmin') return;
 
-        // Immediate execution - don't wait for anything
-        (function() {
-            try {
-                // Set fallback values immediately
-                const setFallbackValues = () => {
-                    const nameEl = document.getElementById('universityName');
-                    const logoEl = document.getElementById('universityLogoPlaceholder');
-                    const dbEl = document.getElementById('sidebarDatabaseName');
-                    
-                    if (nameEl && (nameEl.textContent === 'Loading...' || nameEl.textContent.trim() === '')) {
-                        nameEl.textContent = 'Demo University';
-                        console.log('✅ Set university name fallback');
-                    }
-                    
-                    if (logoEl) {
-                        logoEl.textContent = 'D';
-                        logoEl.style.display = 'flex';
-                        console.log('✅ Set logo fallback');
-                    }
-                    
-                    if (dbEl && (dbEl.textContent === 'Loading database...' || dbEl.textContent.includes('Loading') || dbEl.textContent.trim() === '')) {
-                        dbEl.textContent = 'obe_university_demo';
-                        console.log('✅ Set database name fallback');
-                    }
-                    
-                    const actualLogo = document.getElementById('universityLogo');
-                    if (actualLogo && actualLogo.dataset.logoLoaded !== '1') {
-                        actualLogo.style.display = 'none';
-                    }
-                };
-                
-                // Run immediately if DOM is ready
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', setFallbackValues);
-                } else {
-                    setFallbackValues();
+                const code = String(user.universityCode || '').toUpperCase();
+                const nameFromCode = code === 'DEMO'
+                    ? 'Quest Demo University'
+                    : code.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+                const nameEl = document.getElementById('universityName');
+                const logoPh = document.getElementById('universityLogoPlaceholder');
+                const dbEl = document.getElementById('sidebarDatabaseName');
+
+                if (nameEl && (!nameEl.textContent || nameEl.textContent === 'Loading...')) {
+                    nameEl.textContent = nameFromCode || 'University';
                 }
-                
-                // Run again after short delays in case elements load later
-                setTimeout(setFallbackValues, 100);
-                setTimeout(setFallbackValues, 500);
-                setTimeout(setFallbackValues, 1000);
-                
-                console.log('✅ Direct loading fix applied successfully');
-                
-            } catch (error) {
-                console.error('Direct loading fix error:', error);
+                if (logoPh && !document.getElementById('universityLogo')?.dataset.logoLoaded) {
+                    logoPh.textContent = (nameFromCode || 'U').charAt(0).toUpperCase();
+                    logoPh.style.display = 'flex';
+                }
+                if (dbEl && (!dbEl.textContent || dbEl.textContent.includes('Loading'))) {
+                    dbEl.textContent = code === 'DEMO'
+                        ? 'obe_university_demo'
+                        : `obe_university_${code.toLowerCase().replace(/[^a-z0-9_]/g, '_')}`;
+                }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', applyFromSessionUser, { once: true });
+            } else {
+                applyFromSessionUser();
             }
         })();
     </script>
@@ -102,24 +85,45 @@
             text-align: center;
         }
 
+        /* Single logo slot: show image OR letter, never both */
+        .university-logo-slot {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 1.2rem;
+            position: relative;
+        }
+
+        .university-logo-slot .university-logo-header,
+        .university-logo-slot .university-logo-placeholder {
+            margin: 0;
+        }
+
         .university-logo-header {
             width: 90px;
             height: 90px;
             border-radius: 50%;
-            margin: 0 auto 1.2rem;
             object-fit: contain;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             border: 4px solid rgba(255, 255, 255, 0.4);
             background: white;
             padding: 5px;
-            display: block;
+            display: none;
+        }
+
+        .university-logo-slot #universityLogo[data-logo-loaded="1"] {
+            display: block !important;
+        }
+
+        .university-logo-slot #universityLogo[data-logo-loaded="1"] + .university-logo-placeholder {
+            display: none !important;
+            visibility: hidden;
+            pointer-events: none;
         }
 
         .university-logo-placeholder {
             width: 90px;
             height: 90px;
             border-radius: 50%;
-            margin: 0 auto 1.2rem;
             background: white !important;
             color: #3b82f6 !important;
             display: flex;
@@ -453,9 +457,9 @@
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <img id="universityLogo" src="" alt="University" class="university-logo-header" style="display: none;">
-            <div class="university-logo-placeholder" id="universityLogoPlaceholder">
-                U
+            <div class="university-logo-slot" id="universityLogoSlot">
+                <img id="universityLogo" src="" alt="University" class="university-logo-header">
+                <div class="university-logo-placeholder" id="universityLogoPlaceholder" aria-hidden="false">U</div>
             </div>
             <h5 class="text-white fw-bold mb-2 mt-0" id="universityName">Loading...</h5>
             <small class="text-white-50 fw-semibold d-block">Super Admin Portal</small>
@@ -1573,17 +1577,16 @@
                                 <label class="form-label">Email *</label>
                                 <input type="email" class="form-control" id="editUserEmail" required>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Role *</label>
-                                <select class="form-select" id="editUserRole" required>
-                                    <option value="teacher">Teacher</option>
-                                    <option value="student">Student</option>
-                                    <option value="focal">Focal Person</option>
-                                    <option value="dean">Dean</option>
-                                    <option value="chairman">Chairman</option>
-                                    <option value="controller">Controller</option>
-                                    <option value="admin">Admin</option>
-                                </select>
+                            <div class="col-12">
+                                <label class="form-label">Roles * <small class="text-muted">Select all that apply (e.g. Dean + Teacher)</small></label>
+                                <div class="d-flex flex-wrap gap-2 p-3 border rounded bg-light" id="editUserRolesGroup">
+                                    <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="editUserRole" value="teacher"> Teacher</label>
+                                    <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="editUserRole" value="student"> Student</label>
+                                    <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="editUserRole" value="focal"> Focal Person</label>
+                                    <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="editUserRole" value="chairman"> Chairman</label>
+                                    <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="editUserRole" value="dean"> Dean</label>
+                                    <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="editUserRole" value="controller"> Controller</label>
+                                </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Department</label>
@@ -1639,18 +1642,16 @@
                                 <label class="form-label">Email *</label>
                                 <input type="email" class="form-control" id="newUserEmail" required>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Role *</label>
-                                <select class="form-select" id="newUserRole" required>
-                                    <option value="">Select Role...</option>
-                                    <option value="teacher">Teacher</option>
-                                    <option value="student">Student</option>
-                                    <option value="focal">Focal Person</option>
-                                    <option value="dean">Dean</option>
-                                    <option value="chairman">Chairman</option>
-                                    <option value="controller">Controller</option>
-                                    <option value="admin">Admin</option>
-                                </select>
+                            <div class="col-12">
+                                <label class="form-label">Roles * <small class="text-muted">Select all that apply (e.g. Dean + Teacher)</small></label>
+                                <div class="d-flex flex-wrap gap-2 p-3 border rounded bg-light" id="newUserRolesGroup">
+                                    <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="newUserRole" value="teacher"> Teacher</label>
+                                    <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="newUserRole" value="student"> Student</label>
+                                    <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="newUserRole" value="focal"> Focal Person</label>
+                                    <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="newUserRole" value="chairman"> Chairman</label>
+                                    <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="newUserRole" value="dean"> Dean</label>
+                                    <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="newUserRole" value="controller"> Controller</label>
+                                </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Department</label>
@@ -1765,12 +1766,11 @@
             return headers;
         }
 
-        // Initial validation
-        const allowedRoles = ['superadmin', 'university_superadmin', 'controller'];
-        
-        if (!token || !user || !allowedRoles.includes(user.role)) {
-            console.log('Access denied. Role:', user.role, 'Required:', allowedRoles);
+        if (!token || !user) {
             window.location.href = '/login.html';
+        } else {
+            AuthManager.requireDashboardAccess(['superadmin', 'university_superadmin', 'controller']);
+            if (window.RoleManager) RoleManager.mountSwitcher();
         }
 
         // Validate session is valid
@@ -1778,6 +1778,38 @@
             alert('❌ Invalid session. Please login again.');
             localStorage.clear();
             window.location.href = '/login.html';
+        }
+
+        function getSelectedUserRoles(inputName) {
+            return [...document.querySelectorAll(`input[name="${inputName}"]:checked`)].map(el => el.value);
+        }
+
+        function setSelectedUserRoles(inputName, roles) {
+            const list = Array.isArray(roles) && roles.length ? roles : [];
+            document.querySelectorAll(`input[name="${inputName}"]`).forEach(el => {
+                el.checked = list.includes(el.value);
+            });
+        }
+
+        function userRolesList(u) {
+            if (Array.isArray(u.roles) && u.roles.length) return u.roles;
+            return u.role ? [u.role] : [];
+        }
+
+        function renderUserRoleBadges(u) {
+            const roleColors = {
+                superadmin: 'badge-enterprise',
+                teacher: 'bg-primary',
+                student: 'bg-success',
+                focal: 'bg-warning',
+                dean: 'bg-info',
+                chairman: 'bg-secondary',
+                controller: 'bg-dark',
+                admin: 'badge-premium'
+            };
+            return userRolesList(u).map(r =>
+                `<span class="badge ${roleColors[r] || 'bg-secondary'} me-1">${r}</span>`
+            ).join('');
         }
 
         // Global variables
@@ -1807,13 +1839,17 @@
                 
                 // Immediate fallback display
                 if (user.universityCode) {
-                    const universityName = user.universityCode === 'DEMO' ? 'Demo University' : 
-                                         user.universityCode.replace(/_/g, ' ').toUpperCase();
+                    const universityName = user.universityCode === 'DEMO' ? 'Quest Demo University' : 
+                                         user.universityCode.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
                     const firstLetter = universityName.charAt(0).toUpperCase();
                     
                     // Update UI immediately
                     document.getElementById('universityName').textContent = universityName;
-                    document.getElementById('universityLogoPlaceholder').textContent = firstLetter;
+                    const logoImg = document.getElementById('universityLogo');
+                    const logoPh = document.getElementById('universityLogoPlaceholder');
+                    if (logoPh && logoImg?.dataset.logoLoaded !== '1') {
+                        logoPh.textContent = firstLetter;
+                    }
                     
                     // Update database name display
                     const dbName = user.universityCode === 'DEMO' ? 'obe_university_demo' : `obe_university_${user.universityCode.toLowerCase()}`;
@@ -1861,13 +1897,13 @@
                 
             } catch (error) {
                 console.error('Error in loadUniversityInfo:', error);
-                
-                // Last resort fallback
-                document.getElementById('universityName').textContent = 'Demo University';
-                document.getElementById('universityLogoPlaceholder').textContent = 'D';
-                const dbElement = document.getElementById('sidebarDatabaseName');
-                if (dbElement) {
-                    dbElement.textContent = 'obe_university_demo';
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (user.universityCode) {
+                    updateUIWithUniversityInfo({
+                        universityName: user.name || user.universityCode,
+                        universityCode: user.universityCode,
+                        databaseName: user.universityCode === 'DEMO' ? 'obe_university_demo' : null
+                    });
                 }
             }
         }
@@ -1876,9 +1912,11 @@
         function updateUIWithUniversityInfo(university) {
             console.log('🎨 Updating UI with:', university);
             
-            const universityName = university.universityName || 'Demo University';
-            const universityCode = university.universityCode || 'DEMO';
-            const databaseName = university.databaseName || 'obe_university_demo';
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const universityName = university.universityName || user.name || 'University';
+            const universityCode = university.universityCode || user.universityCode || '';
+            const databaseName = university.databaseName
+                || (universityCode === 'DEMO' ? 'obe_university_demo' : (universityCode ? `obe_university_${String(universityCode).toLowerCase()}` : ''));
             
             // Update all university name elements
             document.querySelectorAll('#universityName, .university-name').forEach(el => {
@@ -1890,12 +1928,23 @@
             const placeholderElement = document.getElementById('universityLogoPlaceholder');
             
             if (university.logoUrl && window.UniversityManager) {
-                UniversityManager.applyUniversityLogo(university.logoUrl);
+                UniversityManager.applyUniversityLogo(university.logoUrl).then((ok) => {
+                    if (!ok && placeholderElement) {
+                        placeholderElement.textContent = universityName.charAt(0).toUpperCase();
+                        UniversityManager.syncUniversityLogoDisplay('placeholder');
+                    }
+                });
+            } else if (placeholderElement && window.UniversityManager) {
+                placeholderElement.textContent = universityName.charAt(0).toUpperCase();
+                UniversityManager.syncUniversityLogoDisplay('placeholder');
             } else if (placeholderElement) {
                 const firstLetter = universityName.charAt(0).toUpperCase();
                 placeholderElement.textContent = firstLetter;
                 placeholderElement.style.display = 'flex';
-                if (logoElement) logoElement.style.display = 'none';
+                if (logoElement) {
+                    logoElement.style.display = 'none';
+                    logoElement.removeAttribute('data-logo-loaded');
+                }
             }
             
             // Update database name
@@ -2172,19 +2221,26 @@
         function showDataEmptyHint(type) {
             const el = document.getElementById('dashboardDataHint');
             if (!el) return;
-            const msg = type === 'courses'
-                ? 'No courses in this university database. On the VPS run: <code>npm run seed-demo</code> or <code>npm run seed-demo -- --reset</code>.'
-                : 'No users in this university database. On the VPS run: <code>npm run seed-demo</code> or <code>npm run seed-demo -- --reset</code>.';
-            if (!el.innerHTML.includes('seed-demo')) {
-                el.innerHTML = `<div class="alert alert-warning mb-0"><i class="fas fa-database me-2"></i>${msg}</div>`;
-                el.style.display = 'block';
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const isDemo = user.universityCode === 'DEMO';
+            let msg;
+            if (isDemo) {
+                msg = type === 'courses'
+                    ? 'No courses yet. Run <code>npm run seed-demo -- --reset</code> on the server, or use Add Course.'
+                    : 'No users yet. Run <code>npm run seed-demo -- --reset</code> on the server, or use Add User.';
+            } else {
+                msg = type === 'courses'
+                    ? 'No courses yet for this university. Click <strong>Add Course</strong> to create your first course.'
+                    : 'No users yet for this university. Click <strong>Add User</strong> to add teachers, students, and staff.';
             }
+            el.innerHTML = `<div class="alert alert-info mb-0"><i class="fas fa-info-circle me-2"></i>${msg}</div>`;
+            el.style.display = 'block';
         }
 
         function showApiLoadError(type, message) {
             const el = document.getElementById('dashboardDataHint');
             if (el) {
-                el.innerHTML = `<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Could not load ${type}: ${message}. Try logging out and in again, or run <code>npm run seed-demo -- --reset</code> on the server.</div>`;
+                el.innerHTML = `<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Could not load ${type}: ${message}. Try logging out and in again. If the problem persists, contact the platform administrator.</div>`;
                 el.style.display = 'block';
             }
         }
@@ -2216,7 +2272,9 @@
 
             const roleCounts = {};
             allUsers.forEach(user => {
-                roleCounts[user.role] = (roleCounts[user.role] || 0) + 1;
+                userRolesList(user).forEach(r => {
+                    roleCounts[r] = (roleCounts[r] || 0) + 1;
+                });
             });
 
             if (usersChart) usersChart.destroy();
@@ -2389,7 +2447,7 @@
                                         </div>
                                     </td>
                                     <td>${u.email}</td>
-                                    <td><span class="badge ${roleColors[u.role] || 'bg-secondary'}">${u.role}</span></td>
+                                    <td>${renderUserRoleBadges(u)}</td>
                                     <td>${typeof u.department === 'object' ? (u.department?.name || 'N/A') : (u.department || 'N/A')}</td>
                                     <td class="text-center">
                                         <button class="btn btn-sm btn-outline-primary action-btn me-1" onclick="editUser('${userId(u)}')" title="Edit">
@@ -2483,7 +2541,7 @@
                     document.getElementById('coursesList').innerHTML = `
                         <div class="alert alert-danger">
                             <i class="fas fa-exclamation-triangle me-2"></i>
-                            Failed to load courses: ${err.error || err.message || response.status}. Run <code>npm run seed-demo</code> on the server if this is a fresh deploy.
+                            Failed to load courses: ${err.error || err.message || response.status}. Refresh the page or log out and in again.
                         </div>`;
                 }
             } catch (error) {
@@ -3067,7 +3125,7 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
             document.getElementById('editUserId').value = userId(userToEdit);
             document.getElementById('editUserName').value = userDisplayName(userToEdit);
             document.getElementById('editUserEmail').value = userToEdit.email;
-            document.getElementById('editUserRole').value = userToEdit.role;
+            setSelectedUserRoles('editUserRole', userRolesList(userToEdit));
             const dept = typeof userToEdit.department === 'object' ? (userToEdit.department?.name || '') : (userToEdit.department || '');
             document.getElementById('editUserDepartment').value = dept;
             document.getElementById('editUserResetPassword').checked = false;
@@ -3087,10 +3145,17 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
             const id = document.getElementById('editUserId').value;
             const resetPassword = document.getElementById('editUserResetPassword').checked;
 
+            const selectedRoles = getSelectedUserRoles('editUserRole');
+            if (!selectedRoles.length) {
+                alert('❌ Select at least one role.');
+                return;
+            }
+
             const userData = {
                 name: document.getElementById('editUserName').value,
                 email: document.getElementById('editUserEmail').value,
-                role: document.getElementById('editUserRole').value,
+                roles: selectedRoles,
+                role: selectedRoles[0],
                 department: document.getElementById('editUserDepartment').value
             };
 
@@ -3705,30 +3770,36 @@ FOBM,Faculty of Business Management,dean.biz@example.com,Faculty of business and
             const firstName = nameParts[0] || '';
             const lastName = nameParts.slice(1).join(' ') || 'User';
 
+            const selectedRoles = getSelectedUserRoles('newUserRole');
+            if (!selectedRoles.length) {
+                alert('❌ Select at least one role.');
+                return;
+            }
+
             const userData = {
                 firstName: firstName,
                 lastName: lastName,
                 email: document.getElementById('newUserEmail').value,
-                role: document.getElementById('newUserRole').value,
+                roles: selectedRoles,
+                role: selectedRoles[0],
                 department: document.getElementById('newUserDepartment').value,
                 password: password,
                 phone: document.getElementById('newUserPhone')?.value || '000-000-0000'
             };
 
-            // Add role-specific fields
-            const role = userData.role;
-            if (role === 'student') {
+            // Add role-specific fields based on selected roles
+            if (selectedRoles.includes('student')) {
                 userData.studentId = document.getElementById('newUserStudentId')?.value;
                 userData.semester = parseInt(document.getElementById('newUserSemester')?.value) || 1;
                 userData.batch = document.getElementById('newUserBatch')?.value || new Date().getFullYear().toString();
-            } else if (['teacher', 'focal', 'chairman'].includes(role)) {
+            } else if (selectedRoles.some(r => ['teacher', 'focal', 'chairman'].includes(r))) {
                 userData.employeeId = document.getElementById('newUserEmployeeId')?.value;
                 userData.designation = document.getElementById('newUserDesignation')?.value || 'Staff';
                 userData.qualification = document.getElementById('newUserQualification')?.value || 'Graduate';
             }
 
             // Validate all required fields
-            if (!userData.firstName || !userData.email || !userData.role || !userData.password) {
+            if (!userData.firstName || !userData.email || !userData.roles?.length || !userData.password) {
                 alert('❌ Please fill in all required fields!');
                 return;
             }
@@ -4309,38 +4380,32 @@ EE-101,Circuit Analysis,4,Electrical Engineering,1,,Basic electrical circuits an
             loadDepartments();
         });
 
-        // IMMEDIATE FALLBACK - Run this right away to prevent "Loading..." state
-        (function() {
-            console.log('🔧 Immediate fallback executing...');
+        (function applySessionUniversityLabels() {
             try {
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
-                if (user.universityCode) {
-                    const universityName = user.universityCode === 'DEMO' ? 'Demo University' : 
-                                         user.universityCode.replace(/_/g, ' ').toUpperCase();
-                    const firstLetter = universityName.charAt(0).toUpperCase();
-                    const dbName = user.universityCode === 'DEMO' ? 'obe_university_demo' : `obe_university_${user.universityCode.toLowerCase()}`;
-                    
-                    // Set immediately
-                    const nameEl = document.getElementById('universityName');
-                    const logoEl = document.getElementById('universityLogoPlaceholder');
-                    const dbEl = document.getElementById('sidebarDatabaseName');
-                    
-                    if (nameEl) nameEl.textContent = universityName;
-                    if (logoEl) logoEl.textContent = firstLetter;
-                    if (dbEl) dbEl.textContent = dbName;
-                    
-                    console.log('✅ Immediate fallback applied:', universityName);
-                }
-            } catch (e) {
-                console.error('Immediate fallback error:', e);
-                // Last resort
+                if (!user.universityCode) return;
+                const code = String(user.universityCode).toUpperCase();
+                const universityName = code === 'DEMO'
+                    ? 'Quest Demo University'
+                    : code.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+                const dbName = code === 'DEMO'
+                    ? 'obe_university_demo'
+                    : `obe_university_${code.toLowerCase().replace(/[^a-z0-9_]/g, '_')}`;
                 const nameEl = document.getElementById('universityName');
                 const logoEl = document.getElementById('universityLogoPlaceholder');
                 const dbEl = document.getElementById('sidebarDatabaseName');
-                
-                if (nameEl) nameEl.textContent = 'Demo University';
-                if (logoEl) logoEl.textContent = 'D';
-                if (dbEl) dbEl.textContent = 'obe_university_demo';
+                const logoImg = document.getElementById('universityLogo');
+                if (nameEl && (!nameEl.textContent || nameEl.textContent === 'Loading...')) {
+                    nameEl.textContent = universityName;
+                }
+                if (logoEl && logoImg?.dataset.logoLoaded !== '1') {
+                    logoEl.textContent = universityName.charAt(0).toUpperCase();
+                }
+                if (dbEl && (!dbEl.textContent || dbEl.textContent.includes('Loading'))) {
+                    dbEl.textContent = dbName;
+                }
+            } catch (e) {
+                console.warn('Session university labels:', e);
             }
         })();
     </script>

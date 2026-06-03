@@ -140,6 +140,173 @@ const PlatformSettings = mongoose.model('PlatformSettings', platformSettingsSche
 
 const JWT_SECRET = process.env.JWT_SECRET || 'quest_obe_jwt_secret_key_2024';
 const PRO_ADMIN_ROLES = ['pro_superadmin', 'platform_admin'];
+const UNIVERSITY_STAFF_ROLES = ['student', 'teacher', 'focal', 'chairman', 'dean', 'controller'];
+const PLATFORM_LOGIN_ROLES = ['pro_superadmin', 'platform_admin', 'university_superadmin', 'support', 'superadmin'];
+
+const ROLE_PRIORITY = {
+    pro_superadmin: 100,
+    platform_admin: 90,
+    university_superadmin: 85,
+    superadmin: 85,
+    controller: 80,
+    dean: 70,
+    chairman: 60,
+    focal: 50,
+    teacher: 40,
+    student: 10,
+    support: 5
+};
+
+function normalizeRoleList(roles) {
+    return [...new Set((roles || []).filter(Boolean).map(r => r === 'superadmin' ? 'university_superadmin' : r))];
+}
+
+function getUserRolesFromDoc(doc) {
+    if (!doc) return [];
+    if (typeof doc.getRoles === 'function') return normalizeRoleList(doc.getRoles());
+    if (Array.isArray(doc.roles) && doc.roles.length) return normalizeRoleList(doc.roles);
+    return doc.role ? normalizeRoleList([doc.role]) : [];
+}
+
+function pickDefaultActiveRole(roles, preferred) {
+    const list = normalizeRoleList(roles);
+    if (!list.length) return null;
+    if (preferred && list.includes(preferred)) return preferred;
+    return list.sort((a, b) => (ROLE_PRIORITY[b] || 0) - (ROLE_PRIORITY[a] || 0))[0];
+}
+
+function isPlatformRole(role) {
+    return PLATFORM_LOGIN_ROLES.includes(role);
+}
+
+function buildTokenPayload(session, activeRole) {
+    const role = activeRole || pickDefaultActiveRole(session.availableRoles);
+    const platformContext = isPlatformRole(role);
+    return {
+        userId: platformContext ? session.platformUserId : session.universityUserId,
+        email: session.email,
+        name: session.name,
+        role,
+        activeRole: role,
+        availableRoles: session.availableRoles,
+        universityId: session.university?._id || session.universityId || null,
+        universityCode: session.university?.universityCode || session.universityCode || null,
+        userType: platformContext ? 'platform' : 'university',
+        platformUserId: session.platformUserId || null,
+        universityUserId: session.universityUserId || null
+    };
+}
+
+function buildUserPayload(session, activeRole) {
+    const role = activeRole || pickDefaultActiveRole(session.availableRoles);
+    return {
+        id: isPlatformRole(role) ? session.platformUserId : session.universityUserId,
+        email: session.email,
+        name: session.name,
+        role,
+        activeRole: role,
+        availableRoles: session.availableRoles,
+        roles: session.availableRoles,
+        universityCode: session.university?.universityCode || session.universityCode || null,
+        studentId: session.universityProfile?.studentId,
+        semester: session.universityProfile?.semester,
+        batch: session.universityProfile?.batch,
+        employeeId: session.universityProfile?.employeeId,
+        department: session.universityProfile?.department,
+        permissions: session.platformProfile?.permissions,
+        isActive: true
+    };
+}
+
+async function findUniversityUserByEmail(email, universityRef) {
+    let university = null;
+    if (universityRef && universityRef._id) {
+        university = universityRef;
+    } else if (typeof universityRef === 'string') {
+        university = await University.findOne({
+            $or: [
+                { universityCode: universityRef.toUpperCase() },
+                { databaseName: universityRef }
+            ]
+        });
+    }
+    if (!university) return null;
+    const dbName = getCanonicalDatabaseName(university) || university.databaseName;
+    const uniDb = mongoose.connection.useDb(dbName);
+    const { User } = getUniModels(uniDb);
+    const uniUser = await User.findOne({ email: email.toLowerCase(), isActive: true });
+    return uniUser ? { uniUser, university } : null;
+}
+
+async function buildLoginSession(email, password) {
+    const normalizedEmail = email.toLowerCase();
+    let platformUser = null;
+    let platformOk = false;
+    let uniLogin = null;
+
+    platformUser = await PlatformUser.findOne({ email: normalizedEmail });
+    if (platformUser?.isActive && await platformUser.comparePassword(password)) {
+        platformOk = true;
+    }
+
+    uniLogin = await findUniversityUserByCredentials(normalizedEmail, password);
+
+    if (!platformOk && !uniLogin) return null;
+
+    const availableRoles = [];
+    let platformUserId = null;
+    let universityUserId = null;
+    let university = uniLogin?.university || null;
+    let name = '';
+    let universityProfile = null;
+    let platformProfile = null;
+
+    if (platformOk) {
+        platformUserId = platformUser._id;
+        platformProfile = platformUser;
+        getUserRolesFromDoc(platformUser).forEach(r => availableRoles.push(r));
+        if (!availableRoles.length && platformUser.role) availableRoles.push(platformUser.role);
+        name = platformUser.name;
+
+        if (platformUser.universityCode) {
+            university = university || await University.findOne({ universityCode: platformUser.universityCode.toUpperCase() });
+            const linked = await findUniversityUserByEmail(normalizedEmail, university);
+            if (linked) {
+                university = linked.university;
+                universityUserId = linked.uniUser._id;
+                universityProfile = linked.uniUser;
+                getUserRolesFromDoc(linked.uniUser).forEach(r => availableRoles.push(r));
+            }
+        }
+    }
+
+    if (uniLogin) {
+        university = uniLogin.university;
+        universityUserId = uniLogin.uniUser._id;
+        universityProfile = uniLogin.uniUser;
+        if (!name) name = `${uniLogin.uniUser.firstName} ${uniLogin.uniUser.lastName}`.trim();
+        getUserRolesFromDoc(uniLogin.uniUser).forEach(r => availableRoles.push(r));
+    }
+
+    const uniqueRoles = normalizeRoleList(availableRoles);
+    if (!uniqueRoles.length) return null;
+
+    const lastRoleKey = `lastActiveRole_${normalizedEmail}`;
+    // lastRole from client is applied at select-role; server uses priority here
+
+    return {
+        email: normalizedEmail,
+        name,
+        availableRoles: uniqueRoles,
+        platformUserId,
+        universityUserId,
+        university,
+        universityCode: university?.universityCode,
+        universityId: university?._id,
+        universityProfile,
+        platformProfile
+    };
+}
 
 async function requireAuth(req, res, next) {
     const token = req.headers.authorization?.split(' ')[1];
@@ -198,10 +365,14 @@ function getUniModels(uniDb) {
 
 function formatUserResponse(user) {
     const obj = user.toObject ? user.toObject({ virtuals: false }) : user;
-    return {
-        ...obj,
-        id: obj._id,
-        name: `${obj.firstName || ''} ${obj.lastName || ''}`.trim(),
+    const roles = getUserRolesFromDoc(user);
+    const instructor = obj.instructor;
+        return {
+            ...obj,
+            id: obj._id,
+            roles,
+            role: obj.role || roles[0],
+            name: `${obj.firstName || ''} ${obj.lastName || ''}`.trim(),
         studentId: obj.studentId,
         semester: obj.semester,
         batch: obj.batch,
@@ -271,6 +442,28 @@ const UNI_DB_COLLECTIONS = [
     'assessments', 'results', 'clos', 'plos', 'peos', 'programs', 'attainments', 'reports', 'settings'
 ];
 
+const MAX_UNIVERSITY_CODE_LEN = 24;
+
+function normalizeUniversityCode(rawCode, universityName) {
+    let code = String(rawCode || '')
+        .toUpperCase()
+        .replace(/[^A-Z0-9_]/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '');
+    if (!code) {
+        code = String(universityName || 'UNI')
+            .replace(/[^A-Za-z0-9]/g, '')
+            .toUpperCase()
+            .slice(0, 12) || 'UNI';
+    }
+    return code.slice(0, MAX_UNIVERSITY_CODE_LEN);
+}
+
+function databaseNameFromUniversityCode(code) {
+    const slug = String(code).toLowerCase().replace(/[^a-z0-9_]/g, '_').slice(0, 40);
+    return `obe_university_${slug}`;
+}
+
 function getCanonicalDatabaseName(university) {
     if (!university) return null;
     const stored = (university.databaseName || '').trim();
@@ -335,16 +528,15 @@ async function findUniversityUserByCredentials(email, password) {
 
 async function getUniversityDatabase(token) {
     const decoded = jwt.verify(token, JWT_SECRET);
+    const activeRole = decoded.activeRole || decoded.role;
     let university;
 
-    if (decoded.userType === 'university') {
-        university = decoded.universityId
-            ? await University.findById(decoded.universityId)
-            : await University.findOne({ universityCode: decoded.universityCode });
-    } else {
-        const user = await PlatformUser.findById(decoded.userId);
-        const allowedPlatformRoles = ['university_superadmin', 'superadmin'];
-        if (!user || !allowedPlatformRoles.includes(user.role)) {
+    const platformAdminRoles = ['university_superadmin', 'superadmin'];
+    const usePlatformContext = decoded.userType === 'platform' && platformAdminRoles.includes(activeRole);
+
+    if (usePlatformContext) {
+        const user = await PlatformUser.findById(decoded.platformUserId || decoded.userId);
+        if (!user || !platformAdminRoles.includes(user.role)) {
             throw new Error('Not authorized');
         }
         university = await University.findById(user.university)
@@ -356,6 +548,10 @@ async function getUniversityDatabase(token) {
             user.university = university._id;
             await user.save().catch(() => {});
         }
+    } else {
+        university = decoded.universityId
+            ? await University.findById(decoded.universityId)
+            : await University.findOne({ universityCode: decoded.universityCode });
     }
 
     if (!university) {
@@ -364,7 +560,8 @@ async function getUniversityDatabase(token) {
 
     const dbName = await syncUniversityDatabaseName(university);
     const uniDb = mongoose.connection.useDb(dbName);
-    return { uniDb, university, decoded };
+    const effectiveDecoded = { ...decoded, role: activeRole, activeRole };
+    return { uniDb, university, decoded: effectiveDecoded };
 }
 
 function buildAuthResponse(userPayload, tokenPayload) {
@@ -372,7 +569,8 @@ function buildAuthResponse(userPayload, tokenPayload) {
     return {
         message: 'Login successful',
         token,
-        user: userPayload
+        user: userPayload,
+        needsRoleSelection: (userPayload.availableRoles || []).length > 1
     };
 }
 
@@ -425,6 +623,7 @@ async function createDefaultAdmin() {
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
+app.get('/select-role', (req, res) => res.sendFile(path.join(__dirname, 'public', 'select-role.html')));
 
 // ============================================
 // AUTHENTICATION
@@ -439,83 +638,80 @@ app.post('/api/auth/login', async (req, res) => {
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and password required' });
         }
-        
-        const normalizedEmail = email.toLowerCase();
-        const platformUser = await PlatformUser.findOne({ email: normalizedEmail });
 
-        if (platformUser) {
-            if (!platformUser.isActive) {
-                return res.status(401).json({ message: 'Account inactive' });
-            }
-            const isValid = await platformUser.comparePassword(password);
-            if (!isValid) {
-                return res.status(401).json({ message: 'Invalid credentials' });
-            }
-            platformUser.lastLogin = new Date();
-            await platformUser.save();
-            console.log(`✅ Login successful: ${email} (${platformUser.role})`);
-            return res.json(buildAuthResponse(
-                {
-                    id: platformUser._id,
-                    email: platformUser.email,
-                    name: platformUser.name,
-                    role: platformUser.role,
-                    universityCode: platformUser.universityCode,
-                    permissions: platformUser.permissions,
-                    isActive: platformUser.isActive
-                },
-                {
-                    userId: platformUser._id,
-                    email: platformUser.email,
-                    role: platformUser.role,
-                    universityId: platformUser.university,
-                    universityCode: platformUser.universityCode,
-                    userType: 'platform'
-                }
-            ));
-        }
-
-        const uniLogin = await findUniversityUserByCredentials(normalizedEmail, password);
-        if (!uniLogin) {
+        const session = await buildLoginSession(email, password);
+        if (!session) {
             console.log(`❌ User not found or wrong password: ${email}`);
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        const { uniUser, university } = uniLogin;
-        uniUser.lastLogin = new Date();
-        await uniUser.save();
+        const preferredRole = req.body.preferredRole || null;
+        const activeRole = pickDefaultActiveRole(session.availableRoles, preferredRole);
 
-        const displayName = `${uniUser.firstName} ${uniUser.lastName}`;
-        console.log(`✅ Login successful: ${email} (${uniUser.role}) @ ${university.universityCode}`);
+        if (session.platformUserId && session.platformProfile) {
+            session.platformProfile.lastLogin = new Date();
+            await session.platformProfile.save();
+        }
+        if (session.universityUserId && session.universityProfile) {
+            session.universityProfile.lastLogin = new Date();
+            await session.universityProfile.save();
+        }
+
+        console.log(`✅ Login successful: ${email} roles=[${session.availableRoles.join(', ')}] active=${activeRole}`);
 
         return res.json(buildAuthResponse(
-            {
-                id: uniUser._id,
-                email: uniUser.email,
-                name: displayName,
-                role: uniUser.role,
-                universityCode: university.universityCode,
-                studentId: uniUser.studentId,
-                semester: uniUser.semester,
-                batch: uniUser.batch,
-                employeeId: uniUser.employeeId,
-                department: uniUser.department,
-                isActive: uniUser.isActive
-            },
-            {
-                userId: uniUser._id,
-                email: uniUser.email,
-                name: displayName,
-                role: uniUser.role,
-                universityId: university._id,
-                universityCode: university.universityCode,
-                userType: 'university'
-            }
+            buildUserPayload(session, activeRole),
+            buildTokenPayload(session, activeRole)
         ));
         
     } catch (error) {
         console.error('❌ Login error:', error);
         res.status(500).json({ message: 'Server error' });
+    }
+});
+
+app.post('/api/auth/select-role', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'Authentication required' });
+
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const { role } = req.body;
+        const availableRoles = normalizeRoleList(decoded.availableRoles || [decoded.activeRole || decoded.role]);
+
+        if (!role || !availableRoles.includes(role)) {
+            return res.status(403).json({ message: 'Role not available for this account' });
+        }
+
+        const session = {
+            email: decoded.email,
+            name: decoded.name,
+            availableRoles,
+            platformUserId: decoded.platformUserId || (isPlatformRole(decoded.activeRole || decoded.role) ? decoded.userId : null),
+            universityUserId: decoded.universityUserId || (!isPlatformRole(decoded.activeRole || decoded.role) ? decoded.userId : null),
+            universityId: decoded.universityId,
+            universityCode: decoded.universityCode,
+            university: decoded.universityId ? { _id: decoded.universityId, universityCode: decoded.universityCode } : null
+        };
+
+        if (isPlatformRole(role) && session.platformUserId) {
+            const pu = await PlatformUser.findById(session.platformUserId);
+            if (pu) session.platformProfile = pu;
+        } else if (session.universityUserId && session.universityCode) {
+            const linked = await findUniversityUserByEmail(decoded.email, session.universityCode);
+            if (linked) {
+                session.universityProfile = linked.uniUser;
+                session.university = linked.university;
+            }
+        }
+
+        return res.json(buildAuthResponse(
+            buildUserPayload(session, role),
+            buildTokenPayload(session, role)
+        ));
+    } catch (error) {
+        console.error('Select role error:', error);
+        res.status(401).json({ message: 'Invalid or expired session' });
     }
 });
 
@@ -525,6 +721,8 @@ app.get('/api/auth/check', async (req, res) => {
     
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
+        const activeRole = decoded.activeRole || decoded.role;
+        const availableRoles = normalizeRoleList(decoded.availableRoles || [activeRole]);
         if (decoded.userType === 'university') {
             return res.json({
                 authenticated: true,
@@ -532,12 +730,15 @@ app.get('/api/auth/check', async (req, res) => {
                     id: decoded.userId,
                     email: decoded.email,
                     name: decoded.name,
-                    role: decoded.role,
+                    role: activeRole,
+                    activeRole,
+                    availableRoles,
+                    roles: availableRoles,
                     universityCode: decoded.universityCode
                 }
             });
         }
-        const user = await PlatformUser.findById(decoded.userId);
+        const user = await PlatformUser.findById(decoded.platformUserId || decoded.userId);
         if (!user || !user.isActive) {
             return res.status(401).json({ authenticated: false });
         }
@@ -547,7 +748,11 @@ app.get('/api/auth/check', async (req, res) => {
                 id: user._id,
                 email: user.email,
                 name: user.name,
-                role: user.role
+                role: activeRole,
+                activeRole,
+                availableRoles,
+                roles: availableRoles,
+                universityCode: decoded.universityCode || user.universityCode
             }
         });
     } catch (error) {
@@ -663,10 +868,11 @@ app.post('/api/universities/create', proAdminAuth, upload.single('logo'), async 
             subscriptionPlan
         } = req.body;
 
-        console.log(`\n📝 Creating university: ${universityName} (${universityCode})`);
+        const normalizedCode = normalizeUniversityCode(universityCode, universityName);
+        console.log(`\n📝 Creating university: ${universityName} (${normalizedCode})`);
 
         // Check if code exists
-        const existing = await University.findOne({ universityCode: universityCode.toUpperCase() });
+        const existing = await University.findOne({ universityCode: normalizedCode });
         if (existing) {
             return res.status(400).json({ message: 'University code already exists' });
         }
@@ -685,7 +891,7 @@ app.post('/api/universities/create', proAdminAuth, upload.single('logo'), async 
                 });
             }
         } else {
-            dbName = `obe_university_${universityCode.toLowerCase()}`;
+            dbName = databaseNameFromUniversityCode(normalizedCode);
         }
 
         const logoPayload = req.file
@@ -695,7 +901,7 @@ app.post('/api/universities/create', proAdminAuth, upload.single('logo'), async 
         // Create university
         const university = new University({
             universityName,
-            universityCode: universityCode.toUpperCase(),
+            universityCode: normalizedCode,
             databaseName: dbName,
             logo: logoPayload,
             address,
@@ -727,7 +933,7 @@ app.post('/api/universities/create', proAdminAuth, upload.single('logo'), async 
         // Create university super admin in PLATFORM database
         let superAdminPassword = '';
         try {
-            superAdminPassword = 'Admin@' + universityCode.toUpperCase() + '2025';
+            superAdminPassword = 'Admin@' + normalizedCode + '2025';
             const hashedPassword = await bcrypt.hash(superAdminPassword, 12);
 
             const superAdmin = new PlatformUser({
@@ -827,10 +1033,6 @@ app.put('/api/universities/:id', proAdminAuth, upload.single('logo'), async (req
                 data: req.file.buffer,
                 contentType: req.file.mimetype
             };
-        }
-
-        if (req.body.superAdminEmail && req.body.superAdminEmail !== university.superAdminEmail) {
-            university.superAdminEmail = String(req.body.superAdminEmail).toLowerCase().trim();
         }
 
         await university.save();
@@ -1790,7 +1992,24 @@ app.post('/api/users', async (req, res) => {
         }
         
         // For controller and dean roles, department is not required
-        if (['controller', 'dean'].includes(req.body.role)) {
+        if (Array.isArray(req.body.roles) && req.body.roles.length) {
+            req.body.roles = normalizeRoleList(req.body.roles.filter(r => UNIVERSITY_STAFF_ROLES.includes(r)));
+            if (!req.body.roles.length) {
+                return res.status(400).json({ message: 'At least one valid role is required' });
+            }
+            req.body.role = req.body.roles[0];
+        } else if (req.body.role) {
+            req.body.roles = [req.body.role];
+        }
+
+        const primaryRoles = req.body.roles || [req.body.role];
+        if (primaryRoles.every(r => ['controller', 'dean'].includes(r))) {
+            delete req.body.department;
+        } else if (primaryRoles.some(r => ['controller', 'dean'].includes(r)) && !req.body.department) {
+            delete req.body.department;
+        }
+        
+        if (['controller', 'dean'].includes(req.body.role) && primaryRoles.length === 1) {
             delete req.body.department;
         }
         
@@ -1842,6 +2061,13 @@ app.put('/api/users/:id', async (req, res) => {
             req.body.department = department ? department._id : undefined;
         }
         
+        if (Array.isArray(req.body.roles) && req.body.roles.length) {
+            req.body.roles = normalizeRoleList(req.body.roles.filter(r => UNIVERSITY_STAFF_ROLES.includes(r)));
+            if (req.body.roles.length) req.body.role = req.body.roles[0];
+        } else if (req.body.role) {
+            req.body.roles = [req.body.role];
+        }
+
         const user = await User.findByIdAndUpdate(
             req.params.id,
             req.body,
@@ -2294,11 +2520,10 @@ app.get('/api/departments', async (req, res) => {
 app.post('/api/universities/:id/change-admin-password', proAdminAuth, async (req, res) => {
     try {
         const { newPassword } = req.body;
-        if (!newPassword || newPassword.length < 6) {
-            return res.status(400).json({ message: 'Password must be at least 6 characters' });
+        if (!newPassword || newPassword.length < 8) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters' });
         }
         
-        // Find the university
         const university = await University.findById(req.params.id);
         if (!university) {
             return res.status(404).json({ message: 'University not found' });
