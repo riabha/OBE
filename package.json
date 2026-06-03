@@ -10,6 +10,7 @@
     "seed-demo": "node scripts/seed-demo-university.js --reset",
     "seed-quest": "node scripts/seed-quest-university.js --import=scripts/data/quest-scraped.json --reset --db=obe_quest",
     "seed-quest-live": "node scripts/seed-quest-university.js --reset --db=obe_quest",
+    "seed-obe-demo": "node scripts/seed-obe-demo.js --db=obe_quest",
     "scrape-quest": "node scripts/seed-quest-university.js --scrape-only",
     "validate-quest": "node scripts/validate-quest-data.js",
     "deploy": "powershell -ExecutionPolicy Bypass -File deploy.ps1"

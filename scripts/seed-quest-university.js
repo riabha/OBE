@@ -335,7 +335,8 @@ async function seedDatabase(dbName, payload, reset) {
   const obeStats = await seedObeForUniversity(uniDb, deptDocs, programs);
   console.log(`  ✅ OBE outcomes: ${obeStats.plos} PLOs, ${obeStats.peos} PEOs, ${obeStats.clos} CLOs`);
 
-  await seedObeDemoSample(uniDb, User, Course, deptIdByCode, hashedPassword, recalculateAttainment);
+  await seedObeDemoSample(uniDb, User, Course, deptIdByCode, hashedPassword, recalculateAttainment)
+    .catch(err => console.warn(`  ⚠️  OBE demo sample skipped: ${err.message}`));
 
   console.log(`\n✅ Seed complete for ${dbName}`);
   console.log(`   Login password for scraped staff: ${DEFAULT_PASSWORD}`);
@@ -352,11 +353,11 @@ async function seedObeDemoSample(uniDb, User, Course, deptIdByCode, hashedPasswo
   if (!course) return;
 
   const demoStudents = [
-    { firstName: 'Ali', lastName: 'Ahmed', studentId: 'QUEST-DEMO-001' },
-    { firstName: 'Sara', lastName: 'Khan', studentId: 'QUEST-DEMO-002' },
-    { firstName: 'Usman', lastName: 'Malik', studentId: 'QUEST-DEMO-003' },
-    { firstName: 'Fatima', lastName: 'Shah', studentId: 'QUEST-DEMO-004' },
-    { firstName: 'Hassan', lastName: 'Raza', studentId: 'QUEST-DEMO-005' }
+    { firstName: 'Ali', lastName: 'Ahmed', studentId: 'QUEST-DEMO-001', phone: '3001234001' },
+    { firstName: 'Sara', lastName: 'Khan', studentId: 'QUEST-DEMO-002', phone: '3001234002' },
+    { firstName: 'Usman', lastName: 'Malik', studentId: 'QUEST-DEMO-003', phone: '3001234003' },
+    { firstName: 'Fatima', lastName: 'Shah', studentId: 'QUEST-DEMO-004', phone: '3001234004' },
+    { firstName: 'Hassan', lastName: 'Raza', studentId: 'QUEST-DEMO-005', phone: '3001234005' }
   ];
 
   let studentCount = 0;
@@ -369,10 +370,12 @@ async function seedObeDemoSample(uniDb, User, Course, deptIdByCode, hashedPasswo
       email: `${s.studentId.toLowerCase()}@demo.quest.edu.pk`,
       password: hashedPassword,
       role: 'student',
+      roles: ['student'],
       department: deptId,
       studentId: s.studentId,
       semester: 4,
       batch: '2024',
+      phone: s.phone,
       isActive: true
     });
     studentCount++;
