@@ -2765,13 +2765,14 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    let successMessage = '✅ University Updated Successfully!\n\n';
-                    successMessage += `University: ${data.universityName}\n`;
+                    const uniName = data.universityName || data.university?.universityName || '';
+                    const adminEmail = data.superAdminEmail || data.university?.superAdminEmail || '';
+                    let successMessage = `✅ ${data.message || 'University Updated Successfully!'}\n\nUniversity: ${uniName}`;
                     
                     if (data.newPassword) {
-                        successMessage += `\n🔑 New Super Admin Password: ${data.newPassword}\n`;
-                        successMessage += `Email: ${data.superAdminEmail}\n\n`;
-                        successMessage += '⚠️ Please save these credentials!';
+                        successMessage += `\n\n🔑 Super admin login (use exactly):\n   📧 Email: ${adminEmail}\n   🔑 Password: ${data.newPassword}\n\n⚠️ Copy this now — the university admin must use this email on the login page.`;
+                    } else if (resetPassword) {
+                        successMessage += '\n\n⚠️ Password reset was requested but the server did not confirm it. Try again or use Platform Users → reset password.';
                     }
                     
                     alert(successMessage);

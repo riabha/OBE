@@ -796,7 +796,9 @@ app.put('/api/universities/:id', proAdminAuth, upload.single('logo'), async (req
         ];
         fields.forEach(f => {
             if (req.body[f] !== undefined && req.body[f] !== '') {
-                university[f] = req.body[f];
+                university[f] = f === 'superAdminEmail'
+                    ? String(req.body[f]).toLowerCase().trim()
+                    : req.body[f];
             }
         });
         if (req.body.isActive !== undefined) {
@@ -827,11 +829,61 @@ app.put('/api/universities/:id', proAdminAuth, upload.single('logo'), async (req
             };
         }
 
+        if (req.body.superAdminEmail && req.body.superAdminEmail !== university.superAdminEmail) {
+            university.superAdminEmail = String(req.body.superAdminEmail).toLowerCase().trim();
+        }
+
         await university.save();
+
+        let passwordResetForResponse = null;
+        const wantsReset = req.body.resetPassword === 'true' || req.body.resetPassword === true;
+        if (wantsReset && req.body.newPassword) {
+            const plainPassword = String(req.body.newPassword);
+            if (plainPassword.length < 8) {
+                return res.status(400).json({ message: 'New password must be at least 8 characters' });
+            }
+            const universityAdmin = await PlatformUser.findOne({
+                university: university._id,
+                role: 'university_superadmin'
+            });
+            if (!universityAdmin) {
+                return res.status(404).json({
+                    message: 'University super admin account not found. Add one from Platform Users or recreate the university.'
+                });
+            }
+            universityAdmin.password = await bcrypt.hash(plainPassword, 12);
+            universityAdmin.email = university.superAdminEmail;
+            universityAdmin.isActive = true;
+            await universityAdmin.save();
+            passwordResetForResponse = plainPassword;
+            console.log(`✅ Password reset for university admin: ${universityAdmin.email}`);
+        } else if (req.body.superAdminEmail) {
+            const universityAdmin = await PlatformUser.findOne({
+                university: university._id,
+                role: 'university_superadmin'
+            });
+            if (universityAdmin && universityAdmin.email !== university.superAdminEmail) {
+                const emailTaken = await PlatformUser.findOne({
+                    email: university.superAdminEmail,
+                    _id: { $ne: universityAdmin._id }
+                });
+                if (emailTaken) {
+                    return res.status(400).json({ message: 'Super admin email already in use by another account' });
+                }
+                universityAdmin.email = university.superAdminEmail;
+                await universityAdmin.save();
+            }
+        }
 
         const obj = university.toObject();
         delete obj.logo;
-        res.json({ message: 'University updated', university: obj });
+        res.json({
+            message: passwordResetForResponse ? 'University updated and super admin password reset' : 'University updated',
+            university: obj,
+            universityName: university.universityName,
+            superAdminEmail: university.superAdminEmail,
+            newPassword: passwordResetForResponse || undefined
+        });
 
     } catch (error) {
         res.status(500).json({ message: 'Error', error: error.message });
@@ -2252,29 +2304,32 @@ app.post('/api/universities/:id/change-admin-password', proAdminAuth, async (req
             return res.status(404).json({ message: 'University not found' });
         }
         
-        // Find the university super admin
-        const universityAdmin = await PlatformUser.findOne({ 
-            university: university._id, 
-            role: 'university_superadmin' 
+        const universityAdmin = await PlatformUser.findOne({
+            university: university._id,
+            role: 'university_superadmin'
+        }) || await PlatformUser.findOne({
+            email: university.superAdminEmail.toLowerCase(),
+            role: 'university_superadmin'
         });
         
         if (!universityAdmin) {
             return res.status(404).json({ message: 'University super admin not found' });
         }
         
-        // Hash new password
         const hashedPassword = await bcrypt.hash(newPassword, 12);
-        
-        // Update password
-        await PlatformUser.findByIdAndUpdate(universityAdmin._id, {
-            password: hashedPassword
-        });
+        universityAdmin.password = hashedPassword;
+        universityAdmin.email = university.superAdminEmail;
+        universityAdmin.university = university._id;
+        universityAdmin.universityCode = university.universityCode;
+        universityAdmin.isActive = true;
+        await universityAdmin.save();
         
         console.log(`✅ Password changed for university admin: ${universityAdmin.email}`);
         
         res.json({ 
             message: 'Password changed successfully',
-            adminEmail: universityAdmin.email
+            adminEmail: universityAdmin.email,
+            newPassword: newPassword
         });
         
     } catch (error) {
