@@ -8,6 +8,8 @@
     "dev": "nodemon server.js",
     "init-db": "node scripts/init-platform-database.js",
     "seed-demo": "node scripts/seed-demo-university.js --reset",
+    "seed-quest": "node scripts/seed-quest-university.js --reset --db=obe_quest",
+    "scrape-quest": "node scripts/seed-quest-university.js --scrape-only",
     "deploy": "powershell -ExecutionPolicy Bypass -File deploy.ps1"
   },
   "engines": {
@@ -15,6 +17,7 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cheerio": "^1.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.21.2",

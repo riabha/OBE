@@ -59,6 +59,7 @@ QUEST_OBE_Portal_Complete_Backup/
 *.sql
 *.sqlite
 *.db
+scripts/data/quest-scraped.json
 
 # Vercel
 .vercel
