@@ -4,7 +4,8 @@
  * Usage:
  *   node scripts/seed-quest-university.js --scrape-only     # save JSON only
  *   node scripts/seed-quest-university.js --reset             # scrape + seed (clears uni DB first)
- *   node scripts/seed-quest-university.js --import=path.json  # seed from saved JSON
+ *   node scripts/seed-quest-university.js --import=scripts/data/quest-scraped.json --reset  # VPS (no scrape)
+ *   npm run scrape-quest   # dev machine only — refresh JSON, commit, then git pull on VPS
  *
  * Default DB: obe_quest (override with --db=obe_quest)
  * Default password for seeded users: quest123

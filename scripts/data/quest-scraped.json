@@ -1,0 +1,6073 @@
+{
+  "scrapedAt": "2026-06-03T16:48:22.463Z",
+  "source": "https://www.quest.edu.pk",
+  "batches": [
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+  ],
+  "note": "Student rosters are not public on quest.edu.pk — staff, departments, and courses only.",
+  "faculties": [
+    {
+      "id": 1,
+      "name": "Faculty of Computer Engineering",
+      "bucket": "Engineering",
+      "deanName": "Prof. Dr. Intesab Hussain Sadhayo",
+      "departments": [
+        {
+          "name": "Artificial Intelligence",
+          "chairmanName": null
+        },
+        {
+          "name": "Computer Systems Engineering",
+          "chairmanName": null
+        },
+        {
+          "name": "Software Engineering",
+          "chairmanName": null
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Faculty of Electrical and Electronic Engineering",
+      "bucket": "Engineering",
+      "deanName": "Prof. Dr. Abdul Fatah Chandio",
+      "departments": [
+        {
+          "name": "Biomedical Engineering",
+          "chairmanName": "Dr. Abdul Aleem Jamali Leading"
+        },
+        {
+          "name": "Electrical (Automation & Control Engineering)",
+          "chairmanName": null
+        },
+        {
+          "name": "Electrical Engineering",
+          "chairmanName": null
+        },
+        {
+          "name": "Electronic Engineering",
+          "chairmanName": null
+        },
+        {
+          "name": "Telecommunication Engineering",
+          "chairmanName": null
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Faculty of Civil and Mechanical Engineering",
+      "bucket": "Engineering",
+      "deanName": "Prof. Dr. Muhammad Ramzan Luhur",
+      "departments": [
+        {
+          "name": "Building and Architectural Engineering",
+          "chairmanName": null
+        },
+        {
+          "name": "Civil Engineering",
+          "chairmanName": null
+        },
+        {
+          "name": "Industrial and Manufacturing Engineering",
+          "chairmanName": null
+        },
+        {
+          "name": "Mechanical Engineering",
+          "chairmanName": null
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Faculty of Environmental Engineering",
+      "bucket": "Engineering",
+      "deanName": "Prof. Dr. Kishan Chand Mukwana",
+      "departments": [
+        {
+          "name": "Chemical Engineering",
+          "chairmanName": null
+        },
+        {
+          "name": "Energy Systems Engineering",
+          "chairmanName": null
+        },
+        {
+          "name": "Environment Engineering",
+          "chairmanName": null
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Faculty of Science",
+      "bucket": "Sciences",
+      "deanName": "Prof. Dr. Muhammad Ibrahim Channa",
+      "departments": [
+        {
+          "name": "Basic Science and Related Studies",
+          "chairmanName": null
+        },
+        {
+          "name": "Chemistry",
+          "chairmanName": null
+        },
+        {
+          "name": "Computer Science",
+          "chairmanName": null
+        },
+        {
+          "name": "Cyber Security",
+          "chairmanName": "Dr. Adnan Ahmed Leading"
+        },
+        {
+          "name": "Data Science",
+          "chairmanName": "Dr. Mehwish Leghari Leading"
+        },
+        {
+          "name": "English (Language and Literature)",
+          "chairmanName": null
+        },
+        {
+          "name": "Information Technology",
+          "chairmanName": null
+        },
+        {
+          "name": "Mathematics and Statistics",
+          "chairmanName": "Prof. Rajab Ali Malookani Leading"
+        },
+        {
+          "name": "Physics",
+          "chairmanName": null
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Faculty of Technology",
+      "bucket": "Engineering",
+      "deanName": "Prof. Dr. Abdul Sattar Jamali",
+      "departments": [
+        {
+          "name": "Civil Engineering Technology",
+          "chairmanName": "Dr. Aftab Hameed Memon Leading"
+        },
+        {
+          "name": "Food Engineering Technology",
+          "chairmanName": "Dr. Imran Ahmed Samo Leading"
+        }
+      ]
+    }
+  ],
+  "deptToFaculty": {
+    "artificial intelligence": {
+      "facultyId": 1,
+      "facultyName": "Faculty of Computer Engineering"
+    },
+    "computer systems engineering": {
+      "facultyId": 1,
+      "facultyName": "Faculty of Computer Engineering"
+    },
+    "software engineering": {
+      "facultyId": 1,
+      "facultyName": "Faculty of Computer Engineering"
+    },
+    "biomedical engineering": {
+      "facultyId": 2,
+      "facultyName": "Faculty of Electrical and Electronic Engineering"
+    },
+    "electrical (automation & control engineering)": {
+      "facultyId": 2,
+      "facultyName": "Faculty of Electrical and Electronic Engineering"
+    },
+    "electrical engineering": {
+      "facultyId": 2,
+      "facultyName": "Faculty of Electrical and Electronic Engineering"
+    },
+    "electronic engineering": {
+      "facultyId": 2,
+      "facultyName": "Faculty of Electrical and Electronic Engineering"
+    },
+    "telecommunication engineering": {
+      "facultyId": 2,
+      "facultyName": "Faculty of Electrical and Electronic Engineering"
+    },
+    "building and architectural engineering": {
+      "facultyId": 3,
+      "facultyName": "Faculty of Civil and Mechanical Engineering"
+    },
+    "civil engineering": {
+      "facultyId": 3,
+      "facultyName": "Faculty of Civil and Mechanical Engineering"
+    },
+    "industrial and manufacturing engineering": {
+      "facultyId": 3,
+      "facultyName": "Faculty of Civil and Mechanical Engineering"
+    },
+    "mechanical engineering": {
+      "facultyId": 3,
+      "facultyName": "Faculty of Civil and Mechanical Engineering"
+    },
+    "chemical engineering": {
+      "facultyId": 4,
+      "facultyName": "Faculty of Environmental Engineering"
+    },
+    "energy systems engineering": {
+      "facultyId": 4,
+      "facultyName": "Faculty of Environmental Engineering"
+    },
+    "environment engineering": {
+      "facultyId": 4,
+      "facultyName": "Faculty of Environmental Engineering"
+    },
+    "basic science and related studies": {
+      "facultyId": 5,
+      "facultyName": "Faculty of Science"
+    },
+    "chemistry": {
+      "facultyId": 5,
+      "facultyName": "Faculty of Science"
+    },
+    "computer science": {
+      "facultyId": 5,
+      "facultyName": "Faculty of Science"
+    },
+    "cyber security": {
+      "facultyId": 5,
+      "facultyName": "Faculty of Science"
+    },
+    "data science": {
+      "facultyId": 5,
+      "facultyName": "Faculty of Science"
+    },
+    "english (language and literature)": {
+      "facultyId": 5,
+      "facultyName": "Faculty of Science"
+    },
+    "information technology": {
+      "facultyId": 5,
+      "facultyName": "Faculty of Science"
+    },
+    "mathematics and statistics": {
+      "facultyId": 5,
+      "facultyName": "Faculty of Science"
+    },
+    "physics": {
+      "facultyId": 5,
+      "facultyName": "Faculty of Science"
+    },
+    "civil engineering technology": {
+      "facultyId": 6,
+      "facultyName": "Faculty of Technology"
+    },
+    "food engineering technology": {
+      "facultyId": 6,
+      "facultyName": "Faculty of Technology"
+    }
+  },
+  "staffByDept": {
+    "Computer Systems Engineering": [
+      {
+        "fullName": "Prof. Dr. Intesab Hussain Sadhayo",
+        "firstName": "Dr.",
+        "lastName": "Intesab Hussain Sadhayo",
+        "designation": "Dean",
+        "roles": [
+          "dean"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Ubaidullah Rajput",
+        "firstName": "Dr.",
+        "lastName": "Ubaidullah Rajput",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Fizza Abbas Alvi",
+        "firstName": "Fizza",
+        "lastName": "Abbas Alvi",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Umair Ali Khan",
+        "firstName": "Dr.",
+        "lastName": "Umair Ali Khan",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Irfana memon Memon",
+        "firstName": "Irfana",
+        "lastName": "memon Memon",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Fareed Ahmed Jokhio",
+        "firstName": "Dr.",
+        "lastName": "Fareed Ahmed Jokhio",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Mohammad Ali Soomro",
+        "firstName": "Mohammad",
+        "lastName": "Ali Soomro",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Shahzana Memon",
+        "firstName": "Shahzana",
+        "lastName": "Memon",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Abdul Wahid Memon",
+        "firstName": "Abdul",
+        "lastName": "Wahid Memon",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Iftikhar Ahmed Koondhar",
+        "firstName": "Iftikhar",
+        "lastName": "Ahmed Koondhar",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Agha Shiraz Ahmed Khan",
+        "firstName": "Agha",
+        "lastName": "Shiraz Ahmed Khan",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Zuhaib Shaikh",
+        "firstName": "Zuhaib",
+        "lastName": "Shaikh",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Beenish Hashmi Qureshi",
+        "firstName": "Beenish",
+        "lastName": "Hashmi Qureshi",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Dileep Kumar Lohana",
+        "firstName": "Dileep",
+        "lastName": "Kumar Lohana",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Ms. Aisha Jokhio",
+        "firstName": "Aisha",
+        "lastName": "Jokhio",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Ms. Haseena Baloch",
+        "firstName": "Haseena",
+        "lastName": "Baloch",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Ghazanfar Ali Junejo",
+        "firstName": "Ghazanfar",
+        "lastName": "Ali Junejo",
+        "designation": "Staff",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Electrical Engineering": [
+      {
+        "fullName": "Prof. Dr. Abdul Sattar Saand",
+        "firstName": "Dr.",
+        "lastName": "Abdul Sattar Saand",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Muhammad usman keerio",
+        "firstName": "Dr.",
+        "lastName": "Muhammad usman keerio",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Aslam Pervez Memon",
+        "firstName": "Dr.",
+        "lastName": "Aslam Pervez Memon",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Ghulam Mustafa Bhutto",
+        "firstName": "Ghulam",
+        "lastName": "Mustafa Bhutto",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Javed Ahmed Laghari",
+        "firstName": "Dr.",
+        "lastName": "Javed Ahmed Laghari",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Ghulam Sarwar Sarwar Kaloi",
+        "firstName": "Ghulam",
+        "lastName": "Sarwar Sarwar Kaloi",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Noor Hussain Mugheri",
+        "firstName": "Noor",
+        "lastName": "Hussain Mugheri",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Muhammad Akram Bhayo",
+        "firstName": "Muhammad",
+        "lastName": "Akram Bhayo",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Aamir Ali Bhatti",
+        "firstName": "Aamir",
+        "lastName": "Ali Bhatti",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Munwar Ayaz Memon",
+        "firstName": "Munwar",
+        "lastName": "Ayaz Memon",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Rameez Akbar Talani",
+        "firstName": "Rameez",
+        "lastName": "Akbar Talani",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Waqar Ahmed Adil",
+        "firstName": "Waqar",
+        "lastName": "Ahmed Adil",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Abdul Khalique Juneja",
+        "firstName": "Abdul",
+        "lastName": "Khalique Juneja",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Riaz Hussain Memon",
+        "firstName": "Riaz",
+        "lastName": "Hussain Memon",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Sadullah Chandio Chandio",
+        "firstName": "Sadullah",
+        "lastName": "Chandio Chandio",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Muhammad Ali Bijarani",
+        "firstName": "Muhammad",
+        "lastName": "Ali Bijarani",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Muhammad Saleem Memon",
+        "firstName": "Muhammad",
+        "lastName": "Saleem Memon",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Abdul Sattar Memon",
+        "firstName": "Abdul",
+        "lastName": "Sattar Memon",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Mohsin Ali Koondhar",
+        "firstName": "Mohsin",
+        "lastName": "Ali Koondhar",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Mansab Ali Lakho",
+        "firstName": "Mansab",
+        "lastName": "Ali Lakho",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Masood Rehman Shaikh",
+        "firstName": "Masood",
+        "lastName": "Rehman Shaikh",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Fahad Hussain Zardari",
+        "firstName": "Fahad",
+        "lastName": "Hussain Zardari",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Aushique Ali Memon",
+        "firstName": "Aushique",
+        "lastName": "Ali Memon",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Jagdesh Kumar",
+        "firstName": "Jagdesh",
+        "lastName": "Kumar",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Irfan Ali Soomro",
+        "firstName": "Irfan",
+        "lastName": "Ali Soomro",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Imdad Hussain Kalhoro",
+        "firstName": "Imdad",
+        "lastName": "Hussain Kalhoro",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Electronic Engineering": [
+      {
+        "fullName": "Prof. Dr. Abdul Fatah Chandio",
+        "firstName": "Dr.",
+        "lastName": "Abdul Fatah Chandio",
+        "designation": "Dean",
+        "roles": [
+          "dean"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Ehsan Ali Buriro",
+        "firstName": "Dr.",
+        "lastName": "Ehsan Ali Buriro",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Nadeem Naeem Bhatti",
+        "firstName": "Dr.",
+        "lastName": "Nadeem Naeem Bhatti",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. M. Adil Ansari",
+        "firstName": "M.",
+        "lastName": "Adil Ansari",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Majid Hussain",
+        "firstName": "Majid",
+        "lastName": "Hussain",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Kelash - Kanwar",
+        "firstName": "Kelash",
+        "lastName": "- Kanwar",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Sara Rehman Memon",
+        "firstName": "Sara",
+        "lastName": "Rehman Memon",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Tasleem Dehraj",
+        "firstName": "Tasleem",
+        "lastName": "Dehraj",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Nasreen Nizamani",
+        "firstName": "Nasreen",
+        "lastName": "Nizamani",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Tarique Rafique Memon",
+        "firstName": "Tarique",
+        "lastName": "Rafique Memon",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Masood Ali Koondhar",
+        "firstName": "Masood",
+        "lastName": "Ali Koondhar",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Talha Bahtti",
+        "firstName": "Talha",
+        "lastName": "Bahtti",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Noor-ul-ain Brohi",
+        "firstName": "Noor-ul-ain",
+        "lastName": "Brohi",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Nazia Keerio",
+        "firstName": "Nazia",
+        "lastName": "Keerio",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Fariaha Durani",
+        "firstName": "Fariaha",
+        "lastName": "Durani",
+        "designation": "Staff",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Muhammad Saleh Memon",
+        "firstName": "Muhammad",
+        "lastName": "Saleh Memon",
+        "designation": "Staff",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Electrical (Automation & Control Engineering)": [
+      {
+        "fullName": "Prof. Dr. Erum Pathan",
+        "firstName": "Dr.",
+        "lastName": "Erum Pathan",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Bhagwan Das",
+        "firstName": "Bhagwan",
+        "lastName": "Das",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Kamran Ali Memon",
+        "firstName": "Kamran",
+        "lastName": "Ali Memon",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Biomedical Engineering": [
+      {
+        "fullName": "Dr. Abdul Aleem Jamali",
+        "firstName": "Abdul",
+        "lastName": "Aleem Jamali",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Suhail Khokhar",
+        "firstName": "Dr.",
+        "lastName": "Suhail Khokhar",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Barkat Khoso",
+        "firstName": "Barkat",
+        "lastName": "Khoso",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Hajira Fatima Bhutto",
+        "firstName": "Hajira",
+        "lastName": "Fatima Bhutto",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Muhammad Ismail",
+        "firstName": "Muhammad",
+        "lastName": "Ismail",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Environment Engineering": [
+      {
+        "fullName": "Prof. Dr. Kishan Chand Mukwana",
+        "firstName": "Dr.",
+        "lastName": "Kishan Chand Mukwana",
+        "designation": "Dean",
+        "roles": [
+          "dean"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Abdul Nasir Laghari",
+        "firstName": "Dr.",
+        "lastName": "Abdul Nasir Laghari",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Ahsanullah Soomro",
+        "firstName": "Ahsanullah",
+        "lastName": "Soomro",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Imran Ahmed Samo",
+        "firstName": "Imran",
+        "lastName": "Ahmed Samo",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Asif Ali Siyal",
+        "firstName": "Asif",
+        "lastName": "Ali Siyal",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Asif Saleh Qureshi",
+        "firstName": "Asif",
+        "lastName": "Saleh Qureshi",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Amin Abdul Raqeeb - Bhutto",
+        "firstName": "Amin",
+        "lastName": "Abdul Raqeeb - Bhutto",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Energy Systems Engineering": [
+      {
+        "fullName": "Prof. Dr. Abdul Qayoom Jakhrani",
+        "firstName": "Dr.",
+        "lastName": "Abdul Qayoom Jakhrani",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Saleem Raza Samo",
+        "firstName": "Dr.",
+        "lastName": "Saleem Raza Samo",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Asif Ali Memon",
+        "firstName": "Dr.",
+        "lastName": "Asif Ali Memon",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Shahid Hussain Siyal",
+        "firstName": "Dr.",
+        "lastName": "Shahid Hussain Siyal",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Zafar Ali Siyal",
+        "firstName": "Zafar",
+        "lastName": "Ali Siyal",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Muhammad Zaki Hassan Memon",
+        "firstName": "Muhammad",
+        "lastName": "Zaki Hassan Memon",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Mahdi Hassan Mallah",
+        "firstName": "Mahdi",
+        "lastName": "Hassan Mallah",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Hammad Hashmi",
+        "firstName": "Hammad",
+        "lastName": "Hashmi",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Yasir Ali",
+        "firstName": "Yasir",
+        "lastName": "Ali",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Urooj Gul",
+        "firstName": "Urooj",
+        "lastName": "Gul",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Chemical Engineering": [
+      {
+        "fullName": "Dr. Babar Ali Qureshi",
+        "firstName": "Babar",
+        "lastName": "Ali Qureshi",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Abdul Sarni Channa",
+        "firstName": "Abdul",
+        "lastName": "Sarni Channa",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Zubair Ahmed Chandio",
+        "firstName": "Zubair",
+        "lastName": "Ahmed Chandio",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Hafiz Anees ur Rehman",
+        "firstName": "Hafiz",
+        "lastName": "Anees ur Rehman",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Nabi Bux Jalbani",
+        "firstName": "Nabi",
+        "lastName": "Bux Jalbani",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Mariam Mir Memon",
+        "firstName": "Mariam",
+        "lastName": "Mir Memon",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Mukhtiar Ali Mallah",
+        "firstName": "Mukhtiar",
+        "lastName": "Ali Mallah",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Shafeeque Ahmed Wahocho",
+        "firstName": "Shafeeque",
+        "lastName": "Ahmed Wahocho",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Faheem Akhtar Shaikh",
+        "firstName": "Faheem",
+        "lastName": "Akhtar Shaikh",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Aamir Bhatti",
+        "firstName": "Aamir",
+        "lastName": "Bhatti",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Ahsan Atta Rao",
+        "firstName": "Ahsan",
+        "lastName": "Atta Rao",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Software Engineering": [
+      {
+        "fullName": "Prof. Dr. Pardeep Kumar",
+        "firstName": "Dr.",
+        "lastName": "Pardeep Kumar",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Sajida Parveen Soomro",
+        "firstName": "Sajida",
+        "lastName": "Parveen Soomro",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Rafia Naz Memon Memon",
+        "firstName": "Rafia",
+        "lastName": "Naz Memon Memon",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Imtiaz Ali Halepoto",
+        "firstName": "Imtiaz",
+        "lastName": "Ali Halepoto",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Fayaz Ahmed Memon",
+        "firstName": "Fayaz",
+        "lastName": "Ahmed Memon",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Ali Raza Bhangwar",
+        "firstName": "Ali",
+        "lastName": "Raza Bhangwar",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Fiza Siyal",
+        "firstName": "Fiza",
+        "lastName": "Siyal",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Fozia Noureen Shaikh",
+        "firstName": "Fozia",
+        "lastName": "Noureen Shaikh",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Muhammad Aamir Bhutto",
+        "firstName": "Muhammad",
+        "lastName": "Aamir Bhutto",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Mir Muhammad Juno",
+        "firstName": "Mir",
+        "lastName": "Muhammad Juno",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Industrial and Manufacturing Engineering": [
+      {
+        "fullName": "Prof. Dr. Abdul Sattar Jamali",
+        "firstName": "Dr.",
+        "lastName": "Abdul Sattar Jamali",
+        "designation": "Dean",
+        "roles": [
+          "dean"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Qadir Bakhsh Jamali",
+        "firstName": "Dr.",
+        "lastName": "Qadir Bakhsh Jamali",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Imdad Ali Memon",
+        "firstName": "Imdad",
+        "lastName": "Ali Memon",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Muhammad Kashif Abbasi",
+        "firstName": "Muhammad",
+        "lastName": "Kashif Abbasi",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Abid Ali Khaskheli",
+        "firstName": "Abid",
+        "lastName": "Ali Khaskheli",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Mushtaque Ahmed Lakho",
+        "firstName": "Mushtaque",
+        "lastName": "Ahmed Lakho",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Aisha Rajput",
+        "firstName": "Aisha",
+        "lastName": "Rajput",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Qadir Ali Baloch",
+        "firstName": "Qadir",
+        "lastName": "Ali Baloch",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Building and Architectural Engineering": [
+      {
+        "fullName": "Prof. Dr. Engr. Muhammad Auchar",
+        "firstName": "Dr.",
+        "lastName": "Engr. Muhammad Auchar",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Ammaar Noor Memon",
+        "firstName": "Ammaar",
+        "lastName": "Noor Memon",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Naeem Mangi",
+        "firstName": "Naeem",
+        "lastName": "Mangi",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Jawad ur rehman",
+        "firstName": "Jawad",
+        "lastName": "ur rehman",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Muhammad Ibrahim Shaikh",
+        "firstName": "Muhammad",
+        "lastName": "Ibrahim Shaikh",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Muzammil Mureed Tunio",
+        "firstName": "Muzammil",
+        "lastName": "Mureed Tunio",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Abdul Qadeer Zardari",
+        "firstName": "Abdul",
+        "lastName": "Qadeer Zardari",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Telecommunication Engineering": [
+      {
+        "fullName": "Prof. Dr. Muhammad Mujtaba Shaikh",
+        "firstName": "Dr.",
+        "lastName": "Muhammad Mujtaba Shaikh",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Safia Amir Dahri",
+        "firstName": "Safia",
+        "lastName": "Amir Dahri",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Nawaz Ali Zardari",
+        "firstName": "Nawaz",
+        "lastName": "Ali Zardari",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Sarfraz Ahmed Soomro",
+        "firstName": "Sarfraz",
+        "lastName": "Ahmed Soomro",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Sundas Metlo",
+        "firstName": "Sundas",
+        "lastName": "Metlo",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Asadullah Laghari",
+        "firstName": "Asadullah",
+        "lastName": "Laghari",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Fozia Panhwar",
+        "firstName": "Fozia",
+        "lastName": "Panhwar",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Mujeeb urRehman",
+        "firstName": "Mujeeb",
+        "lastName": "urRehman",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Leela Wanti Lohano",
+        "firstName": "Leela",
+        "lastName": "Wanti Lohano",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Sarang Karim",
+        "firstName": "Sarang",
+        "lastName": "Karim",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Fatima Qureshi",
+        "firstName": "Fatima",
+        "lastName": "Qureshi",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Nuzhat Madina Lashari",
+        "firstName": "Nuzhat",
+        "lastName": "Madina Lashari",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Mohiuddin",
+        "firstName": "Mohiuddin",
+        "lastName": "Mohiuddin",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Artificial Intelligence": [
+      {
+        "fullName": "Prof. Dr. Asghar Ali Chandio",
+        "firstName": "Dr.",
+        "lastName": "Asghar Ali Chandio",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Adnan Manzoor Rajpar",
+        "firstName": "Dr.",
+        "lastName": "Adnan Manzoor Rajpar",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Shafiullah Soomro",
+        "firstName": "Shafiullah",
+        "lastName": "Soomro",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Atta Muhammad Muhammad",
+        "firstName": "Atta",
+        "lastName": "Muhammad Muhammad",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Zeeshan Rasool",
+        "firstName": "Zeeshan",
+        "lastName": "Rasool",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Mechanical Engineering": [
+      {
+        "fullName": "Prof. Dr. Muhammad Ramzan Luhur",
+        "firstName": "Dr.",
+        "lastName": "Muhammad Ramzan Luhur",
+        "designation": "Dean",
+        "roles": [
+          "dean"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Abdul Rehman Jatoi",
+        "firstName": "Dr.",
+        "lastName": "Abdul Rehman Jatoi",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "drabsoomro@quest.edu.pk",
+        "firstName": "drabsoomro@quest.edu.pk",
+        "lastName": "drabsoomro@quest.edu.pk",
+        "designation": "Staff",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": "drabsoomro@quest.edu.pk"
+      },
+      {
+        "fullName": "Prof. Dr. Abdul Latif Manganhar",
+        "firstName": "Dr.",
+        "lastName": "Abdul Latif Manganhar",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Gordhan Das Valasai",
+        "firstName": "Gordhan",
+        "lastName": "Das Valasai",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Faheem Ahmed Solangi",
+        "firstName": "Faheem",
+        "lastName": "Ahmed Solangi",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Sajjad Bhangwar",
+        "firstName": "Sajjad",
+        "lastName": "Bhangwar",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Aijaz Ali Abbasi",
+        "firstName": "Aijaz",
+        "lastName": "Ali Abbasi",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Pir Bux alias Waqas Mughal",
+        "firstName": "Pir",
+        "lastName": "Bux alias Waqas Mughal",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Umair Ahmed",
+        "firstName": "Umair",
+        "lastName": "Ahmed",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Rameez Raja Siddique",
+        "firstName": "Rameez",
+        "lastName": "Raja Siddique",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Qamar Abbas Kazi",
+        "firstName": "Qamar",
+        "lastName": "Abbas Kazi",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Sher Muhammad Ghoto",
+        "firstName": "Sher",
+        "lastName": "Muhammad Ghoto",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Azhar Hussain Shah",
+        "firstName": "Azhar",
+        "lastName": "Hussain Shah",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Saddam Hussain Rajput",
+        "firstName": "Saddam",
+        "lastName": "Hussain Rajput",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Nisar Ahmed Jamali",
+        "firstName": "Nisar",
+        "lastName": "Ahmed Jamali",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Physics": [
+      {
+        "fullName": "Prof. Dr. Muhammad Afzal Soomro",
+        "firstName": "Dr.",
+        "lastName": "Muhammad Afzal Soomro",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "dradeel@quest.edu.pk",
+        "firstName": "dradeel@quest.edu.pk",
+        "lastName": "dradeel@quest.edu.pk",
+        "designation": "Staff",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": "dradeel@quest.edu.pk"
+      },
+      {
+        "fullName": "adeelbhatti@quest.edu.pk",
+        "firstName": "adeelbhatti@quest.edu.pk",
+        "lastName": "adeelbhatti@quest.edu.pk",
+        "designation": "Staff",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": "adeelbhatti@quest.edu.pk"
+      },
+      {
+        "fullName": "Mr. Imran Ali Kanhio",
+        "firstName": "Imran",
+        "lastName": "Ali Kanhio",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Ms. Jannat Soomro",
+        "firstName": "Jannat",
+        "lastName": "Soomro",
+        "designation": "Lab Instructor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Food Engineering Technology": [],
+    "Civil Engineering": [
+      {
+        "fullName": "Prof. Dr. Daddan Khan Bangwar",
+        "firstName": "Dr.",
+        "lastName": "Daddan Khan Bangwar",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Bashir Ahmed Memon",
+        "firstName": "Bashir",
+        "lastName": "Ahmed Memon",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Ahsan Ali Buriro",
+        "firstName": "Dr.",
+        "lastName": "Ahsan Ali Buriro",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Aftab Hameed Memon",
+        "firstName": "Aftab",
+        "lastName": "Hameed Memon",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Riaz Bhanbhro",
+        "firstName": "Riaz",
+        "lastName": "Bhanbhro",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Mukhtiar Ali Soomro",
+        "firstName": "Mukhtiar",
+        "lastName": "Ali Soomro",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Muneeb Ayoub Memon",
+        "firstName": "Muneeb",
+        "lastName": "Ayoub Memon",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Shahnawaz",
+        "firstName": "Shahnawaz",
+        "lastName": "Shahnawaz",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Nadeem-ul-Kareem Bhatti",
+        "firstName": "Nadeem-ul-Kareem",
+        "lastName": "Bhatti",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Naseem Usman Keerio",
+        "firstName": "Naseem",
+        "lastName": "Usman Keerio",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Ubaidullah Memon",
+        "firstName": "Ubaidullah",
+        "lastName": "Memon",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Mahboob Oad",
+        "firstName": "Mahboob",
+        "lastName": "Oad",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Jam Shahzaib Khan",
+        "firstName": "Jam",
+        "lastName": "Shahzaib Khan",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Aamir Khan Mastoi",
+        "firstName": "Aamir",
+        "lastName": "Khan Mastoi",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Aijaz Ali",
+        "firstName": "Aijaz",
+        "lastName": "Ali",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Arif Asghar Gopang",
+        "firstName": "Arif",
+        "lastName": "Asghar Gopang",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Imran Ali Channa",
+        "firstName": "Imran",
+        "lastName": "Ali Channa",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Muthar Ali Amur (on Study Leave Abroad)",
+        "firstName": "Muthar",
+        "lastName": "Ali Amur (",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Ubaidullah Khan",
+        "firstName": "Ubaidullah",
+        "lastName": "Khan",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Abdul Qadir Memon",
+        "firstName": "Abdul",
+        "lastName": "Qadir Memon",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "armemon@quest.edu.pk",
+        "firstName": "armemon@quest.edu.pk",
+        "lastName": "armemon@quest.edu.pk",
+        "designation": "Staff",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": "armemon@quest.edu.pk"
+      }
+    ],
+    "Civil Engineering Technology": [],
+    "Mathematics and Statistics": [
+      {
+        "fullName": "Prof. Rajab Ali Malookani",
+        "firstName": "Rajab",
+        "lastName": "Ali Malookani",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Khuda Bux Amur",
+        "firstName": "Dr.",
+        "lastName": "Khuda Bux Amur",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Sajad Hussain Sandilo",
+        "firstName": "Dr.",
+        "lastName": "Sajad Hussain Sandilo",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "agshaikh@quest.edu.pk",
+        "firstName": "agshaikh@quest.edu.pk",
+        "lastName": "agshaikh@quest.edu.pk",
+        "designation": "Staff",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": "agshaikh@quest.edu.pk"
+      },
+      {
+        "fullName": "Prof. Dr. Shakeel Ahmed Kamboh",
+        "firstName": "Dr.",
+        "lastName": "Shakeel Ahmed Kamboh",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Abdul Hanan Sheikh",
+        "firstName": "Abdul",
+        "lastName": "Hanan Sheikh",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Wajid Ali Shaikh",
+        "firstName": "Wajid",
+        "lastName": "Ali Shaikh",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Kamran Nazir Memon",
+        "firstName": "Kamran",
+        "lastName": "Nazir Memon",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Sanaullah Dehraj",
+        "firstName": "Sanaullah",
+        "lastName": "Dehraj",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Shujaat Ali Shah",
+        "firstName": "Shujaat",
+        "lastName": "Ali Shah",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Iqrar Ali Pali",
+        "firstName": "Iqrar",
+        "lastName": "Ali Pali",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Asghar Ali Maitlo Ali Shah",
+        "firstName": "Asghar",
+        "lastName": "Ali Maitlo Ali Shah",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Muzaffar Bashir Arain",
+        "firstName": "Muzaffar",
+        "lastName": "Bashir Arain",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Basic Science and Related Studies": [
+      {
+        "fullName": "Prof. Dr. Saifullah Bhutto",
+        "firstName": "Dr.",
+        "lastName": "Saifullah Bhutto",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Inayatullah Kakepoto Former Dean QEC & Chairman, Member Syndicate SAU Shikarpur, Member Academic Council UoL",
+        "firstName": "Dr.",
+        "lastName": "Inayatullah Kakepoto",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Abbas Ali Ghoto",
+        "firstName": "Abbas",
+        "lastName": "Ali Ghoto",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Muhammad Memon",
+        "firstName": "Muhammad",
+        "lastName": "Memon",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Mehboob Ali Jatoi",
+        "firstName": "Mehboob",
+        "lastName": "Ali Jatoi",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Mr. Ajeeb-ur-Rehman Juneja",
+        "firstName": "Mr.",
+        "lastName": "Ajeeb-ur-Rehman Juneja",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Mr. Tarique Hussain Keerio",
+        "firstName": "Mr.",
+        "lastName": "Tarique Hussain Keerio",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Liaquat Ali Tunio",
+        "firstName": "Liaquat",
+        "lastName": "Ali Tunio",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Mr. Syed Muhammad Saeed Ahmed",
+        "firstName": "Mr.",
+        "lastName": "Syed Muhammad Saeed Ahmed",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Ghulam Yameen Mallah",
+        "firstName": "Ghulam",
+        "lastName": "Yameen Mallah",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Ravi Kumar Kumar",
+        "firstName": "Ravi",
+        "lastName": "Kumar Kumar",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Ali Asghar Chandio",
+        "firstName": "Ali",
+        "lastName": "Asghar Chandio",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Saleemullah Bhutto",
+        "firstName": "Saleemullah",
+        "lastName": "Bhutto",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Muhammad Ismail Rahu",
+        "firstName": "Muhammad",
+        "lastName": "Ismail Rahu",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "English (Language and Literature)": [
+      {
+        "fullName": "Prof. Dr. Insaf Ali Siming",
+        "firstName": "Dr.",
+        "lastName": "Insaf Ali Siming",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Mansoor Ahmed Channa",
+        "firstName": "Dr.",
+        "lastName": "Mansoor Ahmed Channa",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Muhammad Arif Soomro",
+        "firstName": "Muhammad",
+        "lastName": "Arif Soomro",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Abdullah Laghari",
+        "firstName": "Abdullah",
+        "lastName": "Laghari",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Mr. Mansoor Ahmed Koondhar",
+        "firstName": "Mr.",
+        "lastName": "Mansoor Ahmed Koondhar",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Mukhtiar Al",
+        "firstName": "Mukhtiar",
+        "lastName": "Al",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "naimatali@quest.edu.pk",
+        "firstName": "naimatali@quest.edu.pk",
+        "lastName": "naimatali@quest.edu.pk",
+        "designation": "Staff",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": "naimatali@quest.edu.pk"
+      }
+    ],
+    "Cyber Security": [
+      {
+        "fullName": "Dr. Adnan Ahmed",
+        "firstName": "Adnan",
+        "lastName": "Ahmed",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Muhammad Awais Rajput",
+        "firstName": "Muhammad",
+        "lastName": "Awais Rajput",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Chemistry": [
+      {
+        "fullName": "Prof. Dr. Abdul Rafay Khatri",
+        "firstName": "Dr.",
+        "lastName": "Abdul Rafay Khatri",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Rizwan Khan",
+        "firstName": "Rizwan",
+        "lastName": "Khan",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Kashif Hussain Mangi",
+        "firstName": "Kashif",
+        "lastName": "Hussain Mangi",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Hadi Bakhsh",
+        "firstName": "Hadi",
+        "lastName": "Bakhsh",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Mahmood Nabi Abbasi",
+        "firstName": "Mahmood",
+        "lastName": "Nabi Abbasi",
+        "designation": "Lab Engineer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Ms. Sidra Yaqoob",
+        "firstName": "Sidra",
+        "lastName": "Yaqoob",
+        "designation": "Teaching Assistant",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Ms. Nousheen Tabassum",
+        "firstName": "Nousheen",
+        "lastName": "Tabassum",
+        "designation": "Teaching Assistant",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Data Science": [
+      {
+        "fullName": "Dr. Mehwish Leghari",
+        "firstName": "Mehwish",
+        "lastName": "Leghari",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Wazir Ali",
+        "firstName": "Wazir",
+        "lastName": "Ali",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Jawed Akhtar Unar",
+        "firstName": "Jawed",
+        "lastName": "Akhtar Unar",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Nadeem Channa",
+        "firstName": "Nadeem",
+        "lastName": "Channa",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Waqas Ahmed Khilji",
+        "firstName": "Waqas",
+        "lastName": "Ahmed Khilji",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Computer Science": [
+      {
+        "fullName": "Prof. Dr. Muhammad Saleem Vighio",
+        "firstName": "Dr.",
+        "lastName": "Muhammad Saleem Vighio",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Akhtar Hussain Jalbani",
+        "firstName": "Dr.",
+        "lastName": "Akhtar Hussain Jalbani",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Aijaz Ahmed Arain",
+        "firstName": "Aijaz",
+        "lastName": "Ahmed Arain",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Shamshad Lakho",
+        "firstName": "Shamshad",
+        "lastName": "Lakho",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Engr. Anees Ahmed Soomro",
+        "firstName": "Anees",
+        "lastName": "Ahmed Soomro",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Ms. Sana Riaz",
+        "firstName": "Sana",
+        "lastName": "Riaz",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Ms. Aisha Chandio",
+        "firstName": "Aisha",
+        "lastName": "Chandio",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Ms. Bushra khan",
+        "firstName": "Bushra",
+        "lastName": "khan",
+        "designation": "Lecturer",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Fareed Ahmed Soomro",
+        "firstName": "Fareed",
+        "lastName": "Ahmed Soomro",
+        "designation": "Staff",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ],
+    "Information Technology": [
+      {
+        "fullName": "Prof. Dr. Muhammad Ibrahim Channa",
+        "firstName": "Dr.",
+        "lastName": "Muhammad Ibrahim Channa",
+        "designation": "Dean",
+        "roles": [
+          "dean"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Muhammad Sulleman Memon",
+        "firstName": "Dr.",
+        "lastName": "Muhammad Sulleman Memon",
+        "designation": "Chairman",
+        "roles": [
+          "chairman"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Mukhtiar Ahmed Memon",
+        "firstName": "Dr.",
+        "lastName": "Mukhtiar Ahmed Memon",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Zahid Hussain Abro",
+        "firstName": "Dr.",
+        "lastName": "Zahid Hussain Abro",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Saifullah Memon",
+        "firstName": "Saifullah",
+        "lastName": "Memon",
+        "designation": "Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Prof. Dr. Engr. Muniba Memon",
+        "firstName": "Dr.",
+        "lastName": "Engr. Muniba Memon",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Shah Zaman Nizamani",
+        "firstName": "Shah",
+        "lastName": "Zaman Nizamani",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Baqar Ali Zardari",
+        "firstName": "Baqar",
+        "lastName": "Ali Zardari",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Saima Siraj Soomro",
+        "firstName": "Saima",
+        "lastName": "Siraj Soomro",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Dr. Waqas Ali Sahito",
+        "firstName": "Waqas",
+        "lastName": "Ali Sahito",
+        "designation": "Associate Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      },
+      {
+        "fullName": "Mr. Himmat Ali Shah",
+        "firstName": "Himmat",
+        "lastName": "Ali Shah",
+        "designation": "Assistant Professor",
+        "roles": [
+          "teacher"
+        ],
+        "emailFromSite": null
+      }
+    ]
+  },
+  "departmentPages": [
+    {
+      "deptId": 1,
+      "deptTitle": "Computer Systems Engineering",
+      "courses": [
+        {
+          "code": "ES408",
+          "title": "Computer Communication and Networking",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 5,
+      "deptTitle": "Data Science",
+      "courses": [
+        {
+          "code": "DS112",
+          "title": "Programming Fundamentals",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH101",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH106",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH115",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS101",
+          "title": "Computer Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS122",
+          "title": "Digital Logic Design",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS322",
+          "title": "Data Mining",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MS124",
+          "title": "Pre-Calculus-II*",
+          "credits": 0,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH125",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS121",
+          "title": "Object Oriented Programming",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH215",
+          "title": "statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS211",
+          "title": "Computer Networks",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS212",
+          "title": "Data Structures",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS213",
+          "title": "Software Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS214",
+          "title": "Artificial Intelligence",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS225",
+          "title": "Machine Learning",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS221",
+          "title": "Introduction to Data Science",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS222",
+          "title": "Database Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS223",
+          "title": "Analysis of Algorithms",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS226",
+          "title": "Advance Statistics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS311",
+          "title": "Computer Organization and Assembly Language",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS314",
+          "title": "Information Security",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS312",
+          "title": "Deep Learning",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS316",
+          "title": "Introduction to Management",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS313",
+          "title": "Data Warehousing and Business Intelligence",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS325",
+          "title": "Human Resource Management",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS321",
+          "title": "Operating Systems",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS323",
+          "title": "Natural Language Processing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS324",
+          "title": "Web Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS411",
+          "title": "Final Year Project - I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS412",
+          "title": "Big Data Analytics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS413",
+          "title": "Entrepreneurship",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS414",
+          "title": "Data Visualization",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS415",
+          "title": "Platform & Architecture for Data Science",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS421",
+          "title": "Final Year Project - II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS422",
+          "title": "Parallel and Distributed Computing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS423",
+          "title": "Professional Practices",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS424",
+          "title": "Reinforcement Learning",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS425",
+          "title": "Civic and Community Engagement",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 6,
+      "deptTitle": "Computer Science",
+      "courses": [
+        {
+          "code": "MS124",
+          "title": "Pre-Calculus-II*",
+          "credits": 0,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 7,
+      "deptTitle": "Information Technology",
+      "courses": [
+        {
+          "code": "CS100",
+          "title": "Computer Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH106",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "GE113",
+          "title": "Islamic Studies/Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "GE114",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MS112",
+          "title": "Pre-Calculus-1*",
+          "credits": 0,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CC122",
+          "title": "Object Oriented Programming",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH107",
+          "title": "Communication Skills",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH101",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "UE121",
+          "title": "Principles of Accounting",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITS121",
+          "title": "Digital Logic Design",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "UE212",
+          "title": "Business Economics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MS124",
+          "title": "Pre-Calculus-II*",
+          "credits": 0,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITS312",
+          "title": "Computer Architecture & Microprocessors",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MS215",
+          "title": "Linear Algebra",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CC213",
+          "title": "Data Structure & Algorithm[him",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CC214",
+          "title": "Computer Networks",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CC215",
+          "title": "Operating Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CC226",
+          "title": "Software Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CC227",
+          "title": "Database Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "UE213",
+          "title": "Principles of Psychology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITC22",
+          "title": "Systems & Network Administration",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH301",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITC312",
+          "title": "IT Project Management",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITS323",
+          "title": "Software Requirement Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITC413",
+          "title": "Web Technologies",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITE311",
+          "title": "Human Computer Interaction",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITC314",
+          "title": "Information Technology Infrastructure",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "GE326",
+          "title": "Technical & Business Writing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITC325",
+          "title": "Virtual Systems & Services",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITE322",
+          "title": "Mobile Application & Development",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH202",
+          "title": "Discrete Mathematics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITS324",
+          "title": "Modeling & Simulation",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CC329",
+          "title": "Information Security",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITE323",
+          "title": "E-Commerce",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITS415",
+          "title": "Operation Research",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITS416",
+          "title": "Automata Theory",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "GE267",
+          "title": "Professional Practices",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "UE414",
+          "title": "Entrepreneurship",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITE414",
+          "title": "Artificial Intelligence",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITC426",
+          "title": "Database Administration & Management",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITS417",
+          "title": "Compiler Construction",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITE425",
+          "title": "Cloud Computing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITE426",
+          "title": "Big Data Analytics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITC427",
+          "title": "Cyber Security",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 8,
+      "deptTitle": "Mathematics and Statistics",
+      "courses": []
+    },
+    {
+      "deptId": 10,
+      "deptTitle": "Basic Science and Related Studies",
+      "courses": []
+    },
+    {
+      "deptId": 11,
+      "deptTitle": "English (Language and Literature)",
+      "courses": []
+    },
+    {
+      "deptId": 12,
+      "deptTitle": "Physics",
+      "courses": [
+        {
+          "code": "PHY122",
+          "title": "Heat & Thermodynamics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 13,
+      "deptTitle": "Artificial Intelligence",
+      "courses": [
+        {
+          "code": "AL112",
+          "title": "Programming Fundamentals",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH113",
+          "title": "Islamic Studies/ Ethic",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH114",
+          "title": "Discrete Mathematics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH115",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH116",
+          "title": "Applied Physics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MS112",
+          "title": "Pre-Calculus-1*",
+          "credits": 0,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL121",
+          "title": "Object Oriented Programming",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL122",
+          "title": "Digital Logic Design",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL123",
+          "title": "Financial Accounting",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH124",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH125",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH126",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL211",
+          "title": "Data Structures",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL214",
+          "title": "Database Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH215",
+          "title": "statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH216",
+          "title": "Linear Algebra",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL224",
+          "title": "Programming for Artificial Intelligence",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL221",
+          "title": "Machine Learning",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL222",
+          "title": "Computer Organization and Assembly Languages",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL223",
+          "title": "Analysis of Algorithms",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL225",
+          "title": "Theory of Automata",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL226",
+          "title": "Software Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AI314",
+          "title": "Introduction to Management",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL315",
+          "title": "Introduction to Data Science",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AI316",
+          "title": "Computer Networks",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL325",
+          "title": "Emerging Trends in Artificial Intelligence",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "DS422",
+          "title": "Parallel and Distributed Computing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL322",
+          "title": "Computer Vision",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL323",
+          "title": "Natural Language Processing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL324",
+          "title": "Autonomous Systems",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL411",
+          "title": "Final Year Project - I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AI412",
+          "title": "Information Security",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL413",
+          "title": "Speech Processing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL414",
+          "title": "Big Data Analytic",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL425",
+          "title": "Professional Practices",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL421",
+          "title": "Final Year Project - II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL422",
+          "title": "Entrepreneurship",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL423",
+          "title": "Reinforcement Learning",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL424",
+          "title": "Civics and Community Engagement",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 15,
+      "deptTitle": "Cyber Security",
+      "courses": [
+        {
+          "code": "CYS112",
+          "title": "Programming Fundamentals",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH414",
+          "title": "Marketing and Digital Strategies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CY124",
+          "title": "Introduction to Cyber Security",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS121",
+          "title": "Object Oriented Programming",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS122",
+          "title": "Computer Networks",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS123",
+          "title": "Digital Logic and Design",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MS124",
+          "title": "Pre-Calculus-II*",
+          "credits": 0,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS212",
+          "title": "Data Structures & Algorithms",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS213",
+          "title": "Database Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS214",
+          "title": "Artificial Intelligence",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH211",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS224",
+          "title": "Software Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH226",
+          "title": "Linear Algebra",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS221",
+          "title": "Network & Information Security",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS222",
+          "title": "Cyber Laws & Cyber Crime",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS223",
+          "title": "Computer Organization & Assembly Language",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS225",
+          "title": "Analysis of Algorithm",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS311",
+          "title": "Secure Software Design & Development",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS312",
+          "title": "Information Assurance",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS313",
+          "title": "Operating Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS314",
+          "title": "Machine Learning",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH315",
+          "title": "Discrete Mathematics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CY322",
+          "title": "Digital Forensics & Malware Analysis",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CY323",
+          "title": "Ethical Hacking and Penetration Testing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS324",
+          "title": "Embedded system",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH321",
+          "title": "Introduction to Project Management",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH322",
+          "title": "Statistics and Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CY321",
+          "title": "Vulnerability Assessment and Reverse Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS412",
+          "title": "Parallel & Distributed Computing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CY413",
+          "title": "Data Sciences & Analytics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH415",
+          "title": "Technical & Business Writing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS416",
+          "title": "Final Year Project - I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS411",
+          "title": "Cryptography and Cryptanalysis",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS421",
+          "title": "Cloud Security",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS422",
+          "title": "Wireless and Mobile Security",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH423",
+          "title": "Professional Practices & Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CYS426",
+          "title": "Final Year Project - II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH424",
+          "title": "Entrepreneurship",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH425",
+          "title": "Civics and community Management",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 16,
+      "deptTitle": "Chemistry",
+      "courses": []
+    },
+    {
+      "deptId": 17,
+      "deptTitle": "Software Engineering",
+      "courses": [
+        {
+          "code": "MTH106",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW110",
+          "title": "Occupational Health & Safety",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW102",
+          "title": "Programming Fundamentals",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EL111",
+          "title": "Applied Physics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH101",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW101",
+          "title": "Computer Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH107",
+          "title": "Communication Skills",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW103",
+          "title": "Object Oriented Programming",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW104",
+          "title": "Introduction to Software Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH202",
+          "title": "Discrete Mathematics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH104",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH105",
+          "title": "Islamic studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW201",
+          "title": "Data Structures and Algorithms",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW202",
+          "title": "Database Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW210",
+          "title": "Computer Arch. & Logic Design",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW204",
+          "title": "Software Req. Engineering",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH204",
+          "title": "Numerical Analysis with Computer Applications",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW205",
+          "title": "Software Design & Architecture",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW206",
+          "title": "Computer Networks",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW207",
+          "title": "Web Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW208",
+          "title": "Operations Research",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW209",
+          "title": "Entrepreneurship",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW301",
+          "title": "Software Construction",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW302",
+          "title": "Elective-I (Mobile Applications Dev.)",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH301",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW311",
+          "title": "Operating Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW305",
+          "title": "Engineering Economics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW306",
+          "title": "Software Project Management",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW310",
+          "title": "Digital Marketing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW308",
+          "title": "Elective-II (Artificial Intelligence)",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW303",
+          "title": "Human Computer Interaction",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH303",
+          "title": "Professional & Social Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW312",
+          "title": "Community Services",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW401",
+          "title": "Cloud Computing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW402",
+          "title": "Elective-Ill (Data Sciences)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW403",
+          "title": "Software Re- engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW404",
+          "title": "Formal Methods in Software Engg:",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW406",
+          "title": "Software Quality Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW407",
+          "title": "MDEE Elective-IV (Internet of Things)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "SW304",
+          "title": "Information Security",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 18,
+      "deptTitle": "Electrical Engineering",
+      "courses": []
+    },
+    {
+      "deptId": 19,
+      "deptTitle": "Electrical (Automation & Control Engineering)",
+      "courses": [
+        {
+          "code": "ES11",
+          "title": "IoT System Design and Applications",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 20,
+      "deptTitle": "Electronic Engineering",
+      "courses": [
+        {
+          "code": "ES103",
+          "title": "Electronic Workshop",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH106",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH105",
+          "title": "Islamic studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH108",
+          "title": "Applied Physics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH101",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS100",
+          "title": "Computer Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH102",
+          "title": "Linear Algebra and Analytical Geometry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS112",
+          "title": "Computer Programming",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES104",
+          "title": "Basic Electronic Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES105",
+          "title": "Circuit Analysis",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH107",
+          "title": "Communication Skills",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES210",
+          "title": "Computer Aided Engineering Design",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES207",
+          "title": "Electronic Circuit Design",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES208",
+          "title": "Digital Logic Design",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES209",
+          "title": "Instrumentation and Measurements",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH103",
+          "title": "Differential Equations a Fourier Series",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH104",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH201",
+          "title": "Complex Variables and Transforms",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES215",
+          "title": "Embedded System Design",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES212",
+          "title": "Electromagnetic Field Theory",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES213",
+          "title": "Integrated Electronics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EL206",
+          "title": "Electrical Machines",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES309",
+          "title": "Signals and Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES311",
+          "title": "Wave Propagation and Antennas",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES315",
+          "title": "Probability, Random Signals, and Stochastic Processes",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES316",
+          "title": "FPGA based System Design",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH302",
+          "title": "Economics and Engineering Management",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES317",
+          "title": "Electronic Communication Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH204",
+          "title": "Numerical Analysis with Computer Applications",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES318",
+          "title": "Digital Signal & Image Processing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES314",
+          "title": "Control Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH402",
+          "title": "Professional and Social Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES408",
+          "title": "Computer Communication and Networking",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES416",
+          "title": "Industrial Control Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES410",
+          "title": "Power Electronics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH403A",
+          "title": "Entrepreneurship and Leadership",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES417",
+          "title": "Robotics and Mechatronic Systems",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES418",
+          "title": "Optoelectronics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES415",
+          "title": "Microwave Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS125",
+          "title": "Artificial Intelligence",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 21,
+      "deptTitle": "Telecommunication Engineering",
+      "courses": [
+        {
+          "code": "ES212",
+          "title": "Electromagnetic Field Theory",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 22,
+      "deptTitle": "Biomedical Engineering",
+      "courses": [
+        {
+          "code": "MTH121",
+          "title": "Applied Physics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS100",
+          "title": "Computer Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH106",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH122",
+          "title": "Basic Mathematics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH123",
+          "title": "Basic Biology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BM101",
+          "title": "Introduction to Biomedical Engineering",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES104",
+          "title": "Basic Electronic Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH101",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BM103",
+          "title": "Physiology",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES105",
+          "title": "Circuit Analysis",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES210",
+          "title": "Computer Aided Engineering Design",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES208",
+          "title": "Digital Logic Design",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BM202",
+          "title": "Human Anatomy",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BM203",
+          "title": "Biomedical Electronics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BM204",
+          "title": "Biochemistry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH204",
+          "title": "Numerical Analysis with Computer Applications",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH104",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES221",
+          "title": "Signals & Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BM301",
+          "title": "Biomedical Instrumentation - I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH301",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES215",
+          "title": "Embedded System Design",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BM308",
+          "title": "Biomechanics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BM303",
+          "title": "Biomedical Signal Processing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BM304",
+          "title": "Biomedical Instrumentation II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS321",
+          "title": "Modelling & Simulation",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH421",
+          "title": "Engineering Management",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BM306",
+          "title": "Biomedical Control Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH423",
+          "title": "Professional Practices & Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BM401",
+          "title": "Medical Imaging",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ES410",
+          "title": "Power Electronics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BM307",
+          "title": "Biomaterials",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH424",
+          "title": "Entrepreneurship",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BM412",
+          "title": "Final year Design Project-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 24,
+      "deptTitle": "Civil Engineering",
+      "courses": []
+    },
+    {
+      "deptId": 25,
+      "deptTitle": "Mechanical Engineering",
+      "courses": []
+    },
+    {
+      "deptId": 26,
+      "deptTitle": "Building and Architectural Engineering",
+      "courses": []
+    },
+    {
+      "deptId": 27,
+      "deptTitle": "Industrial and Manufacturing Engineering",
+      "courses": [
+        {
+          "code": "MTH101",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH107",
+          "title": "Communication Skills",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH105",
+          "title": "Islamic studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH209",
+          "title": "Technical report writing & Presentation skills",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 28,
+      "deptTitle": "Environment Engineering",
+      "courses": []
+    },
+    {
+      "deptId": 30,
+      "deptTitle": "Energy Systems Engineering",
+      "courses": []
+    },
+    {
+      "deptId": 31,
+      "deptTitle": "Chemical Engineering",
+      "courses": [
+        {
+          "code": "CH11",
+          "title": "Chemical Engineering Plant Design",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
+    },
+    {
+      "deptId": 32,
+      "deptTitle": "Food Engineering Technology",
+      "courses": []
+    },
+    {
+      "deptId": 33,
+      "deptTitle": "Civil Engineering Technology",
+      "courses": []
+    }
+  ]
+}
