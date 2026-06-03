@@ -1728,6 +1728,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="/js/dashboard-common.js"></script>
+    <script src="/js/dashboard-data.js"></script>
     <script>
         // Authentication Check
         // Session management
@@ -3644,10 +3646,10 @@ FOBM,Faculty of Business Management,dean.biz@example.com,Faculty of business and
             });
             event.target.classList.add('active');
 
-            // Update counts (mock data for now)
-            document.getElementById('activeAnnouncements').textContent = '5';
-            document.getElementById('scheduledAnnouncements').textContent = '2';
-            document.getElementById('archivedAnnouncements').textContent = '12';
+            const a = window.__dashboardData?.stats?.assessments ?? 0;
+            document.getElementById('activeAnnouncements').textContent = String(a);
+            document.getElementById('scheduledAnnouncements').textContent = String(window.__dashboardData?.stats?.programs ?? 0);
+            document.getElementById('archivedAnnouncements').textContent = String(window.__dashboardData?.stats?.results ?? 0);
         }
 
         // Add User
@@ -4267,6 +4269,7 @@ EE-101,Circuit Analysis,4,Electrical Engineering,1,,Basic electrical circuits an
         // Initialize Dashboard
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 DOM Content Loaded - Initializing dashboard...');
+            DashboardData.load().then(d => { window.__dashboardData = d; }).catch(() => {});
             loadUniversityInfo();
             loadDashboardStats();
             loadFaculties();

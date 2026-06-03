@@ -1010,6 +1010,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/dashboard-common.js"></script>
+    <script src="/js/dashboard-data.js"></script>
     <script src="js/reports-system.js"></script>
     <script>
         let currentUser = null;
@@ -1050,8 +1051,13 @@
                 return;
             }
             
-            currentUser = user;
-            loadDashboardData();
+            DashboardData.load().then(data => {
+                window.__dashboardData = data;
+                currentUser = user;
+                assignedCourses = data.courses || [];
+                loadDashboardData();
+                loadCourses();
+            });
         });
 
         // Navigation functions
@@ -1088,24 +1094,29 @@
 
         // Load dashboard data
         function loadDashboardData() {
+            syncAssessmentsFromDb();
             loadRecentActivity();
             updateStatistics();
             loadAssessmentsTable();
+            if (window.__dashboardData?.clos?.length) {
+                cloAttainment = window.__dashboardData.clos.map(c => ({
+                    clo: c.code,
+                    title: c.description || c.code,
+                    attainment: Math.round(c.attainment || 0),
+                    students: 0,
+                    course: c.courseCode
+                }));
+            }
         }
 
-        // Load recent activity
         function loadRecentActivity() {
-            const activities = [
-                { activity: 'Results Uploaded', course: 'CS-301 Data Structures', date: new Date().toLocaleDateString(), status: 'Completed' },
-                { activity: 'Assessment Created', course: 'CS-302 Algorithms', date: new Date().toLocaleDateString(), status: 'Completed' },
-                { activity: 'CLO Analysis', course: 'CS-401 Database', date: new Date().toLocaleDateString(), status: 'Pending' }
-            ];
-            
+            const activities = (window.__dashboardData?.recentActivity || []).slice(0, 10);
             const tbody = document.getElementById('recentActivity');
-            tbody.innerHTML = activities.map(activity => `
+            if (!tbody) return;
+            tbody.innerHTML = (activities.length ? activities : [{ activity: '—', course: '—', date: '—', status: '—' }]).map(activity => `
                 <tr>
                     <td>${activity.activity}</td>
-                    <td>${activity.course}</td>
+                    <td>${activity.course || activity.subject}</td>
                     <td>${activity.date}</td>
                     <td><span class="badge bg-${getStatusColor(activity.status)}">${activity.status}</span></td>
                 </tr>
@@ -1233,17 +1244,18 @@
             loadAssessmentsTable();
         }
 
-        // Load results
         function loadResults() {
             populateResultsSelects();
-            
-            // Sample uploaded results
-            uploadedResults = [
-                { assessment: 'Assignment 1', course: 'CS-301', type: 'Assignment', students: 30, uploadDate: '2024-01-15', status: 'Completed' },
-                { assessment: 'Midterm Exam', course: 'CS-302', type: 'Midterm', students: 28, uploadDate: '2024-01-10', status: 'Completed' }
-            ];
+            const grouped = {};
+            (window.__dashboardData?.results || []).forEach(r => {
+                const key = `${r.courseCode}-${r.assessmentName}`;
+                if (!grouped[key]) grouped[key] = { assessment: r.assessmentName, course: r.courseCode, type: r.assessmentName, students: 0, uploadDate: DashboardData.fmtDate(r.createdAt), status: 'Completed' };
+                grouped[key].students++;
+            });
+            uploadedResults = Object.values(grouped);
 
             const tbody = document.getElementById('uploadedResultsTable');
+            if (!tbody) return;
             tbody.innerHTML = uploadedResults.map(result => `
                 <tr>
                     <td><strong>${result.assessment}</strong></td>
@@ -1297,47 +1309,20 @@
             }, 2000);
         }
 
-        // Assessment Management System - Global Variables
-        let createdAssessments = [
-            // Sample assessments for demonstration
-            {
-                id: 1,
-                course: 'CS-301',
-                assessmentType: 'Quiz',
-                assessmentName: 'Quiz',
-                questions: [
-                    { number: 1, description: 'Implement Stack', maxMarks: 10, cloId: 1, cloCode: 'CLO1', cloTitle: 'Data Structure Implementation' }
-                ],
-                totalMarks: 10,
-                createdDate: new Date().toLocaleDateString(),
-                structure: { questions: 1, cloPerQuestion: 1, type: 'quiz', canModifyQuestions: false }
-            },
-            {
-                id: 2,
-                course: 'CS-301',
-                assessmentType: 'Midterm',
-                assessmentName: 'Midterm',
-                questions: [
-                    { number: 1, description: 'Binary Tree Traversal', maxMarks: 15, cloId: 2, cloCode: 'CLO2', cloTitle: 'Algorithm Analysis' },
-                    { number: 2, description: 'Hash Table Implementation', maxMarks: 15, cloId: 1, cloCode: 'CLO1', cloTitle: 'Data Structure Implementation' }
-                ],
-                totalMarks: 30,
-                createdDate: new Date().toLocaleDateString(),
-                structure: { questions: 2, cloPerQuestion: 1, type: 'exam', canModifyQuestions: true }
-            },
-            {
-                id: 3,
-                course: 'CS-302',
-                assessmentType: 'Assignment',
-                assessmentName: 'Assignment',
-                questions: [
-                    { number: 1, description: 'Sorting Algorithm Analysis', maxMarks: 20, cloId: 3, cloCode: 'CLO3', cloTitle: 'Algorithm Complexity' }
-                ],
-                totalMarks: 20,
-                createdDate: new Date().toLocaleDateString(),
-                structure: { questions: 1, cloPerQuestion: 1, type: 'assignment', canModifyQuestions: false }
-            }
-        ];
+        let createdAssessments = [];
+
+        function syncAssessmentsFromDb() {
+            createdAssessments = (window.__dashboardData?.assessments || []).map((a, i) => ({
+                id: a._id || i + 1,
+                course: a.courseCode,
+                assessmentType: a.type,
+                assessmentName: a.name || a.title,
+                questions: [],
+                totalMarks: a.maxMarks || a.totalMarks || 0,
+                createdDate: DashboardData.fmtDate(a.createdAt),
+                structure: { questions: 0, cloPerQuestion: 1, type: (a.type || '').toLowerCase(), canModifyQuestions: false }
+            }));
+        }
         let currentQuestionCount = 0;
         let maxQuestions = 5;
         let availableCLOs = [];
@@ -2894,16 +2879,18 @@
             }, 3000);
         }
 
-        // Load CLO Attainment
         function loadCLOAttainment() {
-            cloAttainment = [
-                { clo: 'CLO1', title: 'Analyze Data Structures', attainment: 85, students: 30, course: 'CS-301' },
-                { clo: 'CLO2', title: 'Implement Data Structures', attainment: 78, students: 30, course: 'CS-301' },
-                { clo: 'CLO3', title: 'Evaluate Algorithm Complexity', attainment: 82, students: 28, course: 'CS-302' },
-                { clo: 'CLO4', title: 'Design Efficient Algorithms', attainment: 75, students: 28, course: 'CS-302' }
-            ];
-
+            if (!cloAttainment.length && window.__dashboardData?.clos) {
+                cloAttainment = window.__dashboardData.clos.map(c => ({
+                    clo: c.code,
+                    title: c.description || c.code,
+                    attainment: Math.round(c.attainment || 0),
+                    students: 0,
+                    course: c.courseCode
+                }));
+            }
             const container = document.getElementById('cloAttainmentCards');
+            if (!container) return;
             container.innerHTML = cloAttainment.map(clo => `
                 <div class="col-md-3 mb-3">
                     <div class="card">

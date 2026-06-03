@@ -202,6 +202,10 @@ function formatUserResponse(user) {
         ...obj,
         id: obj._id,
         name: `${obj.firstName || ''} ${obj.lastName || ''}`.trim(),
+        studentId: obj.studentId,
+        semester: obj.semester,
+        batch: obj.batch,
+        employeeId: obj.employeeId,
         department: obj.department?.name || obj.department || null,
         departmentId: obj.department?._id || obj.department
     };
@@ -1660,7 +1664,6 @@ app.get('/api/courses', async (req, res) => {
                 filter.instructor = decoded.userId;
             } else if (decoded.role === 'student') {
                 filter['enrolledStudents.student'] = decoded.userId;
-                filter['enrolledStudents.status'] = { $in: ['enrolled', 'completed'] };
             }
         }
 
@@ -1681,8 +1684,13 @@ async function getUniCollectionData(req, res, collectionName) {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) return res.status(401).json({ message: 'No token' });
-        const { uniDb } = await getUniversityDatabase(token);
-        const items = await uniDb.collection(collectionName).find({}).sort({ code: 1, createdAt: -1 }).toArray();
+        const { uniDb, decoded } = await getUniversityDatabase(token);
+        const query = {};
+        if (decoded.userType === 'university' && decoded.role === 'student') {
+            query.student = new mongoose.Types.ObjectId(decoded.userId);
+        }
+        if (req.query.courseCode) query.courseCode = req.query.courseCode;
+        const items = await uniDb.collection(collectionName).find(query).sort({ code: 1, createdAt: -1 }).toArray();
         res.json(items);
     } catch (error) {
         console.error(`Error fetching ${collectionName}:`, error);
@@ -1696,6 +1704,213 @@ app.get('/api/peos', (req, res) => getUniCollectionData(req, res, 'peos'));
 app.get('/api/programs', (req, res) => getUniCollectionData(req, res, 'programs'));
 app.get('/api/assessments', (req, res) => getUniCollectionData(req, res, 'assessments'));
 app.get('/api/results', (req, res) => getUniCollectionData(req, res, 'results'));
+
+// Role-aware dashboard overview (real DB data for all role dashboards)
+app.get('/api/dashboard/overview', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+
+        const { uniDb, university, decoded } = await getUniversityDatabase(token);
+        const { User, Department, Course } = getUniModels(uniDb);
+
+        let uniUser = null;
+        let deptFilter = null;
+        let courseFilter = { isActive: true };
+
+        if (decoded.userType === 'university') {
+            uniUser = await User.findById(decoded.userId);
+            if (decoded.role === 'teacher') {
+                courseFilter.instructor = decoded.userId;
+            } else if (decoded.role === 'student') {
+                courseFilter['enrolledStudents.student'] = decoded.userId;
+            } else if (['focal', 'chairman'].includes(decoded.role) && uniUser?.department) {
+                deptFilter = uniUser.department;
+            } else if (decoded.role === 'dean' && uniUser?.assignedFaculties?.length) {
+                deptFilter = { $in: uniUser.assignedFaculties };
+            }
+        }
+
+        const deptQuery = { isActive: true };
+        if (deptFilter) {
+            deptQuery._id = typeof deptFilter === 'object' && deptFilter.$in ? deptFilter : deptFilter;
+        }
+
+        const departments = await Department.find(deptQuery)
+            .populate('chairman', 'firstName lastName email')
+            .sort({ name: 1 });
+
+        const deptIds = departments.map(d => d._id);
+        const courses = await Course.find({
+            ...courseFilter,
+            ...(deptFilter && !courseFilter.instructor && !courseFilter['enrolledStudents.student']
+                ? { department: typeof deptFilter === 'object' && deptFilter.$in ? deptFilter : deptFilter }
+                : {})
+        })
+            .populate('department', 'name code faculty')
+            .populate('instructor', 'firstName lastName email')
+            .sort({ code: 1 });
+
+        const courseIds = courses.map(c => c._id);
+        const courseCodes = courses.map(c => c.code);
+
+        const userQuery = { isActive: true };
+        if (deptFilter) userQuery.department = deptFilter;
+        const users = await User.find(userQuery).select('-password').populate('department', 'name code');
+
+        const resultQuery = {};
+        if (decoded.userType === 'university' && decoded.role === 'student') {
+            resultQuery.student = new mongoose.Types.ObjectId(decoded.userId);
+        } else if (courseCodes.length) {
+            resultQuery.courseCode = { $in: courseCodes };
+        }
+        const results = await uniDb.collection('results').find(resultQuery).sort({ createdAt: -1 }).limit(200).toArray();
+
+        const cloQuery = courseCodes.length ? { courseCode: { $in: courseCodes } } : {};
+        const clos = await uniDb.collection('clos').find(cloQuery).toArray();
+        const assessments = await uniDb.collection('assessments').find(
+            courseCodes.length ? { courseCode: { $in: courseCodes } } : {}
+        ).toArray();
+        const plos = await uniDb.collection('plos').find(
+            deptIds.length ? { department: { $in: deptIds } } : {}
+        ).toArray();
+        const programs = await uniDb.collection('programs').find(
+            deptIds.length ? { department: { $in: deptIds } } : {}
+        ).toArray();
+
+        let students = users.filter(u => u.role === 'student');
+        const teachers = users.filter(u => ['teacher', 'focal', 'chairman'].includes(u.role));
+
+        if (decoded.userType === 'university' && decoded.role === 'teacher') {
+            const enrolledIds = new Set();
+            courses.forEach(c => {
+                (c.enrolledStudents || []).forEach(e => {
+                    if (e.student) enrolledIds.add(e.student.toString());
+                });
+            });
+            students = students.filter(s => enrolledIds.has(s._id.toString()));
+        }
+
+        const deptSummaries = departments.map(d => {
+            const deptStudents = students.filter(s => s.department?.toString() === d._id.toString());
+            const deptTeachers = teachers.filter(t => t.department?.toString() === d._id.toString());
+            const deptCourses = courses.filter(c => c.department?._id?.toString() === d._id.toString());
+            const deptResults = results.filter(r => deptCourses.some(c => c.code === r.courseCode));
+            const avgPct = deptResults.length
+                ? Math.round(deptResults.reduce((s, r) => s + (r.percentage || 0), 0) / deptResults.length)
+                : (d.statistics?.averageGrade || 0);
+            return {
+                id: d._id,
+                name: d.name,
+                code: d.code,
+                faculty: d.faculty,
+                chairman: d.chairman ? `${d.chairman.firstName} ${d.chairman.lastName}` : '—',
+                totalStudents: deptStudents.length || d.statistics?.totalStudents || 0,
+                totalTeachers: deptTeachers.length || d.statistics?.totalTeachers || 0,
+                totalCourses: deptCourses.length || d.statistics?.totalCourses || 0,
+                avgPassRate: d.statistics?.passRate || avgPct,
+                avgGPA: (avgPct / 25).toFixed(1)
+            };
+        });
+
+        const gradeCounts = {};
+        results.forEach(r => {
+            const g = r.grade || '—';
+            gradeCounts[g] = (gradeCounts[g] || 0) + 1;
+        });
+
+        const recentActivity = results.slice(0, 15).map(r => ({
+            activity: 'Result recorded',
+            subject: r.courseTitle || r.courseCode,
+            course: r.courseCode,
+            user: r.studentName || 'Student',
+            department: departments.find(d => courses.find(c => c.code === r.courseCode && c.department?._id?.equals(d._id)))?.name || '—',
+            date: r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—',
+            status: 'Completed',
+            marks: r.marksObtained,
+            grade: r.grade
+        }));
+
+        const coursePerformance = courses.map(c => {
+            const cResults = results.filter(r => r.courseCode === c.code);
+            const avg = cResults.length
+                ? Math.round(cResults.reduce((s, r) => s + (r.percentage || 0), 0) / cResults.length)
+                : (c.statistics?.averageGrade || 0);
+            return {
+                code: c.code,
+                title: c.title,
+                name: c.title,
+                avgMarks: avg,
+                students: c.enrolledStudents?.length || c.statistics?.totalEnrolled || 0,
+                instructorName: c.instructor ? `${c.instructor.firstName} ${c.instructor.lastName}` : '—'
+            };
+        });
+
+        res.json({
+            role: decoded.role,
+            university: {
+                name: university.universityName,
+                code: university.universityCode,
+                databaseName: university.databaseName
+            },
+            stats: {
+                departments: departments.length,
+                students: students.length,
+                teachers: teachers.length,
+                courses: courses.length,
+                results: results.length,
+                clos: clos.length,
+                assessments: assessments.length,
+                plos: plos.length
+            },
+            departments: deptSummaries,
+            courses: courses.map(c => {
+                const formatted = formatCourseResponse(c);
+                const enrollment = c.enrolledStudents?.find(e =>
+                    decoded.userType === 'university' && decoded.role === 'student' &&
+                    e.student?.toString() === decoded.userId
+                );
+                return {
+                    ...formatted,
+                    students: c.enrolledStudents?.length || 0,
+                    studentGrade: enrollment?.finalGrade,
+                    studentPercentage: enrollment?.percentage,
+                    instructorName: formatted.instructorName,
+                    departmentName: c.department?.name
+                };
+            }),
+            users: users.map(formatUserResponse),
+            students: students.map(formatUserResponse),
+            teachers: teachers.map(formatUserResponse),
+            results: results.map(r => ({
+                ...r,
+                id: r._id,
+                subject: r.courseTitle || r.courseCode,
+                marks: r.marksObtained,
+                uploaded: r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—'
+            })),
+            assessments,
+            clos,
+            plos,
+            programs,
+            recentActivity,
+            charts: {
+                departmentLabels: deptSummaries.map(d => d.name),
+                departmentStudents: deptSummaries.map(d => d.totalStudents),
+                departmentPassRates: deptSummaries.map(d => d.avgPassRate),
+                gradeLabels: Object.keys(gradeCounts),
+                gradeCounts: Object.values(gradeCounts),
+                cloLabels: clos.map(c => c.code),
+                cloAttainment: clos.map(c => Math.round(c.attainment || 0)),
+                courseLabels: coursePerformance.map(c => c.code),
+                courseAvgMarks: coursePerformance.map(c => c.avgMarks)
+            }
+        });
+    } catch (error) {
+        console.error('Dashboard overview error:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
 
 // Faculties derived from department faculty groupings
 app.get('/api/faculties', async (req, res) => {

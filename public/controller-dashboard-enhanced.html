@@ -486,16 +486,20 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/dashboard-common.js"></script>
+    <script src="/js/dashboard-data.js"></script>
     <script>
         let currentUser = null;
         let resultsData = [];
         let departmentsData = [];
+        let _controllerCharts = [];
 
-        // Check authentication on page load
         document.addEventListener('DOMContentLoaded', function() {
-            if (!AuthManager.requireRole('controller')) return;
-            currentUser = AuthManager.getUser();
-            loadDashboardData();
+            DashboardData.initForRole('controller', () => {
+                currentUser = AuthManager.getUser();
+                resultsData = window.__dashboardData?.results || [];
+                departmentsData = window.__dashboardData?.departments || [];
+                loadDashboardData();
+            });
         });
 
         // Navigation functions
@@ -534,24 +538,22 @@
             createDashboardCharts();
         }
 
-        // Load recent uploads
         function loadRecentUploads() {
-            const uploads = [
-                { student: 'Ahmad Ali', subject: 'Data Structures', department: 'Computer Science', grade: 'A', uploadedBy: 'Dr. Sarah Khan', date: '2024-01-15' },
-                { student: 'Sara Khan', subject: 'Circuit Analysis', department: 'Electrical Engineering', grade: 'B+', uploadedBy: 'Dr. Muhammad Hassan', date: '2024-01-14' },
-                { student: 'Muhammad Hassan', subject: 'Database Systems', department: 'Computer Science', grade: 'A-', uploadedBy: 'Dr. Ali Raza', date: '2024-01-13' },
-                { student: 'Fatima Sheikh', subject: 'Power Systems', department: 'Electrical Engineering', grade: 'A', uploadedBy: 'Prof. Aisha Malik', date: '2024-01-12' }
-            ];
-            
+            const uploads = (window.__dashboardData?.results || []).slice(0, 20);
             const tbody = document.getElementById('recentUploads');
+            if (!tbody) return;
+            if (!uploads.length) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No results yet</td></tr>';
+                return;
+            }
             tbody.innerHTML = uploads.map(upload => `
                 <tr>
-                    <td>${upload.student}</td>
-                    <td>${upload.subject}</td>
-                    <td><span class="department-badge bg-primary">${upload.department}</span></td>
-                    <td><span class="badge bg-${getGradeColor(upload.grade)}">${upload.grade}</span></td>
-                    <td>${upload.uploadedBy}</td>
-                    <td>${upload.date}</td>
+                    <td>${upload.studentName || 'Student'}</td>
+                    <td>${upload.courseTitle || upload.courseCode}</td>
+                    <td><span class="department-badge bg-primary">${upload.courseCode || '—'}</span></td>
+                    <td><span class="badge bg-${DashboardData.gradeColor(upload.grade)}">${upload.grade}</span></td>
+                    <td>${upload.assessmentName || '—'}</td>
+                    <td>${upload.uploaded || DashboardData.fmtDate(upload.createdAt)}</td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary" onclick="viewResult('${upload.student}', '${upload.subject}')">
                             <i class="fas fa-eye"></i>
@@ -564,68 +566,35 @@
             `).join('');
         }
 
-        // Create dashboard charts
         function createDashboardCharts() {
-            // Department Chart
-            const deptCtx = document.getElementById('departmentChart').getContext('2d');
-            new Chart(deptCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Computer Science', 'Electrical Engineering', 'Mechanical Engineering', 'Civil Engineering'],
-                    datasets: [{
-                        data: [450, 320, 280, 197],
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-
-            // Grade Chart
-            const gradeCtx = document.getElementById('gradeChart').getContext('2d');
-            new Chart(gradeCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'D', 'F'],
-                    datasets: [{
-                        label: 'Number of Students',
-                        data: [89, 156, 234, 298, 187, 123, 89, 45, 23, 12],
-                        backgroundColor: '#3b82f6'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
+            const charts = window.__dashboardData?.charts;
+            if (!charts) return;
+            _controllerCharts.forEach(c => DashboardData.destroyChart(c));
+            _controllerCharts = [];
+            _controllerCharts.push(DashboardData.makeDoughnutChart(
+                'departmentChart', charts.departmentLabels, charts.departmentStudents
+            ));
+            _controllerCharts.push(DashboardData.makeBarChart(
+                'gradeChart', charts.gradeLabels, charts.gradeCounts, 'Results', '#3b82f6'
+            ));
         }
 
-        // Load all results
         function loadAllResults() {
-            const results = [
-                { studentId: 'QUEST-2024-001', studentName: 'Ahmad Ali', subject: 'Data Structures', department: 'Computer Science', semester: '7th', marks: 86, grade: 'A', clos: 'CLO1,CLO2,CLO3', plos: 'PLO1,PLO3,PLO5', uploadedBy: 'Dr. Sarah Khan', date: '2024-01-15' },
-                { studentId: 'QUEST-2024-002', studentName: 'Sara Khan', subject: 'Circuit Analysis', department: 'Electrical Engineering', semester: '6th', marks: 81, grade: 'B+', clos: 'CLO1,CLO2', plos: 'PLO1,PLO2,PLO4', uploadedBy: 'Dr. Muhammad Hassan', date: '2024-01-14' },
-                { studentId: 'QUEST-2024-003', studentName: 'Muhammad Hassan', subject: 'Database Systems', department: 'Computer Science', semester: '7th', marks: 82, grade: 'B+', clos: 'CLO1,CLO3,CLO4', plos: 'PLO1,PLO3', uploadedBy: 'Dr. Ali Raza', date: '2024-01-13' }
-            ];
-            
+            const results = window.__dashboardData?.results || [];
             const tbody = document.getElementById('allResultsTable');
+            if (!tbody) return;
             tbody.innerHTML = results.map(result => `
                 <tr>
-                    <td>${result.studentId}</td>
-                    <td>${result.studentName}</td>
-                    <td>${result.subject}</td>
-                    <td><span class="department-badge bg-primary">${result.department}</span></td>
-                    <td>${result.semester}</td>
-                    <td>${result.marks}/100</td>
-                    <td><span class="badge bg-${getGradeColor(result.grade)}">${result.grade}</span></td>
-                    <td><small>CLO: ${result.clos}<br>PLO: ${result.plos}</small></td>
-                    <td>${result.uploadedBy}</td>
-                    <td>${result.date}</td>
+                    <td>${result.studentId || '—'}</td>
+                    <td>${result.studentName || '—'}</td>
+                    <td>${result.courseTitle || result.courseCode}</td>
+                    <td><span class="department-badge bg-primary">${result.courseCode}</span></td>
+                    <td>${result.semester || '—'}</td>
+                    <td>${result.marksObtained || result.marks}/${result.maxMarks || 100}</td>
+                    <td><span class="badge bg-${DashboardData.gradeColor(result.grade)}">${result.grade}</span></td>
+                    <td><small>${result.assessmentName || '—'}</small></td>
+                    <td>—</td>
+                    <td>${result.uploaded || DashboardData.fmtDate(result.createdAt)}</td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary" onclick="viewResult('${result.studentName}', '${result.subject}')">
                             <i class="fas fa-eye"></i>
@@ -641,17 +610,10 @@
             `).join('');
         }
 
-        // Load departments
         function loadDepartments() {
-            const departments = [
-                { name: 'Computer Science', code: 'CS', students: 450, faculty: 45, results: 1250, avgGPA: 3.2 },
-                { name: 'Electrical Engineering', code: 'EE', students: 320, faculty: 38, results: 890, avgGPA: 3.1 },
-                { name: 'Mechanical Engineering', code: 'ME', students: 280, faculty: 32, results: 750, avgGPA: 3.0 },
-                { name: 'Civil Engineering', code: 'CE', students: 197, faculty: 25, results: 520, avgGPA: 2.9 },
-                { name: 'Software Engineering', code: 'SE', students: 156, faculty: 20, results: 420, avgGPA: 3.3 }
-            ];
-            
+            const departments = window.__dashboardData?.departments || [];
             const container = document.getElementById('departmentsGrid');
+            if (!container) return;
             container.innerHTML = departments.map(dept => `
                 <div class="col-md-4 mb-3">
                     <div class="card">
@@ -662,16 +624,16 @@
                             </div>
                             <div class="row text-center">
                                 <div class="col-4">
-                                    <h6 class="text-primary">${dept.students}</h6>
+                                    <h6 class="text-primary">${dept.totalStudents}</h6>
                                     <small class="text-muted">Students</small>
                                 </div>
                                 <div class="col-4">
-                                    <h6 class="text-success">${dept.faculty}</h6>
+                                    <h6 class="text-success">${dept.totalTeachers}</h6>
                                     <small class="text-muted">Faculty</small>
                                 </div>
                                 <div class="col-4">
-                                    <h6 class="text-info">${dept.avgGPA}</h6>
-                                    <small class="text-muted">Avg GPA</small>
+                                    <h6 class="text-info">${dept.avgPassRate}%</h6>
+                                    <small class="text-muted">Pass Rate</small>
                                 </div>
                             </div>
                             <div class="mt-3">

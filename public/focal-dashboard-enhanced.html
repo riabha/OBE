@@ -1468,14 +1468,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/dashboard-common.js"></script>
+    <script src="/js/dashboard-data.js"></script>
     <script>
         let currentUser = null;
+        let _focalCharts = [];
 
-        // Check authentication on page load
         document.addEventListener('DOMContentLoaded', function() {
-            if (!AuthManager.requireRole('focal')) return;
-            currentUser = AuthManager.getUser();
-            loadDashboardData();
+            DashboardData.initForRole('focal', () => {
+                currentUser = AuthManager.getUser();
+                loadDashboardData();
+            });
         });
 
         // Navigation functions
@@ -1532,17 +1534,11 @@
             createDashboardCharts();
         }
 
-        // Load recent activity
         function loadRecentActivity() {
-            const activities = [
-                { activity: 'Result Uploaded', subject: 'Programming Fundamentals', user: 'Dr. Sarah Khan', date: '2024-01-15', status: 'Completed' },
-                { activity: 'Student Added', subject: 'Software Engineering', user: 'You', date: '2024-01-14', status: 'Completed' },
-                { activity: 'Subject Assigned', subject: 'Data Structures', user: 'You', date: '2024-01-13', status: 'Pending' },
-                { activity: 'Teacher Added', subject: 'Algorithms', user: 'You', date: '2024-01-12', status: 'Completed' }
-            ];
-            
+            const activities = window.__dashboardData?.recentActivity || [];
             const tbody = document.getElementById('recentActivity');
-            tbody.innerHTML = activities.map(activity => `
+            if (!tbody) return;
+            tbody.innerHTML = (activities.length ? activities : [{ activity: '—', subject: '—', user: '—', date: '—', status: '—' }]).map(activity => `
                 <tr>
                     <td>${activity.activity}</td>
                     <td>${activity.subject}</td>
@@ -1553,62 +1549,30 @@
             `).join('');
         }
 
-        // Create dashboard charts
         function createDashboardCharts() {
-            // Performance Chart
-            const perfCtx = document.getElementById('performanceChart').getContext('2d');
-            new Chart(perfCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Programming Fundamentals', 'Software Engineering'],
-                    datasets: [{
-                        label: 'Average Marks',
-                        data: [85, 78],
-                        backgroundColor: ['#3b82f6', '#10b981']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, max: 100 }
-                    }
-                }
-            });
-
-            // CLO Chart
-            const cloCtx = document.getElementById('cloChart').getContext('2d');
-            new Chart(cloCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['CLO1', 'CLO2', 'CLO3', 'CLO4'],
-                    datasets: [{
-                        data: [85, 78, 92, 88],
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
+            const charts = window.__dashboardData?.charts;
+            if (!charts) return;
+            _focalCharts.forEach(c => DashboardData.destroyChart(c));
+            _focalCharts = [];
+            _focalCharts.push(DashboardData.makeBarChart(
+                'performanceChart', charts.courseLabels, charts.courseAvgMarks, 'Avg %', ['#3b82f6', '#10b981']
+            ));
+            _focalCharts.push(DashboardData.makeDoughnutChart(
+                'cloChart', charts.cloLabels, charts.cloAttainment
+            ));
         }
 
-        // Load subjects
         function loadSubjects() {
-            const subjects = [
-                { name: 'Programming Fundamentals', code: 'PF-101', credits: 3, teacher: 'Dr. Sarah Khan', students: 25, status: 'Active' },
-                { name: 'Software Engineering', code: 'SE-201', credits: 3, teacher: 'Prof. Muhammad Hassan', students: 20, status: 'Active' }
-            ];
-            
+            const subjects = window.__dashboardData?.courses || [];
             const tbody = document.getElementById('subjectsTable');
+            if (!tbody) return;
             tbody.innerHTML = subjects.map(subject => `
                 <tr>
-                    <td>${subject.name}</td>
+                    <td>${subject.name || subject.title}</td>
                     <td>${subject.code}</td>
-                    <td>${subject.credits}</td>
-                    <td>${subject.teacher}</td>
-                    <td>${subject.students}</td>
+                    <td>${subject.creditHours || subject.credits || 3}</td>
+                    <td>${subject.instructorName || '—'}</td>
+                    <td>${subject.students || 0}</td>
                     <td><span class="badge bg-success">${subject.status}</span></td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary" onclick="editSubject('${subject.code}')">
@@ -1622,23 +1586,18 @@
             `).join('');
         }
 
-        // Load students
         function loadStudents() {
-            const students = [
-                { id: 'QUEST-2024-001', name: 'Ahmad Ali', email: 'ahmad@quest.edu.pk', semester: '7th', subjects: 2, performance: 'Good' },
-                { id: 'QUEST-2024-002', name: 'Sara Khan', email: 'sara@quest.edu.pk', semester: '6th', subjects: 2, performance: 'Excellent' },
-                { id: 'QUEST-2024-003', name: 'Muhammad Hassan', email: 'mhassan@quest.edu.pk', semester: '7th', subjects: 2, performance: 'Average' }
-            ];
-            
+            const students = window.__dashboardData?.students || [];
             const tbody = document.getElementById('studentsTable');
+            if (!tbody) return;
             tbody.innerHTML = students.map(student => `
                 <tr>
-                    <td>${student.id}</td>
+                    <td>${student.studentId || student.id}</td>
                     <td>${student.name}</td>
                     <td>${student.email}</td>
-                    <td>${student.semester}</td>
-                    <td>${student.subjects}</td>
-                    <td><span class="badge bg-${getPerformanceColor(student.performance)}">${student.performance}</span></td>
+                    <td>${student.semester || '—'}</td>
+                    <td>${(window.__dashboardData?.courses || []).length}</td>
+                    <td><span class="badge bg-primary">Active</span></td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary" onclick="viewStudent('${student.id}')">
                             <i class="fas fa-eye"></i>
@@ -1651,21 +1610,18 @@
             `).join('');
         }
 
-        // Load teachers
         function loadTeachers() {
-            const teachers = [
-                { id: 'EMP-001', name: 'Dr. Sarah Khan', email: 'sarah@quest.edu.pk', subjects: 2, students: 45, status: 'Active' },
-                { id: 'EMP-002', name: 'Prof. Muhammad Hassan', email: 'mhassan@quest.edu.pk', subjects: 1, students: 20, status: 'Active' }
-            ];
-            
+            const teachers = (window.__dashboardData?.teachers || []).filter(t => t.role === 'teacher');
+            const courses = window.__dashboardData?.courses || [];
             const tbody = document.getElementById('teachersTable');
+            if (!tbody) return;
             tbody.innerHTML = teachers.map(teacher => `
                 <tr>
-                    <td>${teacher.id}</td>
+                    <td>${teacher.employeeId || teacher.id}</td>
                     <td>${teacher.name}</td>
                     <td>${teacher.email}</td>
-                    <td>${teacher.subjects}</td>
-                    <td>${teacher.students}</td>
+                    <td>${courses.length}</td>
+                    <td>${(window.__dashboardData?.students || []).length}</td>
                     <td><span class="badge bg-success">${teacher.status}</span></td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary" onclick="viewTeacher('${teacher.id}')">
@@ -1679,48 +1635,47 @@
             `).join('');
         }
 
-        // Load mappings
         function loadMappings() {
-            const mappings = [
-                { subject: 'Programming Fundamentals', clo1: '85%', clo2: '78%', clo3: '92%', clo4: '88%', plos: 'PLO1,PLO3,PLO5' },
-                { subject: 'Software Engineering', clo1: '76%', clo2: '82%', clo3: '79%', clo4: '85%', plos: 'PLO1,PLO2,PLO4' }
-            ];
-            
+            const courses = window.__dashboardData?.courses || [];
+            const clos = window.__dashboardData?.clos || [];
             const tbody = document.getElementById('mappingTable');
-            tbody.innerHTML = mappings.map(mapping => `
+            if (!tbody) return;
+            tbody.innerHTML = courses.map(course => {
+                const courseClos = clos.filter(c => c.courseCode === course.code);
+                const cells = [0, 1, 2, 3].map(i => {
+                    const clo = courseClos[i];
+                    return clo ? `<span class="badge bg-success">${Math.round(clo.attainment || 0)}%</span>` : '<span class="badge bg-secondary">—</span>';
+                });
+                return `
                 <tr>
-                    <td>${mapping.subject}</td>
-                    <td><span class="badge bg-success">${mapping.clo1}</span></td>
-                    <td><span class="badge bg-success">${mapping.clo2}</span></td>
-                    <td><span class="badge bg-success">${mapping.clo3}</span></td>
-                    <td><span class="badge bg-success">${mapping.clo4}</span></td>
-                    <td><small>${mapping.plos}</small></td>
+                    <td>${course.name || course.title}</td>
+                    <td>${cells[0]}</td>
+                    <td>${cells[1]}</td>
+                    <td>${cells[2]}</td>
+                    <td>${cells[3]}</td>
+                    <td><small>${(window.__dashboardData?.plos || []).map(p => p.code).join(', ') || '—'}</small></td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="editMapping('${mapping.subject}')">
+                        <button class="btn btn-sm btn-outline-primary" onclick="editMapping('${course.code}')">
                             <i class="fas fa-edit"></i>
                         </button>
                     </td>
-                </tr>
-            `).join('');
+                </tr>`;
+            }).join('');
         }
 
-        // Load results
         function loadResults() {
-            const results = [
-                { student: 'Ahmad Ali', subject: 'Programming Fundamentals', teacher: 'Dr. Sarah Khan', marks: 86, grade: 'A', clos: 'CLO1,CLO2,CLO3', uploaded: '2024-01-15' },
-                { student: 'Sara Khan', subject: 'Software Engineering', teacher: 'Prof. Muhammad Hassan', marks: 81, grade: 'B+', clos: 'CLO1,CLO2', uploaded: '2024-01-14' }
-            ];
-            
+            const results = window.__dashboardData?.results || [];
             const tbody = document.getElementById('resultsTable');
+            if (!tbody) return;
             tbody.innerHTML = results.map(result => `
                 <tr>
-                    <td>${result.student}</td>
-                    <td>${result.subject}</td>
-                    <td>${result.teacher}</td>
-                    <td>${result.marks}/100</td>
-                    <td><span class="badge bg-${getGradeColor(result.grade)}">${result.grade}</span></td>
-                    <td><small>${result.clos}</small></td>
-                    <td>${result.uploaded}</td>
+                    <td>${result.studentName || '—'}</td>
+                    <td>${result.courseTitle || result.courseCode}</td>
+                    <td>—</td>
+                    <td>${result.marksObtained || result.marks}/${result.maxMarks || 100}</td>
+                    <td><span class="badge bg-${DashboardData.gradeColor(result.grade)}">${result.grade}</span></td>
+                    <td><small>${result.assessmentName || '—'}</small></td>
+                    <td>${result.uploaded || DashboardData.fmtDate(result.createdAt)}</td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary" onclick="viewResult('${result.student}', '${result.subject}')">
                             <i class="fas fa-eye"></i>
@@ -1814,24 +1769,18 @@
             }
         }
 
-        // New Course Management Functions
         function loadCourses() {
-            const courses = [
-                { code: 'CS-301', name: 'Data Structures', credits: 3, semester: '3rd', sections: 2, students: 60, status: 'Active' },
-                { code: 'CS-302', name: 'Algorithms', credits: 3, semester: '4th', sections: 2, students: 58, status: 'Active' },
-                { code: 'CS-401', name: 'Database Systems', credits: 3, semester: '5th', sections: 1, students: 45, status: 'Active' },
-                { code: 'CS-402', name: 'Software Engineering', credits: 3, semester: '6th', sections: 1, students: 42, status: 'Active' }
-            ];
-            
+            const courses = window.__dashboardData?.courses || [];
             const tbody = document.getElementById('coursesTable');
+            if (!tbody) return;
             tbody.innerHTML = courses.map(course => `
                 <tr>
                     <td><strong>${course.code}</strong></td>
-                    <td>${course.name}</td>
-                    <td>${course.credits}</td>
-                    <td>${course.semester}</td>
-                    <td><span class="badge bg-primary">${course.sections}</span></td>
-                    <td>${course.students}</td>
+                    <td>${course.name || course.title}</td>
+                    <td>${course.creditHours || course.credits || 3}</td>
+                    <td>${course.semester || '—'}</td>
+                    <td><span class="badge bg-primary">1</span></td>
+                    <td>${course.students || 0}</td>
                     <td><span class="badge bg-success">${course.status}</span></td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary" onclick="editCourse('${course.code}')">
@@ -2580,33 +2529,23 @@
         }
 
         function loadCLOAttainmentData() {
+            const clos = window.__dashboardData?.clos || [];
             const tbody = document.getElementById('cloAttainmentTable');
-            if (tbody) {
-                tbody.innerHTML = `
+            if (!tbody) return;
+            tbody.innerHTML = clos.map(clo => {
+                const pct = Math.round(clo.attainment || 0);
+                const attained = pct >= 60;
+                return `
                     <tr>
-                        <td>CLO1</td>
-                        <td>Data Structure Analysis</td>
-                        <td>45</td>
-                        <td>38</td>
-                        <td class="attainment-high">84%</td>
-                        <td><span class="badge bg-success">Attained</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary">Details</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CLO2</td>
-                        <td>Algorithm Design</td>
-                        <td>45</td>
-                        <td>25</td>
-                        <td class="attainment-low">56%</td>
-                        <td><span class="badge bg-danger">Not Attained</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary">Details</button>
-                        </td>
-                    </tr>
-                `;
-            }
+                        <td>${clo.code}</td>
+                        <td>${clo.description || '—'}</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td class="${attained ? 'attainment-high' : 'attainment-low'}">${pct}%</td>
+                        <td><span class="badge bg-${attained ? 'success' : 'danger'}">${attained ? 'Attained' : 'Not Attained'}</span></td>
+                        <td><button class="btn btn-sm btn-outline-primary">Details</button></td>
+                    </tr>`;
+            }).join('') || '<tr><td colspan="7" class="text-center text-muted">No CLOs</td></tr>';
         }
 
         function loadCQIActions() {

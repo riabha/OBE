@@ -480,6 +480,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/dashboard-common.js"></script>
+    <script src="/js/dashboard-data.js"></script>
     <script>
         let currentUser = null;
         let coursesData = [];
@@ -516,9 +517,12 @@
                 return;
             }
             
-            currentUser = user;
-            updateProfileInfo();
-            loadDashboardData();
+            DashboardData.load().then(data => {
+                window.__dashboardData = data;
+                currentUser = user;
+                updateProfileInfo();
+                loadDashboardData();
+            });
         });
 
         // Update profile information
@@ -566,21 +570,26 @@
             updateProgressRing();
         }
 
-        // Load recent results
         function loadRecentResults() {
-            const results = [
-                { subject: 'Data Structures', grade: 'A', marks: 86, date: '2024-01-15' },
-                { subject: 'Algorithms', grade: 'A+', marks: 94, date: '2024-01-14' },
-                { subject: 'Database Systems', grade: 'B+', marks: 82, date: '2024-01-13' },
-                { subject: 'Software Engineering', grade: 'A', marks: 88, date: '2024-01-12' }
-            ];
-            
+            const byCourse = {};
+            (window.__dashboardData?.results || []).forEach(r => {
+                const key = r.courseCode || r.courseTitle;
+                if (!byCourse[key] || (r.createdAt && new Date(r.createdAt) > new Date(byCourse[key].createdAt || 0))) {
+                    byCourse[key] = r;
+                }
+            });
+            const results = Object.values(byCourse).slice(0, 8);
             const container = document.getElementById('recentResults');
+            if (!container) return;
+            if (!results.length) {
+                container.innerHTML = '<p class="text-muted p-2">No results yet</p>';
+                return;
+            }
             container.innerHTML = results.map(result => `
                 <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
                     <div>
-                        <strong>${result.subject}</strong><br>
-                        <small class="text-muted">${result.marks}/100</small>
+                        <strong>${result.courseTitle || result.courseCode}</strong><br>
+                        <small class="text-muted">${result.marksObtained || result.marks}/${result.maxMarks || 100}</small>
                     </div>
                     <div class="text-end">
                         <span class="badge bg-${getGradeColor(result.grade)} grade-badge">${result.grade}</span><br>
@@ -590,31 +599,22 @@
             `).join('');
         }
 
-        // Load courses (API with demo fallback)
         async function loadCourses() {
-            let courses = [];
-            try {
-                const data = await APIManager.get('/api/courses');
-                if (data && data.length) {
-                    courses = data.map(c => ({
-                        name: c.name || c.title,
-                        code: c.code,
-                        credits: c.creditHours || c.credits || 3,
-                        instructor: c.instructorName || 'Faculty',
-                        grade: '—',
-                        status: 'Enrolled'
-                    }));
-                }
-            } catch (e) {
-                console.warn('Courses API fallback:', e.message);
-            }
-            if (!courses.length) {
-                courses = [
-                    { name: 'Data Structures', code: 'CS-201', credits: 3, instructor: 'Faculty', grade: 'A', status: 'Enrolled' }
-                ];
-            }
+            const courses = (window.__dashboardData?.courses || []).map(c => ({
+                name: c.name || c.title,
+                code: c.code,
+                credits: c.creditHours || c.credits || 3,
+                instructor: c.instructorName || 'Faculty',
+                grade: c.studentGrade || '—',
+                status: c.studentPercentage >= 50 ? 'Completed' : 'Enrolled'
+            }));
 
             const container = document.getElementById('coursesGrid');
+            if (!container) return;
+            if (!courses.length) {
+                container.innerHTML = '<div class="col-12 text-muted">No enrolled courses</div>';
+                return;
+            }
             container.innerHTML = courses.map(course => `
                 <div class="col-md-4 mb-3">
                     <div class="card course-card" onclick="viewCourseDetails('${course.code}')">
@@ -635,30 +635,16 @@
             `).join('');
         }
 
-        // Load results (API with demo fallback)
         async function loadResults() {
-            let results = [];
-            try {
-                const data = await APIManager.get('/api/results');
-                if (data && data.length) {
-                    results = data.map(r => ({
-                        subject: r.courseName || r.subject || r.courseCode,
-                        code: r.courseCode || r.code,
-                        credits: r.credits || 3,
-                        marks: r.marks || r.score || 0,
-                        grade: r.grade || '—',
-                        gpa: r.gpa || '—',
-                        semester: r.semester || currentUser.semester || '—'
-                    }));
-                }
-            } catch (e) {
-                console.warn('Results API fallback:', e.message);
-            }
-            if (!results.length) {
-                results = [
-                    { subject: 'Sample Course', code: 'CS-201', credits: 3, marks: 86, grade: 'A', gpa: 4.0, semester: currentUser.semester || '—' }
-                ];
-            }
+            const results = (window.__dashboardData?.results || []).map(r => ({
+                subject: r.courseTitle || r.courseCode,
+                code: r.courseCode,
+                credits: 3,
+                marks: r.marksObtained || r.marks || 0,
+                grade: r.grade || '—',
+                gpa: '—',
+                semester: r.semester || currentUser.semester || '—'
+            }));
 
             const tbody = document.getElementById('resultsTableBody');
             tbody.innerHTML = results.map(result => `
@@ -685,15 +671,20 @@
             loadProgressReport();
         }
 
-        // Load assignments
         function loadAssignments() {
-            const assignments = [
-                { title: 'Data Structures Assignment 3', course: 'CS-201', dueDate: '2024-02-15', status: 'Pending', priority: 'High' },
-                { title: 'Algorithm Design Project', course: 'CS-301', dueDate: '2024-02-20', status: 'In Progress', priority: 'Medium' },
-                { title: 'Database Design Report', course: 'CS-302', dueDate: '2024-02-18', status: 'Completed', priority: 'Low' }
-            ];
-            
+            const assignments = (window.__dashboardData?.assessments || []).map(a => ({
+                title: a.title || a.name,
+                course: a.courseCode,
+                dueDate: a.dueDate ? DashboardData.fmtDate(a.dueDate) : '—',
+                status: 'Pending',
+                priority: a.type === 'Final' ? 'High' : 'Medium'
+            }));
             const container = document.getElementById('assignmentsGrid');
+            if (!container) return;
+            if (!assignments.length) {
+                container.innerHTML = '<div class="col-12 text-muted">No assessments scheduled</div>';
+                return;
+            }
             container.innerHTML = assignments.map(assignment => `
                 <div class="col-md-4 mb-3">
                     <div class="card">
