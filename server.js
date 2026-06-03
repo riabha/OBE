@@ -2488,6 +2488,33 @@ app.get('/api/clos', async (req, res) => {
     return getUniCollectionData(req, res, 'clos');
 });
 
+app.post('/api/clos', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { courseCode, code, title, description, bloomLevel, assessmentMethod } = req.body;
+        if (!courseCode || !code) {
+            return res.status(400).json({ message: 'courseCode and code required' });
+        }
+        const doc = {
+            courseCode: String(courseCode).toUpperCase(),
+            code: String(code).toUpperCase(),
+            title: title || description || code,
+            description: description || title || '',
+            bloomLevel: bloomLevel || 'Apply',
+            assessmentMethod: assessmentMethod || 'Assignment',
+            attainment: 0,
+            isActive: true,
+            createdAt: new Date()
+        };
+        const result = await uniDb.collection('clos').insertOne(doc);
+        res.status(201).json({ message: 'CLO created', clo: { ...doc, _id: result.insertedId, id: result.insertedId } });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
 // Assessments CRUD
 app.post('/api/assessments', async (req, res) => {
     try {

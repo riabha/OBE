@@ -1483,21 +1483,8 @@
         });
 
         // Navigation functions
-        function showSection(sectionName) {
-            // Hide all sections
-            document.querySelectorAll('[id$="-section"]').forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            // Show selected section
-            document.getElementById(sectionName + '-section').style.display = 'block';
-            
-            // Update active nav link
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
+        function showSection(sectionName, evt) {
+            if (!showDashboardSection(sectionName, evt)) return;
             // Load section-specific data
             if (sectionName === 'courses') {
                 loadCourses();
@@ -1799,29 +1786,38 @@
             `).join('');
         }
 
-        function createCourse() {
+        async function createCourse() {
             const courseCode = document.getElementById('courseCode').value;
             const courseName = document.getElementById('courseName').value;
             const creditHours = document.getElementById('creditHours').value;
             const department = document.getElementById('courseDepartment').value;
             const semester = document.getElementById('courseSemester').value;
             const description = document.getElementById('courseDescription').value;
-            
             if (!courseCode || !courseName || !creditHours) {
                 showAlert('Please fill in all required fields', 'warning');
                 return;
             }
-            
-            showAlert(`Course "${courseName}" (${courseCode}) created successfully!`, 'success');
-            
-            // Clear form
-            document.getElementById('courseCode').value = '';
-            document.getElementById('courseName').value = '';
-            document.getElementById('creditHours').value = '';
-            document.getElementById('courseDescription').value = '';
-            
-            // Refresh courses list
-            loadCourses();
+            try {
+                await ObeWrites.createCourse({
+                    code: courseCode.toUpperCase(),
+                    name: courseName,
+                    title: courseName,
+                    creditHours: Number(creditHours),
+                    credits: Number(creditHours),
+                    department,
+                    semester: parseInt(String(semester).replace(/\D/g, ''), 10) || 1,
+                    description
+                });
+                showAlert(`Course "${courseName}" (${courseCode}) saved to database.`, 'success');
+                document.getElementById('courseCode').value = '';
+                document.getElementById('courseName').value = '';
+                document.getElementById('creditHours').value = '';
+                document.getElementById('courseDescription').value = '';
+                await ObeWrites.refreshDashboard();
+                loadCourses();
+            } catch (err) {
+                showAlert('Failed to create course: ' + err.message, 'danger');
+            }
         }
 
         function loadClassrooms() {
@@ -1916,29 +1912,36 @@
             `).join('');
         }
 
-        function createCLO() {
+        async function createCLO() {
             const course = document.getElementById('cloCourse').value;
             const cloCode = document.getElementById('cloCode').value;
             const cloTitle = document.getElementById('cloTitle').value;
             const bloomLevel = document.getElementById('bloomLevel').value;
             const assessmentMethod = document.getElementById('assessmentMethod').value;
             const description = document.getElementById('cloDescription').value;
-            
             if (!course || !cloCode || !cloTitle) {
                 showAlert('Please fill in all required fields', 'warning');
                 return;
             }
-            
-            showAlert(`CLO "${cloTitle}" (${cloCode}) created successfully for ${course}!`, 'success');
-            
-            // Clear form
-            document.getElementById('cloCourse').value = '';
-            document.getElementById('cloCode').value = '';
-            document.getElementById('cloTitle').value = '';
-            document.getElementById('cloDescription').value = '';
-            
-            // Refresh CLOs list
-            loadCLOs();
+            try {
+                await ObeWrites.createClo({
+                    courseCode: course,
+                    code: cloCode,
+                    title: cloTitle,
+                    description: description || cloTitle,
+                    bloomLevel,
+                    assessmentMethod
+                });
+                showAlert(`CLO "${cloTitle}" saved for ${course}.`, 'success');
+                document.getElementById('cloCourse').value = '';
+                document.getElementById('cloCode').value = '';
+                document.getElementById('cloTitle').value = '';
+                document.getElementById('cloDescription').value = '';
+                await ObeWrites.refreshDashboard();
+                loadCLOs();
+            } catch (err) {
+                showAlert('Failed to create CLO: ' + err.message, 'danger');
+            }
         }
 
         // New Interactive Functions
@@ -1975,11 +1978,18 @@
         }
 
         function showAddCLOModal() {
-            showAlert('Add CLO modal functionality will be implemented', 'info');
+            showSection('clos');
+            document.getElementById('clos-section')?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showAddCourseModal() {
+            showSection('courses');
+            document.getElementById('courseCode')?.focus();
         }
 
         function showCreateSectionModal() {
-            showAlert('Create section modal functionality will be implemented', 'info');
+            showSection('classrooms');
+            document.getElementById('sectionCourse')?.focus();
         }
 
         // Interactive functions
@@ -2330,22 +2340,64 @@
             showAlert('Teacher Excel template downloaded successfully!', 'success');
         }
 
-        function addStudent() {
+        async function addStudent() {
             const form = document.getElementById('addStudentForm');
             const formData = new FormData(form);
             const studentData = Object.fromEntries(formData);
-            
-            showAlert(`Student ${studentData.name} added successfully!`, 'success');
-            bootstrap.Modal.getInstance(document.getElementById('addStudentModal')).hide();
-            form.reset();
+            const parts = (studentData.name || '').trim().split(/\s+/);
+            try {
+                await ObeWrites.createUser({
+                    firstName: parts[0] || 'Student',
+                    lastName: parts.slice(1).join(' ') || parts[0] || 'User',
+                    email: studentData.email,
+                    password: 'Demo@2025',
+                    role: 'student',
+                    studentId: studentData.studentId,
+                    semester: studentData.semester,
+                    batch: studentData.batch || '2024',
+                    phone: studentData.phone || '923000000000',
+                    department: currentUser?.department || 'Computer Science'
+                });
+                showAlert(`Student ${studentData.name} saved to database.`, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('addStudentModal')).hide();
+                form.reset();
+                await ObeWrites.refreshDashboard();
+                loadStudents();
+            } catch (err) {
+                showAlert('Failed to add student: ' + err.message, 'danger');
+            }
         }
 
-        function showAddTeacherModal() {
-            showAlert('Add teacher modal functionality will be implemented', 'info');
+        async function showAddTeacherModal() {
+            const name = prompt('Teacher full name:');
+            if (!name) return;
+            const email = prompt('Teacher email:');
+            if (!email) return;
+            const employeeId = prompt('Employee ID:', 'EMP-' + Date.now());
+            try {
+                const parts = name.trim().split(/\s+/);
+                await ObeWrites.createUser({
+                    firstName: parts[0],
+                    lastName: parts.slice(1).join(' ') || parts[0],
+                    email,
+                    password: 'Demo@2025',
+                    role: 'teacher',
+                    employeeId,
+                    designation: 'Faculty',
+                    qualification: 'MSc',
+                    department: currentUser?.department || 'Computer Science'
+                });
+                showAlert('Teacher saved to database.', 'success');
+                await ObeWrites.refreshDashboard();
+                loadTeachers();
+            } catch (err) {
+                showAlert('Failed: ' + err.message, 'danger');
+            }
         }
 
         function assignSubject() {
-            showAlert('Subject assignment functionality will be implemented', 'info');
+            showSection('mapping');
+            showAlert('Select a course mapping row or use the mapping section.', 'info');
         }
 
         function uploadResults() {
@@ -2408,11 +2460,11 @@
         }
 
         function showAddSubjectModal() {
-            showAlert('Add subject modal functionality will be implemented', 'info');
+            showSection('subjects');
         }
 
         function showMappingModal() {
-            showAlert('Add mapping modal functionality will be implemented', 'info');
+            showSection('mapping');
         }
 
         function refreshData() {

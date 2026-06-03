@@ -1328,6 +1328,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/dashboard-common.js"></script>
     <script src="/js/dashboard-data.js"></script>
+    <script src="/js/obe-writes.js"></script>
     
     <script>
         let currentUser = null;
@@ -1341,24 +1342,8 @@
         });
 
         // Navigation functionality
-        function showSection(sectionName) {
-            // Hide all sections
-            const sections = document.querySelectorAll('[id$="-section"]');
-            sections.forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            // Show selected section
-            document.getElementById(sectionName + '-section').style.display = 'block';
-            
-            // Update active nav link
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // Load section-specific data
+        function showSection(sectionName, evt) {
+            if (!showDashboardSection(sectionName, evt)) return;
             loadSectionData(sectionName);
         }
 
@@ -1370,9 +1355,71 @@
                 case 'performance':
                     loadPerformanceCharts();
                     break;
+                case 'courses':
+                    loadChairmanCourses();
+                    break;
+                case 'students':
+                    loadChairmanStudents();
+                    break;
+                case 'assessments':
+                    loadChairmanAssessments();
+                    break;
                 default:
                     break;
             }
+        }
+
+        function loadChairmanCourses() {
+            const tbody = document.querySelector('#courses-section tbody');
+            if (!tbody) return;
+            const courses = window.__dashboardData?.courses || [];
+            tbody.innerHTML = courses.length ? courses.map(c => `
+                <tr>
+                    <td><span class="badge bg-primary">${c.code}</span></td>
+                    <td>${c.name || c.title}</td>
+                    <td>${c.credits || 3}</td>
+                    <td>${c.instructorName || '—'}</td>
+                    <td>${c.studentCount || '—'}</td>
+                    <td><span class="badge bg-success">Active</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewCourse('${c.code}')"><i class="fas fa-eye"></i></button>
+                    </td>
+                </tr>`).join('') : '<tr><td colspan="7" class="text-center text-muted">No courses</td></tr>';
+        }
+
+        function loadChairmanStudents() {
+            const tbody = document.querySelector('#students-section tbody');
+            if (!tbody) return;
+            const students = window.__dashboardData?.students || [];
+            tbody.innerHTML = students.length ? students.map(s => `
+                <tr>
+                    <td><span class="badge bg-info">${s.studentId || s.id}</span></td>
+                    <td>${s.name || '—'}</td>
+                    <td>${s.program || '—'}</td>
+                    <td>${s.semester || '—'}</td>
+                    <td><span class="badge bg-success">${s.cgpa || '—'}</span></td>
+                    <td><span class="badge bg-success">Active</span></td>
+                    <td><button class="btn btn-sm btn-outline-primary" onclick="viewStudent('${s.studentId || s.id}')"><i class="fas fa-eye"></i></button></td>
+                </tr>`).join('') : '<tr><td colspan="7" class="text-center text-muted">No students</td></tr>';
+        }
+
+        function loadChairmanAssessments() {
+            const tbody = document.querySelector('#assessments-section tbody');
+            if (!tbody) return;
+            const list = window.__dashboardData?.assessments || [];
+            tbody.innerHTML = list.length ? list.map(a => `
+                <tr>
+                    <td><span class="badge bg-primary">${a.courseCode}</span></td>
+                    <td>${a.name || a.title}</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>${a.totalMarks || a.maxMarks || '—'}</td>
+                    <td><span class="badge bg-success">Active</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewAssessment('${a._id || a.id}')"><i class="fas fa-eye"></i></button>
+                        <button class="btn btn-sm btn-outline-info" onclick="downloadResults('${a._id || a.id}')"><i class="fas fa-download"></i></button>
+                    </td>
+                </tr>`).join('') : '<tr><td colspan="7" class="text-center text-muted">No assessments</td></tr>';
         }
 
         function loadOverviewCharts() {
@@ -1723,7 +1770,8 @@
         }
 
         function editFocalAssignment() {
-            showAlert('Edit focal person assignment functionality will be implemented.', 'info');
+            showSection('focal');
+            showAlert('Update focal person details in the focal section.', 'info');
         }
 
         function removeFocalAssignment() {
@@ -1741,8 +1789,26 @@
         }
 
         // Course Management Functions
-        function showAddCourseModal() {
-            showAlert('Add Course functionality will be implemented.', 'info');
+        async function showAddCourseModal() {
+            const code = prompt('Course code (e.g. CS-350):');
+            if (!code) return;
+            const name = prompt('Course name:');
+            if (!name) return;
+            try {
+                await ObeWrites.createCourse({
+                    code: code.toUpperCase(),
+                    name,
+                    title: name,
+                    creditHours: 3,
+                    department: currentUser?.department || 'Computer Science',
+                    semester: 1
+                });
+                await ObeWrites.refreshDashboard();
+                loadChairmanCourses();
+                showAlert('Course created in database.', 'success');
+            } catch (err) {
+                showAlert('Failed: ' + err.message, 'danger');
+            }
         }
 
         function viewCourse(code) {
@@ -1754,12 +1820,44 @@
         }
 
         // Student Management Functions
-        function showAddStudentModal() {
-            showAlert('Add Student functionality will be implemented.', 'info');
+        async function showAddStudentModal() {
+            const name = prompt('Student full name:');
+            if (!name) return;
+            const email = prompt('Student email:');
+            if (!email) return;
+            const studentId = prompt('Student ID:');
+            if (!studentId) return;
+            try {
+                const parts = name.trim().split(/\s+/);
+                await ObeWrites.createUser({
+                    firstName: parts[0],
+                    lastName: parts.slice(1).join(' ') || parts[0],
+                    email,
+                    password: 'Demo@2025',
+                    role: 'student',
+                    studentId,
+                    semester: 1,
+                    batch: '2024',
+                    department: currentUser?.department || 'Computer Science'
+                });
+                await ObeWrites.refreshDashboard();
+                loadChairmanStudents();
+                showAlert('Student created in database.', 'success');
+            } catch (err) {
+                showAlert('Failed: ' + err.message, 'danger');
+            }
         }
 
         function exportStudentData() {
-            showAlert('Student data exported successfully.', 'success');
+            const rows = (window.__dashboardData?.students || []).map(s => ({
+                studentId: s.studentId || s.id,
+                name: s.name,
+                email: s.email,
+                semester: s.semester
+            }));
+            if (!rows.length) return showAlert('No students to export.', 'warning');
+            ObeWrites.downloadCsv('department-students.csv', rows);
+            showAlert('Student data exported.', 'success');
         }
 
         function viewStudent(id) {
@@ -1772,7 +1870,15 @@
 
         // Assessment Functions
         function generateAssessmentReport() {
-            showAlert('Assessment report generated successfully.', 'success');
+            const rows = (window.__dashboardData?.assessments || []).map(a => ({
+                course: a.courseCode,
+                name: a.name || a.title,
+                type: a.type,
+                marks: a.totalMarks || a.maxMarks
+            }));
+            if (!rows.length) return showAlert('No assessments to export.', 'warning');
+            ObeWrites.downloadCsv('assessments-report.csv', rows);
+            showAlert('Assessment report downloaded.', 'success');
         }
 
         function viewAssessment(id) {
@@ -1780,21 +1886,40 @@
         }
 
         function downloadResults(id) {
-            showAlert(`Results for ${id} downloaded successfully.`, 'success');
+            const rows = (window.__dashboardData?.results || []).filter(r =>
+                String(r.assessmentId || r.assessmentName || '').includes(String(id))
+            );
+            if (!rows.length) {
+                showAlert('No results found for this assessment.', 'warning');
+                return;
+            }
+            ObeWrites.downloadCsv(`results-${id}.csv`, rows);
+            showAlert('Results downloaded.', 'success');
         }
 
-        // Performance Functions
         function exportPerformanceReport() {
-            showAlert('Performance report exported successfully.', 'success');
+            const data = window.__dashboardData?.charts;
+            if (!data?.departmentLabels) return showAlert('No performance data yet.', 'warning');
+            const rows = data.departmentLabels.map((label, i) => ({
+                department: label,
+                passRate: data.departmentPassRates?.[i]
+            }));
+            ObeWrites.downloadCsv('performance-report.csv', rows);
+            showAlert('Performance report exported.', 'success');
         }
 
-        // Report Functions
         function generateComprehensiveReport() {
-            showAlert('Comprehensive report generated successfully.', 'success');
+            ObeWrites.downloadCsv('comprehensive-summary.csv', [
+                { metric: 'Students', value: window.__dashboardData?.stats?.students || 0 },
+                { metric: 'Teachers', value: window.__dashboardData?.stats?.teachers || 0 },
+                { metric: 'Courses', value: window.__dashboardData?.stats?.courses || 0 },
+                { metric: 'Results', value: (window.__dashboardData?.results || []).length }
+            ]);
+            showAlert('Summary report downloaded.', 'success');
         }
 
         function generateAcademicReport() {
-            showAlert('Academic performance report generated successfully.', 'success');
+            exportPerformanceReport();
         }
 
         function generateFacultyReport() {

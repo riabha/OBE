@@ -31,6 +31,38 @@ function authFetch(url, options = {}) {
     return fetch(url, { ...options, headers });
 }
 
+/**
+ * Safe section switcher for role dashboards. Avoids errors when event is missing
+ * (e.g. Quick Action buttons) and still highlights the correct sidebar link.
+ */
+function showDashboardSection(sectionName, clickEvent) {
+    const sectionEl = document.getElementById(sectionName + '-section');
+    if (!sectionEl) {
+        console.warn('[nav] Section not found:', sectionName + '-section');
+        return false;
+    }
+    document.querySelectorAll('[id$="-section"]').forEach(s => { s.style.display = 'none'; });
+    sectionEl.style.display = 'block';
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    const evt = clickEvent || (typeof window.event !== 'undefined' ? window.event : null);
+    let link = null;
+    if (evt) {
+        if (evt.currentTarget?.classList?.contains('nav-link')) {
+            link = evt.currentTarget;
+        } else {
+            link = evt.target?.closest?.('.nav-link');
+        }
+    }
+    if (!link) {
+        link = Array.from(document.querySelectorAll('.nav-link')).find(a => {
+            const oc = a.getAttribute('onclick') || '';
+            return oc.includes(`'${sectionName}'`) || oc.includes(`"${sectionName}"`);
+        });
+    }
+    if (link) link.classList.add('active');
+    return true;
+}
+
 // API Configuration
 const API_BASE = '';
 const API_ENDPOINTS = {
@@ -387,3 +419,4 @@ window.DASHBOARD_BY_ROLE = DASHBOARD_BY_ROLE;
 window.getDashboardForRole = getDashboardForRole;
 window.getAPIHeaders = getAPIHeaders;
 window.authFetch = authFetch;
+window.showDashboardSection = showDashboardSection;

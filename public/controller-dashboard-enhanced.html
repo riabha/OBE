@@ -485,8 +485,10 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <script src="/js/dashboard-common.js"></script>
     <script src="/js/dashboard-data.js"></script>
+    <script src="/js/obe-writes.js"></script>
     <script>
         let currentUser = null;
         let resultsData = [];
@@ -503,21 +505,8 @@
         });
 
         // Navigation functions
-        function showSection(sectionName) {
-            // Hide all sections
-            document.querySelectorAll('[id$="-section"]').forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            // Show selected section
-            document.getElementById(sectionName + '-section').style.display = 'block';
-            
-            // Update active nav link
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
+        function showSection(sectionName, evt) {
+            if (!showDashboardSection(sectionName, evt)) return;
             // Load section-specific data
             if (sectionName === 'results') {
                 loadAllResults();
@@ -647,31 +636,31 @@
             `).join('');
         }
 
-        // Load mappings
         function loadMappings() {
-            const mappings = [
-                { subject: 'Data Structures', department: 'Computer Science', clo1: '85%', clo2: '78%', clo3: '92%', clo4: '88%', plos: 'PLO1,PLO3,PLO5' },
-                { subject: 'Circuit Analysis', department: 'Electrical Engineering', clo1: '76%', clo2: '82%', clo3: '79%', clo4: '85%', plos: 'PLO1,PLO2,PLO4' },
-                { subject: 'Database Systems', department: 'Computer Science', clo1: '88%', clo2: '85%', clo3: '91%', clo4: '83%', plos: 'PLO1,PLO3,PLO6' }
-            ];
-            
+            const clos = window.__dashboardData?.clos || [];
             const tbody = document.getElementById('mappingTable');
-            tbody.innerHTML = mappings.map(mapping => `
+            if (!tbody) return;
+            const byCourse = {};
+            clos.forEach(c => {
+                if (!byCourse[c.courseCode]) byCourse[c.courseCode] = [];
+                byCourse[c.courseCode].push(c);
+            });
+            const rows = Object.keys(byCourse);
+            tbody.innerHTML = rows.length ? rows.map(code => {
+                const list = byCourse[code];
+                const pcts = list.map(c => Math.round(c.attainment || 0) + '%');
+                return `
                 <tr>
-                    <td>${mapping.subject}</td>
-                    <td><span class="department-badge bg-primary">${mapping.department}</span></td>
-                    <td><span class="badge bg-success">${mapping.clo1}</span></td>
-                    <td><span class="badge bg-success">${mapping.clo2}</span></td>
-                    <td><span class="badge bg-success">${mapping.clo3}</span></td>
-                    <td><span class="badge bg-success">${mapping.clo4}</span></td>
-                    <td><small>${mapping.plos}</small></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="editMapping('${mapping.subject}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+                    <td>${code}</td>
+                    <td><span class="department-badge bg-primary">${list[0]?.department || '—'}</span></td>
+                    <td><span class="badge bg-success">${pcts[0] || '—'}</span></td>
+                    <td><span class="badge bg-success">${pcts[1] || '—'}</span></td>
+                    <td><span class="badge bg-success">${pcts[2] || '—'}</span></td>
+                    <td><span class="badge bg-success">${pcts[3] || '—'}</span></td>
+                    <td><small>${list.map(c => c.code).join(', ')}</small></td>
+                    <td><button class="btn btn-sm btn-outline-primary" onclick="editMapping('${code}')"><i class="fas fa-edit"></i></button></td>
+                </tr>`;
+            }).join('') : '<tr><td colspan="8" class="text-center text-muted">No CLO mappings</td></tr>';
         }
 
         // Load templates
@@ -798,7 +787,11 @@
         }
 
         function downloadTemplate(name) {
-            showAlert(`Downloading template: ${name}`, 'success');
+            ObeWrites.downloadCsv('results-upload-template.csv', [
+                { studentId: 'STU001', 'Quiz 1': 8, 'Midterm': 35 },
+                { studentId: 'STU002', 'Quiz 1': 9, 'Midterm': 40 }
+            ]);
+            showAlert(`Template downloaded (${name}).`, 'success');
         }
 
         function editTemplate(name) {
@@ -806,15 +799,34 @@
         }
 
         function showBulkUpload() {
-            showAlert('Bulk upload functionality will be implemented', 'info');
+            showSection('results');
+            const courses = window.__dashboardData?.courses || [];
+            const courseCode = prompt('Course code for results CSV:', courses[0]?.code || '');
+            if (!courseCode) return;
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv';
+            input.onchange = async () => {
+                try {
+                    const result = await ObeWrites.importResultsFromCsvFile(input.files[0], courseCode.trim().toUpperCase());
+                    showAlert(`Imported ${result.imported} result(s).`, 'success');
+                    await ObeWrites.refreshDashboard();
+                    loadAllResults();
+                    loadRecentUploads();
+                } catch (err) {
+                    showAlert('Upload failed: ' + err.message, 'danger');
+                }
+            };
+            input.click();
         }
 
         function showTemplateManager() {
-            showAlert('Template manager functionality will be implemented', 'info');
+            showSection('templates');
+            downloadTemplate('Standard Result Template');
         }
 
         function showMappingEditor() {
-            showAlert('Mapping editor functionality will be implemented', 'info');
+            showSection('mapping');
         }
 
         function generateAnalytics() {
@@ -822,30 +834,60 @@
         }
 
         function showMappingModal() {
-            showAlert('Add mapping modal functionality will be implemented', 'info');
+            showSection('mapping');
         }
 
         function generateReport() {
-            showAlert('Generating comprehensive report...', 'success');
+            exportResults();
         }
 
         function exportResults() {
-            showAlert('Exporting results to Excel...', 'success');
+            const rows = (window.__dashboardData?.results || []).map(r => ({
+                studentId: r.studentId,
+                studentName: r.studentName,
+                course: r.courseCode,
+                marks: r.marksObtained,
+                grade: r.grade,
+                assessment: r.assessmentName
+            }));
+            if (!rows.length) return showAlert('No results to export.', 'warning');
+            ObeWrites.downloadCsv('all-results.csv', rows);
+            showAlert('Results exported.', 'success');
         }
 
         function filterResults() {
-            const department = document.getElementById('departmentFilter').value;
-            const semester = document.getElementById('semesterFilter').value;
-            showAlert(`Filtering by Department: ${department || 'All'}, Semester: ${semester || 'All'}`, 'info');
+            const department = document.getElementById('departmentFilter')?.value;
+            const semester = document.getElementById('semesterFilter')?.value;
+            let results = window.__dashboardData?.results || [];
+            if (department) results = results.filter(r => (r.department || '').toLowerCase().includes(department.toLowerCase()));
+            if (semester) results = results.filter(r => String(r.semester) === String(semester));
+            const tbody = document.getElementById('allResultsTable');
+            if (!tbody) return;
+            tbody.innerHTML = results.length ? results.map(result => `
+                <tr>
+                    <td>${result.studentId || '—'}</td>
+                    <td>${result.studentName || '—'}</td>
+                    <td>${result.courseTitle || result.courseCode}</td>
+                    <td><span class="department-badge bg-primary">${result.courseCode}</span></td>
+                    <td>${result.semester || '—'}</td>
+                    <td>${result.marksObtained}/${result.maxMarks || 100}</td>
+                    <td><span class="badge bg-${DashboardData.gradeColor(result.grade)}">${result.grade}</span></td>
+                    <td>${result.assessmentName || '—'}</td>
+                    <td>—</td>
+                    <td>${DashboardData.fmtDate(result.createdAt)}</td>
+                    <td>—</td>
+                </tr>`).join('') : '<tr><td colspan="11" class="text-center text-muted">No matching results</td></tr>';
+            showAlert(`Showing ${results.length} result(s).`, 'info');
         }
 
         function saveSettings() {
             showAlert('Settings saved successfully!', 'success');
         }
 
-        function refreshData() {
+        async function refreshData() {
+            window.__dashboardData = await DashboardData.load(true);
             loadDashboardData();
-            showAlert('Data refreshed successfully!', 'success');
+            showAlert('Data refreshed from database.', 'success');
         }
 
         function logout() {

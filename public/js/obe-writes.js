@@ -21,6 +21,14 @@ const ObeWrites = {
         return APIManager.post('/api/courses', payload);
     },
 
+    async createUser(payload) {
+        return APIManager.post('/api/users', payload);
+    },
+
+    async createClo(payload) {
+        return APIManager.post('/api/clos', payload);
+    },
+
     async createAssessment(payload) {
         return APIManager.post('/api/assessments', payload);
     },

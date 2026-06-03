@@ -1063,21 +1063,8 @@
         });
 
         // Navigation functions
-        function showSection(sectionName) {
-            // Hide all sections
-            document.querySelectorAll('[id$="-section"]').forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            // Show selected section
-            document.getElementById(sectionName + '-section').style.display = 'block';
-            
-            // Update active nav link
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
+        function showSection(sectionName, evt) {
+            if (!showDashboardSection(sectionName, evt)) return;
             // Load section-specific data
             if (sectionName === 'courses') {
                 loadCourses();

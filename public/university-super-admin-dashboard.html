@@ -1081,7 +1081,7 @@
                 <!-- Filter Tabs -->
                 <ul class="nav nav-tabs mb-4">
                     <li class="nav-item">
-                        <a class="nav-link active" onclick="filterAnnouncements('active')">Active</a>
+                        <a class="nav-link active" onclick="filterAnnouncements('active', event)">Active</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" onclick="filterAnnouncements('scheduled')">Scheduled</a>
@@ -3640,11 +3640,13 @@ FOBM,Faculty of Business Management,dean.biz@example.com,Faculty of business and
             modal.hide();
         }
 
-        function filterAnnouncements(status) {
+        function filterAnnouncements(status, evt) {
             document.querySelectorAll('.nav-tabs .nav-link').forEach(link => {
                 link.classList.remove('active');
             });
-            event.target.classList.add('active');
+            const e = evt || (typeof event !== 'undefined' ? event : null);
+            const tab = e?.target?.closest?.('.nav-link') || e?.currentTarget;
+            if (tab) tab.classList.add('active');
 
             const a = window.__dashboardData?.stats?.assessments ?? 0;
             document.getElementById('activeAnnouncements').textContent = String(a);
