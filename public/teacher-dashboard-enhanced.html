@@ -1199,7 +1199,7 @@
                 tbody.innerHTML = students.map(student => `
                     <tr>
                         <td><strong>${student.studentId || student.id}</strong></td>
-                        <td>${student.firstName} ${student.lastName}</td>
+                        <td>${student.name || `${student.firstName || ''} ${student.lastName || ''}`.trim()}</td>
                         <td>${student.course || 'N/A'}</td>
                         <td><span class="badge bg-info">${student.section || 'A'}</span></td>
                         <td>
