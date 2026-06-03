@@ -120,6 +120,15 @@ function parseCreditHours(raw) {
   return Number.isFinite(n) ? n : 3;
 }
 
+function normalizeCourseCode(rawCode, deptCode) {
+  let code = cleanText(rawCode).replace(/\s+/g, '').toUpperCase().replace(/-/g, '');
+  if (!code || code === '--' || code === 'NA' || code === 'N/A' || code === 'CODE') return null;
+  if (/^[A-Z]{2,}\d/.test(code)) return code.slice(0, 10);
+  if (/^\d{1,4}$/.test(code)) return `${deptCode}${code}`.slice(0, 10);
+  if (/^[A-Z]{2,}\*?$/.test(code)) return `${deptCode}${code.replace(/\*/g, '')}`.slice(0, 10);
+  return null;
+}
+
 async function scrapeFaculties() {
   const faculties = [];
   const deptToFaculty = {};
@@ -223,36 +232,39 @@ async function scrapeDepartmentCourses(deptId) {
   const html = await fetchHtml(`/department/${deptId}/`);
   const $ = cheerio.load(html);
   const deptTitle = cleanText($('h1').first().text()).replace(/ Department$/i, '');
+  const deptCode = deptCodeFromName(deptTitle);
   const courses = [];
   const seen = new Set();
 
   $('table').each((_, table) => {
-    const headers = $(table).find('tr').first().find('th, td').map((__, c) => cleanText($(c).text()).toLowerCase()).get();
-    if (!headers.some(h => h.includes('course')) && !headers.some(h => h.includes('code'))) return;
-
-    $(table).find('tr').slice(1).each((__, row) => {
-      const cells = $(row).find('td').map((___, c) => cleanText($(c).text())).get();
+    $(table).find('tr').each((__, row) => {
+      const cells = $(row).find('td').map((i, c) => cleanText($(c).text())).get();
       if (cells.length < 2) return;
-      let code = cells[0];
-      let title = cells[1];
-      let creditsRaw = cells[2] || '3';
-      if (/^[A-Za-z]{2,}\d{2,}/.test(cells[0])) {
-        // ok
-      } else if (/^[A-Za-z]{2,}\d{2,}/.test(cells[1])) {
-        code = cells[1];
-        title = cells[0];
-        creditsRaw = cells[2] || '3';
-      } else return;
 
-      code = code.replace(/\s+/g, '').toUpperCase();
-      if (!code || code === 'CODE' || seen.has(code)) return;
-      seen.add(code);
-      if (/^\d+$/.test(code) && title.length < 4) return;
+      let codeRaw = cells[0];
+      let title = cells[1];
+      let creditsRaw = cells[2] || '3+0';
+
+      if (!normalizeCourseCode(codeRaw, deptCode) && normalizeCourseCode(cells[1], deptCode)) {
+        codeRaw = cells[1];
+        title = cells[0];
+        creditsRaw = cells[2] || '3+0';
+      }
+
+      const code = normalizeCourseCode(codeRaw, deptCode);
+      if (!code || !title || title.length < 3 || /^course$/i.test(title)) return;
+
+      const key = `${deptCode}:${code}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+
+      let credits = parseCreditHours(creditsRaw);
+      if (credits === 0) credits = 1;
 
       courses.push({
         code,
         title,
-        credits: parseCreditHours(creditsRaw),
+        credits: Math.min(6, credits),
         batches: BATCHES
       });
     });

@@ -1160,6 +1160,40 @@
                 </div>
             </div>
 
+            <!-- My Staff Profile (multi-role like QOBE) -->
+            <div class="content-card mb-4 border-primary border-2">
+                <h5 class="mb-3"><i class="fas fa-user-tag me-2 text-primary"></i>My Staff Profile &amp; Roles</h5>
+                <p class="text-muted small">As University Super Admin you can also act as <strong>Teacher</strong>, <strong>Dean</strong>, <strong>Chairman</strong>, etc. Link a staff profile to your account, then log out and back in to pick a role (like QualityOBE).</p>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Department (for Teacher/Chairman/Focal)</label>
+                        <select class="form-select" id="myStaffDepartment">
+                            <option value="">Select department...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Additional staff roles</label>
+                        <div class="d-flex flex-wrap gap-2 p-2 border rounded bg-light" id="myStaffRolesGroup">
+                            <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="myStaffRole" value="teacher" checked> Teacher</label>
+                            <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="myStaffRole" value="dean"> Dean</label>
+                            <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="myStaffRole" value="chairman"> Chairman</label>
+                            <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="myStaffRole" value="focal"> Focal</label>
+                            <label class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="myStaffRole" value="controller"> Controller</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Designation (optional)</label>
+                        <input type="text" class="form-control" id="myStaffDesignation" placeholder="e.g., Professor / Dean">
+                    </div>
+                    <div class="col-12">
+                        <button type="button" class="btn btn-primary-gradient" onclick="saveMyStaffProfile()">
+                            <i class="fas fa-link me-2"></i>Link Staff Profile to My Account
+                        </button>
+                        <small class="text-muted ms-2">After saving, log out and log in again to use the role picker.</small>
+                    </div>
+                </div>
+            </div>
+
             <div class="content-card">
                 <h5><i class="fas fa-cog me-2 text-primary"></i>University Settings</h5>
                 
@@ -1913,8 +1947,8 @@
         }
 
         function userRolesList(u) {
-            if (Array.isArray(u.roles) && u.roles.length) return u.roles;
-            return u.role ? [u.role] : [];
+            const raw = Array.isArray(u.roles) && u.roles.length ? u.roles : (u.role ? [u.role] : []);
+            return [...new Set(raw.filter(Boolean))];
         }
 
         function renderUserRoleBadges(u) {
@@ -2263,7 +2297,10 @@
             }
             else if (section === 'assessments') loadAssessments();
             else if (section === 'obe') loadOBEData();
-            else if (section === 'settings') loadDatabaseStats();
+            else if (section === 'settings') {
+                loadDepartments().then(() => populateDepartmentSelect(document.getElementById('myStaffDepartment'), '', false));
+                loadDatabaseStats();
+            }
             
             if (event && event.target) {
                 event.target.closest('.sidebar-menu-item').classList.add('active');
@@ -2646,7 +2683,7 @@
                                     </td>
                                     <td>${u.email}</td>
                                     <td>${renderUserRoleBadges(u)}</td>
-                                    <td>${typeof u.department === 'object' ? (u.department?.name || 'N/A') : (u.department || 'N/A')}</td>
+                                    <td>${u.departmentName || (typeof u.department === 'object' ? (u.department?.name || 'N/A') : (u.department || 'N/A'))}</td>
                                     <td class="text-center">
                                         <button class="btn btn-sm btn-outline-primary action-btn me-1" onclick="editUser('${userId(u)}')" title="Edit">
                                             <i class="fas fa-edit"></i>
@@ -2677,8 +2714,8 @@
             filteredUsers = allUsers.filter(u => {
                 const name = userDisplayName(u).toLowerCase();
                 const matchesSearch = name.includes(searchTerm) || u.email.toLowerCase().includes(searchTerm);
-                const deptName = typeof u.department === 'object' ? (u.department?.name || '') : (u.department || '');
-                const matchesRole = roleFilter === 'all' || u.role === roleFilter;
+                const deptName = u.departmentName || (typeof u.department === 'object' ? (u.department?.name || '') : (u.department || ''));
+                const matchesRole = roleFilter === 'all' || userRolesList(u).includes(roleFilter);
                 const matchesDept = deptFilter === 'all' || deptName === deptFilter;
                 return matchesSearch && matchesRole && matchesDept;
             });
@@ -2773,8 +2810,9 @@
                                         <div>
                                             <h6 class="fw-bold text-primary mb-1">${c.code}</h6>
                                             <p class="mb-0">${c.title || c.name}</p>
+                                            <small class="text-muted">${courseDeptName(c)}</small>
                                         </div>
-                                        <span class="badge bg-primary">${c.creditHours || 3} CH</span>
+                                        <span class="badge bg-primary">${c.creditHours || c.credits || 3} CH</span>
                                     </div>
                                     <div class="d-flex gap-2 mt-3">
                                         <button class="btn btn-sm btn-outline-primary flex-fill" onclick="viewCourse('${courseId(c)}')">
@@ -3404,9 +3442,11 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
             document.getElementById('editUserEmail').value = userToEdit.email;
             setSelectedUserRoles('editUserRole', userRolesList(userToEdit));
 
-            const deptId = typeof userToEdit.department === 'object'
-                ? normId(userToEdit.department?._id || userToEdit.department?.id)
-                : normId(userToEdit.department);
+            const deptId = userToEdit.departmentId
+                ? normId(userToEdit.departmentId)
+                : (typeof userToEdit.department === 'object'
+                    ? normId(userToEdit.department?._id || userToEdit.department?.id)
+                    : '');
             populateDepartmentSelect(document.getElementById('editUserDepartment'), deptId);
 
             document.getElementById('editUserResetPassword').checked = false;
@@ -3436,8 +3476,7 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
                 name: document.getElementById('editUserName').value,
                 email: document.getElementById('editUserEmail').value,
                 roles: selectedRoles,
-                role: selectedRoles[0],
-                department: document.getElementById('editUserDepartment').value
+                department: document.getElementById('editUserDepartment').value || null
             };
 
             if (resetPassword) {
@@ -4120,8 +4159,7 @@ FOBM,Faculty of Business Management,dean.biz@example.com,Faculty of business and
                 lastName: lastName,
                 email: document.getElementById('newUserEmail').value,
                 roles: selectedRoles,
-                role: selectedRoles[0],
-                department: document.getElementById('newUserDepartment').value,
+                department: document.getElementById('newUserDepartment').value || null,
                 password: password,
                 phone: document.getElementById('newUserPhone')?.value || '000-000-0000'
             };
@@ -4433,6 +4471,42 @@ FOBM,Faculty of Business Management,dean.biz@example.com,Faculty of business and
             } catch (error) {
                 console.error('Error checking database:', error);
                 alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // Link super admin to staff roles (Teacher, Dean, etc.)
+        async function saveMyStaffProfile() {
+            const roles = [...document.querySelectorAll('input[name="myStaffRole"]:checked')].map(el => el.value);
+            if (!roles.length) {
+                alert('Select at least one staff role.');
+                return;
+            }
+            const departmentId = document.getElementById('myStaffDepartment').value;
+            if (roles.some(r => ['teacher', 'focal', 'chairman'].includes(r)) && !departmentId) {
+                alert('Select a department for Teacher, Chairman, or Focal roles.');
+                return;
+            }
+            try {
+                const response = await fetch('/api/users/me/staff-profile', {
+                    method: 'POST',
+                    headers: {
+                        ...getAPIHeaders(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        roles,
+                        departmentId: departmentId || null,
+                        designation: document.getElementById('myStaffDesignation').value || undefined
+                    })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    alert('✅ ' + (result.message || 'Staff profile linked.') + '\n\nLog out and log in again to switch roles from the role picker.');
+                } else {
+                    alert('❌ ' + (result.message || result.error || 'Failed'));
+                }
+            } catch (error) {
+                alert('❌ ' + error.message);
             }
         }
 

@@ -1,5 +1,5 @@
 {
-  "scrapedAt": "2026-06-03T16:48:22.463Z",
+  "scrapedAt": "2026-06-03T17:37:19.804Z",
   "source": "https://www.quest.edu.pk",
   "batches": [
     "2022",
@@ -2806,9 +2806,372 @@
       "deptTitle": "Computer Systems Engineering",
       "courses": [
         {
+          "code": "CSE222",
+          "title": "Computer Programmming",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE286",
+          "title": "Applied Physics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE179",
+          "title": "Linear Algebra & Analytical Geometry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE362",
+          "title": "Functional English",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE288",
+          "title": "Computing Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE410",
+          "title": "Object Oriented Programming",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE103",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE1000",
+          "title": "Electronic Engineering",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE136",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE168",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE13",
+          "title": "Islamic Studies/ Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE331",
+          "title": "Data Structures and Algorithms",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE332",
+          "title": "Database Management Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE299",
+          "title": "Digital Logic Design",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE140",
+          "title": "Complex Variable and Transform",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE3",
+          "title": "System Administration",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "ES408",
           "title": "Computer Communication and Networking",
           "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE425",
+          "title": "Operating Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE157",
+          "title": "Automation and Robotics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE306",
+          "title": "Microprocessors and Interfacing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE310",
+          "title": "Communication Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE148",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE342",
+          "title": "Mobile Applications Development",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE108",
+          "title": "Engineering Economics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE430",
+          "title": "Artificial Intelligence",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE426",
+          "title": "Software Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE155",
+          "title": "Modeling and Simulation",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE317",
+          "title": "Professional and social ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE401",
+          "title": "Entrepreneur and Leadership",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE343",
+          "title": "Digital Image Processing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE54",
+          "title": "Final Year Project-I (FYP-I)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE436",
+          "title": "Parallel & Distributed Computing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE1",
+          "title": "Wireless Communication",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CSE55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
           "batches": [
             "2022",
             "2023",
@@ -2867,6 +3230,17 @@
           ]
         },
         {
+          "code": "MTH116",
+          "title": "Discrete Mathematics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "CS101",
           "title": "Computer Fundamentals",
           "credits": 3,
@@ -2889,6 +3263,28 @@
           ]
         },
         {
+          "code": "MTH123",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH124",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "DS322",
           "title": "Data Mining",
           "credits": 3,
@@ -2902,7 +3298,7 @@
         {
           "code": "MS124",
           "title": "Pre-Calculus-II*",
-          "credits": 0,
+          "credits": 1,
           "batches": [
             "2022",
             "2023",
@@ -3032,6 +3428,17 @@
           ]
         },
         {
+          "code": "MTH214",
+          "title": "Linear Algebra",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "DS226",
           "title": "Advance Statistics",
           "credits": 3,
@@ -3056,6 +3463,17 @@
         {
           "code": "DS314",
           "title": "Information Security",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH315",
+          "title": "Technical and Business Writing",
           "credits": 3,
           "batches": [
             "2022",
@@ -3260,7 +3678,458 @@
         {
           "code": "MS124",
           "title": "Pre-Calculus-II*",
-          "credits": 0,
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS404",
+          "title": "Computer Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS405",
+          "title": "Programming Fundamentals",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS406",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS407",
+          "title": "Applied Physics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS519",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS361",
+          "title": "Applied calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS299",
+          "title": "Digital Logic Design",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS515",
+          "title": "Object Oriented Programming",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS411",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS412",
+          "title": "Islamic Studies/Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS413",
+          "title": "Computer Organization & Assembly Language",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS414",
+          "title": "Data Structures & Algorithms",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS518",
+          "title": "Linear Algebra and Analytical Geometry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS416",
+          "title": "Discrete Mathematics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS417",
+          "title": "Financial Accounting and Management",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS418",
+          "title": "Design & Analysis of Algorithms",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS419",
+          "title": "Database Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS420",
+          "title": "E-commerce",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS421",
+          "title": "Visual Programming",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS422",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS423",
+          "title": "Theory of Automata",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS424",
+          "title": "Theory of Programming Languages",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS425",
+          "title": "Operating Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS426",
+          "title": "Software Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS431",
+          "title": "Web Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH424",
+          "title": "Professional Practices",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS427",
+          "title": "Compiler Construction",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS428",
+          "title": "Computer Networks",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS429",
+          "title": "Numerical Analysis and Computer Applications",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS430",
+          "title": "Artificial Intelligence",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS432",
+          "title": "Technical & Business Writing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS433",
+          "title": "Graph Theory",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS434",
+          "title": "Information Security",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS528",
+          "title": "Entrepreneurship and Leadership",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS436",
+          "title": "Parallel & Distributed Computing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS437",
+          "title": "Mobile Application Development",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS54",
+          "title": "Final Year Project-I (FYP-I)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS438",
+          "title": "Cyber Security",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS439",
+          "title": "Big Data Analytics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS440",
+          "title": "Human Computer Interaction",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
           "batches": [
             "2022",
             "2023",
@@ -3278,6 +4147,17 @@
           "code": "CS100",
           "title": "Computer Fundamentals",
           "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ITCCLLL",
+          "title": "Programming Fundamentals",
+          "credits": 4,
           "batches": [
             "2022",
             "2023",
@@ -3308,6 +4188,17 @@
           ]
         },
         {
+          "code": "ITMSLLL",
+          "title": "Applied Physics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "GE114",
           "title": "Pakistan Studies",
           "credits": 2,
@@ -3321,7 +4212,7 @@
         {
           "code": "MS112",
           "title": "Pre-Calculus-1*",
-          "credits": 0,
+          "credits": 1,
           "batches": [
             "2022",
             "2023",
@@ -3398,7 +4289,7 @@
         {
           "code": "MS124",
           "title": "Pre-Calculus-II*",
-          "credits": 0,
+          "credits": 1,
           "batches": [
             "2022",
             "2023",
@@ -3704,6 +4595,17 @@
           ]
         },
         {
+          "code": "IT54",
+          "title": "Final Year Project-I (FYP-I)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "ITC426",
           "title": "Database Administration & Management",
           "credits": 4,
@@ -3757,6 +4659,17 @@
             "2024",
             "2025"
           ]
+        },
+        {
+          "code": "IT55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
         }
       ]
     },
@@ -3773,15 +4686,940 @@
     {
       "deptId": 11,
       "deptTitle": "English (Language and Literature)",
-      "courses": []
+      "courses": [
+        {
+          "code": "ENG412",
+          "title": "Islamic Studies/Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG406",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG474",
+          "title": "Introduction to Literary Studies",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG475",
+          "title": "Introduction to Language Studies",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG476",
+          "title": "Study Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG477",
+          "title": "Introduction to Psychology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG479",
+          "title": "Phonetics and Phonology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG519",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG481",
+          "title": "Statistical Methods",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG480",
+          "title": "Introduction to IT Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG411",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG478",
+          "title": "History of English Literature",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG482",
+          "title": "English Through Technology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG483",
+          "title": "Novel/Short Story (Fiction)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG484",
+          "title": "Major Literary Movements",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG485",
+          "title": "Introduction to Morphology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG486",
+          "title": "Introduction to Philosophy",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG487",
+          "title": "International Relations",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG488",
+          "title": "Academic Reading and Writing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG493",
+          "title": "Creative Writing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG492",
+          "title": "Poetry-I (Classical Poetry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG491",
+          "title": "Sociolinguistics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG490",
+          "title": "Syntax",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG489",
+          "title": "Prose (Non-fiction)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG494",
+          "title": "Novel 18th to 19th Century",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG495",
+          "title": "Semantics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG496",
+          "title": "Literary Criticism-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG497",
+          "title": "Psycholinguistics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG498",
+          "title": "Women Writers",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG1010",
+          "title": "Intercultural Communication",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG500",
+          "title": "Drama-I (Classical and Renaissance)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG501",
+          "title": "Poetry-II (Romantic and Victorian)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG502",
+          "title": "Literary Criticism-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG503",
+          "title": "Pragmatics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG504",
+          "title": "English for Specific Purposes (ESP)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG505",
+          "title": "Research Methodology -I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG506",
+          "title": "Drama-II (Modern)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG507",
+          "title": "Postcolonial Literature",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG508",
+          "title": "Translation Studies",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG509",
+          "title": "Critical Discourse Analysis",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG54",
+          "title": "Final Year Project-I (FYP-I)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG511",
+          "title": "Pakistani Literature in English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG512",
+          "title": "Stylistics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG513",
+          "title": "Syllabus and Materials Designing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENG510",
+          "title": "Modern Novel",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
     },
     {
       "deptId": 12,
       "deptTitle": "Physics",
       "courses": [
         {
+          "code": "PHY172",
+          "title": "Environmental Physics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY111",
+          "title": "Mechanics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY361",
+          "title": "Applied calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY404",
+          "title": "Computer Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY406",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY519",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY105",
+          "title": "Electrical Systems for Buildings",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "PHY122",
           "title": "Heat & Thermodynamics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY58",
+          "title": "Differential Equations",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH124",
+          "title": "Accounting",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY411",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY412",
+          "title": "Islamic Studies/Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PH211",
+          "title": "Waves and Oscillations",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PH212",
+          "title": "Optics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH213",
+          "title": "Physical Chemistry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY446",
+          "title": "Linear Algebra",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH315",
+          "title": "Technical and Business Writing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY221",
+          "title": "Modern Physics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY222",
+          "title": "Electronics-I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY223",
+          "title": "Classical Mechanics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH224",
+          "title": "Complex Variable and Transform",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH225",
+          "title": "Probability and Statistics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY311",
+          "title": "Electronic Material and Devices",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY312",
+          "title": "Electromagnetic Theory-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY313",
+          "title": "Quantum Mechanics-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY314",
+          "title": "Mathematical Methods of Physics-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY429",
+          "title": "Numerical Analysis and Computer Applications",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY321",
+          "title": "Electromagnetic Theory-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY323",
+          "title": "Mathematical Methods of Physics-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY324",
+          "title": "Quantum Mechanics-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY325",
+          "title": "Statistical Mechanics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY218",
+          "title": "Fluid Mechanics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY414",
+          "title": "Atomic & Molecular Physics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY415",
+          "title": "Solid State Physics-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY421",
+          "title": "Solid State Physics-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY422",
+          "title": "Particle Physics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY423",
+          "title": "Nuclear Physics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY424",
+          "title": "Laser",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "PHY500",
+          "title": "Comprehensive Viva Voce",
           "credits": 3,
           "batches": [
             "2022",
@@ -3796,6 +5634,17 @@
       "deptId": 13,
       "deptTitle": "Artificial Intelligence",
       "courses": [
+        {
+          "code": "AI111",
+          "title": "Computer Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
         {
           "code": "AL112",
           "title": "Programming Fundamentals",
@@ -3854,7 +5703,7 @@
         {
           "code": "MS112",
           "title": "Pre-Calculus-1*",
-          "credits": 0,
+          "credits": 1,
           "batches": [
             "2022",
             "2023",
@@ -3931,6 +5780,17 @@
         {
           "code": "AL211",
           "title": "Data Structures",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AI430",
+          "title": "Artificial Intelligence",
           "credits": 4,
           "batches": [
             "2022",
@@ -4039,6 +5899,28 @@
           ]
         },
         {
+          "code": "AL312",
+          "title": "Artificial Neural Networks & Deep Learning",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AL313",
+          "title": "Knowledge Representation & Reasoning",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "AI314",
           "title": "Introduction to Management",
           "credits": 2,
@@ -4053,6 +5935,17 @@
           "code": "AL315",
           "title": "Introduction to Data Science",
           "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "AI311",
+          "title": "Operating Systems",
+          "credits": 3,
           "batches": [
             "2022",
             "2023",
@@ -4171,6 +6064,17 @@
           ]
         },
         {
+          "code": "MTH415",
+          "title": "Technical & Business Writing",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "AL425",
           "title": "Professional Practices",
           "credits": 2,
@@ -4232,6 +6136,17 @@
       "deptTitle": "Cyber Security",
       "courses": [
         {
+          "code": "CYBCYSLLL",
+          "title": "Computer Fundamental",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "CYS112",
           "title": "Programming Fundamentals",
           "credits": 4,
@@ -4246,6 +6161,28 @@
           "code": "MTH414",
           "title": "Marketing and Digital Strategies",
           "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH113",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH115",
+          "title": "Functional English",
+          "credits": 3,
           "batches": [
             "2022",
             "2023",
@@ -4300,7 +6237,7 @@
         {
           "code": "MS124",
           "title": "Pre-Calculus-II*",
-          "credits": 0,
+          "credits": 1,
           "batches": [
             "2022",
             "2023",
@@ -4334,6 +6271,17 @@
           "code": "CYS214",
           "title": "Artificial Intelligence",
           "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH215",
+          "title": "Applied Calculus",
+          "credits": 3,
           "batches": [
             "2022",
             "2023",
@@ -4665,7 +6613,481 @@
     {
       "deptId": 16,
       "deptTitle": "Chemistry",
-      "courses": []
+      "courses": [
+        {
+          "code": "CS100",
+          "title": "Computer fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH104",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH106",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH113",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH119",
+          "title": "Basic Mathematics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM113",
+          "title": "Physics-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH101",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH105",
+          "title": "Islamic Studies/Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH107",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM121",
+          "title": "Functional Biology-I",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM122",
+          "title": "Organic Chemistry-I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM123",
+          "title": "Physics-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH209",
+          "title": "Technical & Business Writing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM211",
+          "title": "Functional biology-II",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM212",
+          "title": "Forensic Chemistry",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM213",
+          "title": "Environmental Chemistry",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM214",
+          "title": "Physical Chemistry-I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH301",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM221",
+          "title": "Green Chemistry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM222",
+          "title": "Analytical Chemistry-I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM223",
+          "title": "Biochemistry-1",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM224",
+          "title": "Applied Chemistry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM225",
+          "title": "Thermodynamics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM311",
+          "title": "Inorganic Chemistry-II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM312",
+          "title": "Organic Chemistry-II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM313",
+          "title": "Physical Chemistry-II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM314",
+          "title": "Analytical Chemistry-II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM321",
+          "title": "Inorganic Chemistry-Ill",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM322",
+          "title": "Organic Chemistry-Ill",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM323",
+          "title": "Physical Chemistry-Ill",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM324",
+          "title": "Fuel Chemistry",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM411",
+          "title": "Heterocyclic And Organometallic Compounds",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM412",
+          "title": "Reactive Intermediates",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM413",
+          "title": "Organic Spectroscopy",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM414",
+          "title": "Organic Special Lab-I",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM415",
+          "title": "Stereochemistry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM416",
+          "title": "Final Year Project-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM421",
+          "title": "Natural Products",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM422",
+          "title": "Organic Synthesis",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM423",
+          "title": "Medicinal Chemistry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM424",
+          "title": "Organic Special Lab-II",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM425",
+          "title": "Nanotechnology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHM426",
+          "title": "Final Year Project-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
     },
     {
       "deptId": 17,
@@ -5079,6 +7501,17 @@
           ]
         },
         {
+          "code": "SWE54",
+          "title": "Final Year Project-I (FYP-I)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "SW406",
           "title": "Software Quality Engineering",
           "credits": 4,
@@ -5110,22 +7543,947 @@
             "2024",
             "2025"
           ]
+        },
+        {
+          "code": "SWE55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
         }
       ]
     },
     {
       "deptId": 18,
       "deptTitle": "Electrical Engineering",
-      "courses": []
+      "courses": [
+        {
+          "code": "EE366",
+          "title": "Applied Mechanics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE364",
+          "title": "Computing Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE285",
+          "title": "Electrical Workshop Practice",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE328",
+          "title": "Applied Physics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE330",
+          "title": "Functional English",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE297",
+          "title": "Electrical Network Analysis",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE374",
+          "title": "Theory of Electromagnetic Field",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE299",
+          "title": "Digital Logic Design",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE300",
+          "title": "Computer Programming",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE301",
+          "title": "Engineering Drawing",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE180",
+          "title": "DifferentiaI Equations & Fourier Series",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE376",
+          "title": "Computer Programming",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EL1",
+          "title": "Electrical Network Analysis",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE377",
+          "title": "Differential Equations and Fourier Series",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE378",
+          "title": "Engineering Drawing",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE350",
+          "title": "Digital Logic Design",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE305",
+          "title": "Electrical Machines",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE337",
+          "title": "Microprocessors and Interfacing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE383",
+          "title": "Complex Variables & Transforms",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE303",
+          "title": "Instrumentation & Measurement",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE373",
+          "title": "Signals and Systems",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE312",
+          "title": "Technical Writing",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE338",
+          "title": "Communication Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE311",
+          "title": "Numerical Analysis with computer applications",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE384",
+          "title": "Advanced Electrical Machine",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE309",
+          "title": "Electrical Power Generation",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE317",
+          "title": "Professional and social ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE314",
+          "title": "Control Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE313",
+          "title": "Electrical Power Transmission",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE315",
+          "title": "Power Electronics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE335",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE396",
+          "title": "Industrial Drives",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE319",
+          "title": "Power System Analysis",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE318",
+          "title": "Power Distribution and Utilization",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE54",
+          "title": "Final Year Project-I (FYP-I)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE321",
+          "title": "Power Economics and Management",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE325",
+          "title": "Entrepreneurship and Leadership",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE322",
+          "title": "Power System Control",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE323",
+          "title": "Power System Protection",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE324",
+          "title": "High Voltage Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EE55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
     },
     {
       "deptId": 19,
       "deptTitle": "Electrical (Automation & Control Engineering)",
       "courses": [
         {
+          "code": "EEAC408",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC362",
+          "title": "Functional English",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC363",
+          "title": "Workshop practice",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC364",
+          "title": "Computing Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC407",
+          "title": "Applied Physics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC287",
+          "title": "Applied Mechanics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC291",
+          "title": "Linear Circuit Analysis",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC294",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC369",
+          "title": "Electronic Devices and Circuits",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC370",
+          "title": "Linear Algebra & Analytical Geometry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC371",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC372",
+          "title": "Islamic Studies/ Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC373",
+          "title": "Signals and Systems",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC374",
+          "title": "Theory of Electromagnetic Field",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC333",
+          "title": "Digital Logic & Design",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC300",
+          "title": "Computer Programming",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC377",
+          "title": "Differential Equations and Fourier Series",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC301",
+          "title": "Engineering Drawing",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC379",
+          "title": "Sensors and Signal Conditioning",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC353",
+          "title": "Digital Signal Processing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC381",
+          "title": "Electrical Machine",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC382",
+          "title": "Embedded System and Microcontroller",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC383",
+          "title": "Complex Variables & Transforms",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC384",
+          "title": "Advanced Electrical Machine",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC385",
+          "title": "Control System - I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC386",
+          "title": "Communication System",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC387",
+          "title": "Technical Writing",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC429",
+          "title": "Numerical Analysis and Computer Applications",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC389",
+          "title": "Control System - II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC315",
+          "title": "Power Electronics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "ES11",
           "title": "IoT System Design and Applications",
           "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC392",
+          "title": "Professional and social Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC335",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC157",
+          "title": "Automation and Robotics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC395",
+          "title": "Renewable Energy and Systems",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC396",
+          "title": "Industrial Drives",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC321",
+          "title": "Power Economics and Management",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC54",
+          "title": "Final Year Project-I (FYP-I)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC398",
+          "title": "Artificial intelligence and Application",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC399",
+          "title": "Smart Grid",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC400",
+          "title": "Industrial Maintenance and Safety",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC401",
+          "title": "Entrepreneur and Leadership",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EEAC55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
           "batches": [
             "2022",
             "2023",
@@ -5536,6 +8894,17 @@
           ]
         },
         {
+          "code": "ELN54",
+          "title": "Final Year Project-I (FYP-I)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "ES417",
           "title": "Robotics and Mechatronic Systems",
           "credits": 3,
@@ -5578,6 +8947,17 @@
             "2024",
             "2025"
           ]
+        },
+        {
+          "code": "ELN55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
         }
       ]
     },
@@ -5586,8 +8966,316 @@
       "deptTitle": "Telecommunication Engineering",
       "courses": [
         {
+          "code": "TEL344",
+          "title": "Introduction to Computers",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL345",
+          "title": "Introduction to Telecommunication",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL346",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL365",
+          "title": "Applied Physics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL362",
+          "title": "Functional English",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL372",
+          "title": "Islamic Studies/ Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL410",
+          "title": "Object Oriented Programming",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL221",
+          "title": "Basic Electronics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL368",
+          "title": "Communication Skills",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL370",
+          "title": "Linear Algebra & Analytical Geometry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL371",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL147",
+          "title": "Technical report writing & Presentation skills",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL348",
+          "title": "Circuit Analysis",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL349",
+          "title": "Amplifiers and Oscillators",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL299",
+          "title": "Digital Logic Design",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL377",
+          "title": "Differential Equations and Fourier Series",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "ES212",
           "title": "Electromagnetic Field Theory",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL373",
+          "title": "Signals and Systems",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL334",
+          "title": "Complex Variables & Transforms",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL352",
+          "title": "Organizational Behavior",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL380",
+          "title": "Digital signal processing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL354",
+          "title": "Wave Propagation and Antennas",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL386",
+          "title": "Communication System",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL356",
+          "title": "Probability and Stochastic Processes",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL340",
+          "title": "Entrepreneurship & Leadership",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL357",
+          "title": "RF and Microwave Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL358",
+          "title": "Emerging wireless Technologies & RF Planning",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL359",
+          "title": "Mobile and Wireless Communications",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "TEL54",
+          "title": "Final Year Project-I (FYP-I)",
           "credits": 3,
           "batches": [
             "2022",
@@ -5628,6 +9316,17 @@
           "code": "MTH106",
           "title": "Functional English",
           "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH105",
+          "title": "Islamic Studies",
+          "credits": 2,
           "batches": [
             "2022",
             "2023",
@@ -5713,6 +9412,28 @@
           ]
         },
         {
+          "code": "MTH107",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH203",
+          "title": "Complex Variable & Transform",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "ES210",
           "title": "Computer Aided Engineering Design",
           "credits": 1,
@@ -5737,6 +9458,17 @@
         {
           "code": "BM202",
           "title": "Human Anatomy",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS113",
+          "title": "Object Oriented Programming",
           "credits": 3,
           "batches": [
             "2022",
@@ -5900,6 +9632,17 @@
           ]
         },
         {
+          "code": "BMEBMXXX",
+          "title": "Elective-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "MTH423",
           "title": "Professional Practices & Ethics",
           "credits": 2,
@@ -5925,6 +9668,17 @@
           "code": "ES410",
           "title": "Power Electronics",
           "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BME54",
+          "title": "Final Year Project-I (FYP-I)",
+          "credits": 3,
           "batches": [
             "2022",
             "2023",
@@ -5970,25 +9724,1546 @@
     {
       "deptId": 24,
       "deptTitle": "Civil Engineering",
-      "courses": []
+      "courses": [
+        {
+          "code": "CE10",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE11",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE137",
+          "title": "Engineering Mechanics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE12",
+          "title": "Islamic Studies/ Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE14",
+          "title": "Pakistan Study",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE15",
+          "title": "Surveying-I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE16",
+          "title": "Engineering Drawing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE17",
+          "title": "Computer Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CECIVILENG",
+          "title": "---",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE20",
+          "title": "Linear Algebra & Analytical Geometry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE21",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE23",
+          "title": "Strength of Materials-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE24",
+          "title": "Civil Engineering Drawing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE25",
+          "title": "Architecture & Town Planning",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE26",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE114",
+          "title": "Construction Engineering",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE32",
+          "title": "Numerical Analysis & Computer Applications",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE28",
+          "title": "Fluid Mechanics & Hydraulics-I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE29",
+          "title": "Strength of Materials-II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE30",
+          "title": "Transportation Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE31",
+          "title": "Theory of Structures",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE33",
+          "title": "Fluid Mechanics & Hydraulics-II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE34",
+          "title": "Plain & Reinforced Concrete",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE35",
+          "title": "Highway & Traffic Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE36",
+          "title": "Structural Analysis",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE37",
+          "title": "Engineering Economics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE44",
+          "title": "Reinforced & Pre-stressed Concrete",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE45",
+          "title": "Hydrology & Water Storage Structures",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE46",
+          "title": "Steel Structures",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE47",
+          "title": "Soil Mechanics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE48",
+          "title": "Modern Methods of Structural Analysis",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE38",
+          "title": "Structural Design & Drawing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE42",
+          "title": "Engineering Environmental-I",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE43",
+          "title": "Professional Ethics for Engineers",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE39",
+          "title": "Geotechnical Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE40",
+          "title": "Irrigation & Drainage",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE999",
+          "title": "Project Planning Economics and Management",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE50",
+          "title": "Quantity Surveying & Estimation for Civil Works",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE49",
+          "title": "Environmental Engineering-I I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE121",
+          "title": "Quantity Surveying Engineereing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
     },
     {
       "deptId": 25,
       "deptTitle": "Mechanical Engineering",
-      "courses": []
+      "courses": [
+        {
+          "code": "ME168",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME92",
+          "title": "Applied Physics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME171",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME136",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME209",
+          "title": "Computer Fundamental",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME57",
+          "title": "Workshop Practice",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME58",
+          "title": "Differential Equations",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME103",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME177",
+          "title": "Engineering Drawing & Graphics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME60",
+          "title": "Engineering Statics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME62",
+          "title": "Engineering Materials",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME169",
+          "title": "Islamic Studies/Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME63",
+          "title": "Complex Variable & Transforms",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME64",
+          "title": "Engineering Dynamics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME1000",
+          "title": "Electronic Engineering",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME66",
+          "title": "Mechanics of Materials-I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME67",
+          "title": "Thermodynamics-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME135",
+          "title": "Electrical Engineering",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME187",
+          "title": "Numerical Analysis & Computer Applications",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME138",
+          "title": "Mechanics of Machines",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME69",
+          "title": "Fluid Mechanics-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME70",
+          "title": "Mechanics of Materials-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME71",
+          "title": "Thermodynamics-II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME148",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME151",
+          "title": "Instrumentation and Control",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME73",
+          "title": "Fluid Mechanics-II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME1001",
+          "title": "Engineering Management & Economics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME75",
+          "title": "Renewable & Emerging Energy Technologies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME81",
+          "title": "Machine Design& CAD-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME76",
+          "title": "Manufacturing Processes-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME77",
+          "title": "Machine Design & CAD-II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME78",
+          "title": "Heat & Mass Transfer",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME79",
+          "title": "Mechatronics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME1002",
+          "title": "Total Quality Management",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME147",
+          "title": "Technical report writing & Presentation skills",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME82",
+          "title": "Aerodynamics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME83",
+          "title": "Safety, Health & Envoirment",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME84",
+          "title": "Manufacturing Processes-II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME85",
+          "title": "Mechanical Vibrations",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME54",
+          "title": "Final Year Project-I (FYP-I)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME86",
+          "title": "Power Plants",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME87",
+          "title": "Heating Ventilation & Air• Conditions & systmes",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME88",
+          "title": "Automobile Engineering",
+          "credits": 6,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME89",
+          "title": "Maintenance Engineering",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
     },
     {
       "deptId": 26,
       "deptTitle": "Building and Architectural Engineering",
-      "courses": []
+      "courses": [
+        {
+          "code": "BAE90",
+          "title": "History of Building Technology",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE286",
+          "title": "Applied Physics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE167",
+          "title": "Computer Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE301",
+          "title": "Engineering Drawing",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE290",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE91",
+          "title": "Calculus and Analytical Geometry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE96",
+          "title": "Applied Differential Equations",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE97",
+          "title": "Pakistan and Islamic Studies",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE253",
+          "title": "Engineering Mechanics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE95",
+          "title": "Construction Materials",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE98",
+          "title": "Occupational Health and Safety",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE99",
+          "title": "FIne Arts",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE105",
+          "title": "Electrical Systems for Buildings",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE146",
+          "title": "Fluid Mechanics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE102",
+          "title": "Soil Mechanics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE215",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE100",
+          "title": "Engineering Surveying-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE403",
+          "title": "Probability & Statistics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE109",
+          "title": "Structural Analysis-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE108",
+          "title": "Engineering Economics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE111",
+          "title": "Linear Algebra",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE123",
+          "title": "Architectural Design-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE106",
+          "title": "Mechanics of Solids",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE107",
+          "title": "Engineering Surveying-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE115",
+          "title": "Reinforced Concrete Design-I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE113",
+          "title": "Numerical Analysis",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE114",
+          "title": "Construction Engineering",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE116",
+          "title": "Environmental Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE118",
+          "title": "Environmental Control System",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE119",
+          "title": "Mechanical Systems for Buildings",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE120",
+          "title": "Structural Analysis-II",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE121",
+          "title": "Quantity Surveying Engineereing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE237",
+          "title": "Energy Efficiency in Buildings",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE124",
+          "title": "Reinforced Concrete Design-II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE125",
+          "title": "Geotechnical and Foundation Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE243",
+          "title": "Project Management",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE127",
+          "title": "Town Planning",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE128",
+          "title": "Architectural Design-Ill",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE129",
+          "title": "Steel Structures",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE130",
+          "title": "Professional Ethic",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE54",
+          "title": "Final Year Project-I (FYP-I)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE131",
+          "title": "Building Safety",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE132",
+          "title": "Integrated Building Design",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE133",
+          "title": "Entrepreneurship for Engineers",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE134",
+          "title": "Structural Dynamics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "BAE55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
     },
     {
       "deptId": 27,
       "deptTitle": "Industrial and Manufacturing Engineering",
       "courses": [
         {
+          "code": "MTH104",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "MTH101",
           "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH106",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "EL106",
+          "title": "Electrical Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME101",
+          "title": "Engineering Mechanics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME102",
+          "title": "Workshop Practice",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH211",
+          "title": "Differential Equations",
           "credits": 3,
           "batches": [
             "2022",
@@ -6009,9 +11284,163 @@
           ]
         },
         {
+          "code": "IME203",
+          "title": "Engineering Drawing & Graphics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME104",
+          "title": "Engineering Materials",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME178",
+          "title": "Applied Thromodynamics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "MTH105",
           "title": "Islamic studies",
           "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME201",
+          "title": "Mechanics of Machines",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH203",
+          "title": "Complex Variable & Transform",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME141",
+          "title": "Mechanics of Materials",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS100",
+          "title": "Computer Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME139",
+          "title": "Machine Design",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME208",
+          "title": "Fluid Mechanics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH204",
+          "title": "Numerical Analysis & Computer Applications",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME205",
+          "title": "Design of Experiment",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME207",
+          "title": "Quality and Reliability Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME206",
+          "title": "Manufacturing Processes",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME302",
+          "title": "Computer Aided Engineering Design",
+          "credits": 4,
           "batches": [
             "2022",
             "2023",
@@ -6029,27 +11458,1635 @@
             "2024",
             "2025"
           ]
+        },
+        {
+          "code": "MTH301",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME301",
+          "title": "Work study and Method Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME303",
+          "title": "Instrumentation and Control",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME304",
+          "title": "Lean and Agile Manufacturing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME309",
+          "title": "Automation and robotics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME307",
+          "title": "Modeling and Simulation",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME306",
+          "title": "Production Planning and Control",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME305",
+          "title": "Operation Research",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME308",
+          "title": "Computer Aided Manufacturing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME405A",
+          "title": "FYP-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME401",
+          "title": "Finite Element Analysis",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME402",
+          "title": "Maintenance Engineering",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME403",
+          "title": "Human Factors Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME404",
+          "title": "Production system Design",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME409",
+          "title": "Supply chain and Logistics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME405B",
+          "title": "FYP-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME406",
+          "title": "Entrepreneurship",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME407",
+          "title": "Operations of Manufacturing system",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "IME408",
+          "title": "Human Resources Management",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
         }
       ]
     },
     {
       "deptId": 28,
       "deptTitle": "Environment Engineering",
-      "courses": []
+      "courses": [
+        {
+          "code": "ENV165",
+          "title": "Introduction to Environmental Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV173",
+          "title": "Environmental Chemistry",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV167",
+          "title": "Computer Fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV169",
+          "title": "Islamic Studies/Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV171",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV172",
+          "title": "Environmental Physics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV166",
+          "title": "Surveying &Leveling",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV168",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV136",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV174",
+          "title": "Introduction to Microbiology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV175",
+          "title": "Electrical Technology",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV213",
+          "title": "Engineering Drawing & Graphics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV179",
+          "title": "Linear Algebra & Analytical Geometry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV181",
+          "title": "Fluid Mechanics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV183",
+          "title": "Water Supply & Treatment Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV182",
+          "title": "GIS & Remote Sensing",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV184",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV180",
+          "title": "DifferentiaI Equations & Fourier Series",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV178",
+          "title": "Applied Thromodynamics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV176",
+          "title": "Environmental Hydrology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV191",
+          "title": "Wastewater Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV185",
+          "title": "Sustainable Development & Urban Planning",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV187",
+          "title": "Numerical Analysis & Computer Applications",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV189",
+          "title": "Air & Noise Pollution Control",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV193",
+          "title": "Agricultural Pollution",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV192",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV194",
+          "title": "Solid Waste Management",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV190",
+          "title": "Health, Safety & Environment",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV188",
+          "title": "Biotechnology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV186",
+          "title": "Green Energy Technologies",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV202",
+          "title": "Project Planning & Management",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV204",
+          "title": "Environmental Laws & Policies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV54",
+          "title": "Final Year Project-I (FYP-I)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV195",
+          "title": "Environmental Economics & Entrepreneurship",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV198",
+          "title": "Modeling of Environmental Systems",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV200",
+          "title": "Industrial Pollution & Control",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV203",
+          "title": "Cleaner Production Techniques",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV196",
+          "title": "Risk Assessment & Management",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV199",
+          "title": "Natural Resources Management",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ENV201",
+          "title": "Environmental Impact Assessment",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
     },
     {
       "deptId": 30,
       "deptTitle": "Energy Systems Engineering",
-      "courses": []
+      "courses": [
+        {
+          "code": "ESE205",
+          "title": "Energy System & Resources",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE290",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE170",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE208",
+          "title": "Workshop Technolgy",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE209",
+          "title": "Computer Fundamental",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE295",
+          "title": "Islamic Studies/ Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE211",
+          "title": "Engineering Thermodynamics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE212",
+          "title": "Basic Electrical engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE213",
+          "title": "Engineering Drawing & Graphics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE214",
+          "title": "Differential Equations, Power series, Laplace Transform",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE184",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE216",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE217",
+          "title": "Fuels & Combustion",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE146",
+          "title": "Fluid Mechanics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE219",
+          "title": "Materials for Energy Applications",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE271",
+          "title": "Numerical Analysis & Computer Applications",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE221",
+          "title": "Basic Electronics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE300",
+          "title": "Computer Programming",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE223",
+          "title": "Thermal Systems Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE224",
+          "title": "Hydro Power Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE225",
+          "title": "Bio - Energy Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE226",
+          "title": "Instrumentation & measurement",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE227",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE228",
+          "title": "Heat & Mass Transfer",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE229",
+          "title": "Photovoltaic Technology",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE230",
+          "title": "Health Safety & Environment",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE231",
+          "title": "Energy Conversation & Auditing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE232",
+          "title": "Hybrid Vehicles & Smarter Energy",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE235",
+          "title": "Solar Thermal Technologies",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE236",
+          "title": "Power plant Technology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE237",
+          "title": "Energy Efficiency in Buildings",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE238",
+          "title": "Energy Storage Technologies",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE239",
+          "title": "Technical Report Writing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE240",
+          "title": "Wind Energy Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE241",
+          "title": "Power Transmission, Distribution & Utilization",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE242",
+          "title": "Computer Applications in Energy Systems",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE243",
+          "title": "Project Management",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE54",
+          "title": "Final Year Project-I (FYP-I)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE244",
+          "title": "Climate Change & Environment",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE245",
+          "title": "Energy Planning & Economics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE246",
+          "title": "Clean Coal Technologies",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE276",
+          "title": "Entrepreneurship & Innovation",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ESE55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
     },
     {
       "deptId": 31,
       "deptTitle": "Chemical Engineering",
       "courses": [
         {
+          "code": "CH1",
+          "title": "Basic Chemical Engineering",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE249",
+          "title": "Engineering Drawing and Computer Graphics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE296",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE295",
+          "title": "Islamic Studies/ Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE362",
+          "title": "Functional English",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE370",
+          "title": "Linear Algebra & Analytical Geometry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE363",
+          "title": "Workshop practice",
+          "credits": 1,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE250",
+          "title": "Chemical Process Technology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE251",
+          "title": "Inorganic & Organic Chemistry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE252",
+          "title": "Engineering Materials",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE253",
+          "title": "Engineering Mechanics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE346",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE255",
+          "title": "Basic Electrical Technology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE256",
+          "title": "Chemical Engineering Thermodynamics-I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE257",
+          "title": "Chemical Process Calculations-I",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE258",
+          "title": "Health, Safety & Environment",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE259",
+          "title": "Chemical Engineering Fluid Mechanics-I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE260",
+          "title": "Physical & Analytical Chemistry",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE377",
+          "title": "Differential Equations and Fourier Series",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE262",
+          "title": "Chemical Engineering Fluid Mechanics-II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE263",
+          "title": "Chemical Engineering Thermodynamics-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE264",
+          "title": "Chemical Process Calculations- II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE265",
+          "title": "Particulate Technology",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE334",
+          "title": "Complex Variables & Transforms",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE267",
+          "title": "Mass Transfer",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE268",
+          "title": "Heat Transfer Operation",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
           "code": "CH11",
           "title": "Chemical Engineering Plant Design",
           "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE270",
+          "title": "Introduction to Computers & Programming Concepts",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE271",
+          "title": "Numerical Analysis & Computer Applications",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE272",
+          "title": "Chemical Reaction Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE37",
+          "title": "Engineering Economics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE274",
+          "title": "Fuel & Energy",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE275",
+          "title": "Simultaneous Heat & Mass Transfer",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE227",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE276",
+          "title": "Entrepreneurship & Innovation",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE277",
+          "title": "Instrumentation & Process Control",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE278",
+          "title": "Pollution Control Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE279",
+          "title": "Transport Phenomena",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE280",
+          "title": "Technical Report Writing Communication Skills",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE281",
+          "title": "Chemical Process Design & Simulation",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE282",
+          "title": "Industrial Management",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE283",
+          "title": "Petroleum Refinery & Gas Engineering",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE284",
+          "title": "Biochemical Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CHE55",
+          "title": "Final Year Project-II (FYP-II)",
+          "credits": 3,
           "batches": [
             "2022",
             "2023",
@@ -6062,12 +13099,839 @@
     {
       "deptId": 32,
       "deptTitle": "Food Engineering Technology",
-      "courses": []
+      "courses": [
+        {
+          "code": "FET101",
+          "title": "Applied Physics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET102",
+          "title": "Introduction to Food Technology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH104",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH105",
+          "title": "Islamic Studies or Ethics",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH101",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH106",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET121",
+          "title": "Basic Agriculture",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET122",
+          "title": "Food Chemistry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "ME108",
+          "title": "Workshop Practice",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH107",
+          "title": "Communication Skills",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CS100",
+          "title": "Computer fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH301",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET201",
+          "title": "Marketing and Agriculture Business",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET205",
+          "title": "Food Biochemistry",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET204",
+          "title": "Fruits and Vegetables Processing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET203",
+          "title": "Applied Thermodynamics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET202",
+          "title": "Fluid Mechanics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET225",
+          "title": "Cereal Technology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET226",
+          "title": "Bakery Products Technology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET221",
+          "title": "Unit Operation in Food Technology-I",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET222",
+          "title": "Meat, Poultry and Egg Technology",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET223",
+          "title": "Dairy Technology",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET224",
+          "title": "Food Biotechnology",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET303",
+          "title": "Sugar and Confectionary Technology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET301",
+          "title": "Unit Operation in Food Technology-II",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET302",
+          "title": "Food Safety",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET304",
+          "title": "Fats and Oils Technology",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET305",
+          "title": "Instrumental Techniques in Food Analysis",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET306",
+          "title": "Beverage Technology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET322",
+          "title": "Food Plant Layout and Design",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET321",
+          "title": "Heat Transfer and Mass Transfer",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET323",
+          "title": "Food Processing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET324",
+          "title": "Food Product Development",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET325",
+          "title": "Postharvest Technology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET326",
+          "title": "Project-I",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET401",
+          "title": "Food Laws and Regulations",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET405",
+          "title": "Project-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET403",
+          "title": "Food Packaging Technology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET404",
+          "title": "Food Quality Management",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET402",
+          "title": "Entrepreneurship",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "FET420",
+          "title": "Supervised Industrial Training",
+          "credits": 6,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
     },
     {
       "deptId": 33,
       "deptTitle": "Civil Engineering Technology",
-      "courses": []
+      "courses": [
+        {
+          "code": "CS100",
+          "title": "Computer fundamentals",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE203",
+          "title": "Civil Engineering Drawing",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT124",
+          "title": "Surveying",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CET3",
+          "title": "System Administration",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH101",
+          "title": "Applied Calculus",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CM112",
+          "title": "Occupational Health & safety Management",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH104",
+          "title": "Pakistan Studies",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH107",
+          "title": "Functional English",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT134",
+          "title": "Concrete Technology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT144",
+          "title": "Applied Mechanics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT154",
+          "title": "Materials and Methods of Construction",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH211",
+          "title": "Differential Equation",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT243",
+          "title": "Fluid Mechanics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE308",
+          "title": "Soil Mechanics",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE209",
+          "title": "Architecture and Town Planning",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "MTH301",
+          "title": "Statistics & Probability",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT254",
+          "title": "Mechanics of Solids",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT274",
+          "title": "Water Supply &Wastewater Management",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE303",
+          "title": "Transportation Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CET31",
+          "title": "Theory of Structures",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT313",
+          "title": "Hydrology",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CE407",
+          "title": "Foundations Engineering",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT323",
+          "title": "Reinforced Concrete Structures",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT333",
+          "title": "Construction and Hydraulic Machinery",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT343",
+          "title": "Computer Aided Building Modeling & Design",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT350",
+          "title": "Professional Ethics for Technologist",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT383",
+          "title": "Irrigation and Hydraulic Structures",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT363",
+          "title": "Pre-stressed & Precast concrete",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT373",
+          "title": "Geology & Earthquake Engineering",
+          "credits": 2,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT4103",
+          "title": "Project-II",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT404",
+          "title": "Building Services",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT403",
+          "title": "Quantity Surveying and Contract Documents",
+          "credits": 4,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT402",
+          "title": "Entrepreneurship",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        },
+        {
+          "code": "CT401",
+          "title": "Economics",
+          "credits": 3,
+          "batches": [
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ]
+        }
+      ]
     }
   ]
 }

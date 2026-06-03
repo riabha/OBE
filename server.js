@@ -175,6 +175,25 @@ function pickDefaultActiveRole(roles, preferred) {
     return list.sort((a, b) => (ROLE_PRIORITY[b] || 0) - (ROLE_PRIORITY[a] || 0))[0];
 }
 
+function applyUniversityUserRoleDefaults(user, roles) {
+    const list = roles || getUserRolesFromDoc(user);
+    const idSuffix = String(user._id || Date.now()).slice(-6);
+
+    if (list.includes('student')) {
+        if (!user.studentId) user.studentId = `STU${idSuffix}`;
+        if (!user.semester) user.semester = 1;
+        if (!user.batch) user.batch = String(new Date().getFullYear());
+    }
+    if (list.some(r => ['teacher', 'focal', 'chairman'].includes(r))) {
+        if (!user.employeeId) user.employeeId = `EMP${idSuffix}`;
+        if (!user.designation) user.designation = 'Faculty';
+        if (!user.qualification) user.qualification = 'Graduate';
+    }
+    if (list.every(r => ['controller', 'dean'].includes(r))) {
+        user.department = undefined;
+    }
+}
+
 function isPlatformRole(role) {
     return PLATFORM_LOGIN_ROLES.includes(role);
 }
@@ -381,6 +400,7 @@ function formatUserResponse(user) {
         batch: obj.batch,
         employeeId: obj.employeeId,
         department: obj.department?.name || obj.department || null,
+        departmentName: obj.department?.name || null,
         departmentId: obj.department?._id || obj.department
     };
 }
@@ -1949,7 +1969,15 @@ app.get('/api/users', async (req, res) => {
         if (req.query.department) filter.department = req.query.department;
 
         const users = await User.find(filter).select('-password').populate('department', 'name code').sort({ role: 1, lastName: 1 });
-        res.json(users.map(formatUserResponse));
+        const seen = new Set();
+        const unique = [];
+        for (const u of users) {
+            const key = u.email.toLowerCase();
+            if (seen.has(key)) continue;
+            seen.add(key);
+            unique.push(u);
+        }
+        res.json(unique.map(formatUserResponse));
         
     } catch (error) {
         console.error('Error fetching users:', error);
@@ -2003,7 +2031,7 @@ app.post('/api/users', async (req, res) => {
             if (!req.body.roles.length) {
                 return res.status(400).json({ message: 'At least one valid role is required' });
             }
-            req.body.role = req.body.roles[0];
+            req.body.role = pickDefaultActiveRole(req.body.roles, req.body.role);
         } else if (req.body.role) {
             req.body.roles = [req.body.role];
         }
@@ -2024,14 +2052,12 @@ app.post('/api/users', async (req, res) => {
         req.body.password = hashedPassword;
         
         const user = new User(req.body);
+        applyUniversityUserRoleDefaults(user, primaryRoles);
         await user.save();
         
         console.log(`✅ User created: ${user.email}`);
         
-        const userObj = user.toObject();
-        delete userObj.password;
-        
-        res.status(201).json({ message: 'User created', user: userObj });
+        res.status(201).json({ message: 'User created', user: formatUserResponse(user) });
         
     } catch (error) {
         console.error('Error creating user:', error);
@@ -2049,49 +2075,112 @@ app.put('/api/users/:id', async (req, res) => {
         
         const { uniDb } = await getUniversityDatabase(token);
         const { User, Department } = getUniModels(uniDb);
-        
-        // Don't allow password update through this endpoint
-        delete req.body.password;
+
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
 
         if (req.body.name) {
             const parts = req.body.name.trim().split(/\s+/);
-            req.body.firstName = parts[0] || '';
-            req.body.lastName = parts.slice(1).join(' ') || parts[0];
-            delete req.body.name;
+            user.firstName = parts[0] || '';
+            user.lastName = parts.slice(1).join(' ') || parts[0];
         }
+        if (req.body.email) user.email = req.body.email.toLowerCase();
 
-        if (req.body.department && typeof req.body.department === 'string') {
-            if (/^[a-f\d]{24}$/i.test(req.body.department)) {
-                req.body.department = req.body.department;
-            } else {
+        if (req.body.department === '' || req.body.department === null) {
+            user.department = undefined;
+        } else if (req.body.department) {
+            if (typeof req.body.department === 'string' && /^[a-f\d]{24}$/i.test(req.body.department)) {
+                user.department = req.body.department;
+            } else if (typeof req.body.department === 'string') {
                 const department = await Department.findOne({
                     name: { $regex: new RegExp(`^${req.body.department}$`, 'i') }
                 });
-                req.body.department = department ? department._id : undefined;
+                user.department = department ? department._id : undefined;
             }
         }
-        
+
         if (Array.isArray(req.body.roles) && req.body.roles.length) {
-            req.body.roles = normalizeRoleList(req.body.roles.filter(r => UNIVERSITY_STAFF_ROLES.includes(r)));
-            if (req.body.roles.length) req.body.role = req.body.roles[0];
+            const roles = normalizeRoleList(req.body.roles.filter(r => UNIVERSITY_STAFF_ROLES.includes(r)));
+            if (!roles.length) return res.status(400).json({ message: 'At least one valid role is required' });
+            user.roles = roles;
+            user.role = pickDefaultActiveRole(roles, req.body.role);
+            applyUniversityUserRoleDefaults(user, roles);
         } else if (req.body.role) {
-            req.body.roles = [req.body.role];
+            user.roles = [req.body.role];
+            user.role = req.body.role;
+            applyUniversityUserRoleDefaults(user, [req.body.role]);
         }
 
-        const user = await User.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true, runValidators: true }
-        ).select('-password');
-        
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+        if (req.body.password) {
+            user.password = await bcrypt.hash(req.body.password, 12);
         }
-        
-        res.json({ message: 'User updated', user });
+
+        if (req.body.designation) user.designation = req.body.designation;
+        if (req.body.employeeId) user.employeeId = req.body.employeeId;
+        if (req.body.studentId) user.studentId = req.body.studentId;
+
+        await user.save();
+        await user.populate('department', 'name code');
+        res.json({ message: 'User updated', user: formatUserResponse(user) });
         
     } catch (error) {
-        res.status(500).json({ message: 'Error', error: error.message });
+        console.error('Error updating user:', error);
+        res.status(500).json({ message: error.message || 'Error updating user', error: error.message });
+    }
+});
+
+// Link university super admin to a staff profile (teacher/dean/chairman) for multi-role login
+app.post('/api/users/me/staff-profile', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+
+        const { uniDb, decoded } = await getUniversityDatabase(token);
+        const { User, Department } = getUniModels(uniDb);
+        const email = (decoded.email || req.headers['x-user-email'] || '').toLowerCase();
+        if (!email) return res.status(400).json({ message: 'Email not found in session' });
+
+        const platformUser = await PlatformUser.findOne({ email });
+        const requestedRoles = normalizeRoleList((req.body.roles || ['teacher']).filter(r => UNIVERSITY_STAFF_ROLES.includes(r)));
+        if (!requestedRoles.length) return res.status(400).json({ message: 'Select at least one staff role' });
+
+        let user = await User.findOne({ email });
+        if (!user) {
+            const nameParts = (platformUser?.name || email.split('@')[0]).trim().split(/\s+/);
+            user = new User({
+                firstName: nameParts[0],
+                lastName: nameParts.slice(1).join(' ') || nameParts[0],
+                email,
+                password: platformUser?.password || await bcrypt.hash('ChangeMe123!', 12),
+                role: pickDefaultActiveRole(requestedRoles),
+                roles: requestedRoles,
+                isActive: true
+            });
+        } else {
+            user.roles = normalizeRoleList([...(user.roles || [user.role]), ...requestedRoles]);
+            user.role = pickDefaultActiveRole(user.roles);
+        }
+
+        if (req.body.departmentId) {
+            user.department = req.body.departmentId;
+        } else if (req.body.department) {
+            const dept = await Department.findOne({ name: { $regex: new RegExp(`^${req.body.department}$`, 'i') } });
+            if (dept) user.department = dept._id;
+        }
+
+        if (req.body.designation) user.designation = req.body.designation;
+        applyUniversityUserRoleDefaults(user, user.roles);
+        await user.save();
+        await user.populate('department', 'name code');
+
+        res.json({
+            message: 'Staff profile linked. Log out and log in again to switch roles from the role picker.',
+            user: formatUserResponse(user),
+            hint: 'Use the role switcher in the header after re-login to act as Teacher, Dean, etc.'
+        });
+    } catch (error) {
+        console.error('Staff profile link error:', error);
+        res.status(500).json({ message: error.message || 'Error linking staff profile', error: error.message });
     }
 });
 

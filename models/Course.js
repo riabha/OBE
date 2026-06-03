@@ -11,7 +11,6 @@ const courseSchema = new mongoose.Schema({
     code: {
         type: String,
         required: [true, 'Course code is required'],
-        unique: true,
         uppercase: true,
         trim: true,
         maxlength: [10, 'Course code cannot exceed 10 characters']
@@ -67,7 +66,7 @@ const courseSchema = new mongoose.Schema({
     instructor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: [true, 'Instructor is required']
+        default: null
     },
     coInstructors: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -272,7 +271,7 @@ courseSchema.virtual('enrolledCount').get(function() {
 });
 
 // Index for better query performance
-courseSchema.index({ code: 1 });
+courseSchema.index({ code: 1, department: 1 }, { unique: true });
 courseSchema.index({ department: 1 });
 courseSchema.index({ instructor: 1 });
 courseSchema.index({ semester: 1 });

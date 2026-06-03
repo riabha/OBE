@@ -244,12 +244,22 @@ async function seedDatabase(dbName, payload, reset) {
   }
 
   // Courses
+  const instructorByDept = new Map();
+  for (const d of payload.departments) {
+    const teacher = payload.users.find(u =>
+      u.departmentCode === d.code && (u.roles || []).some(r => ['teacher', 'chairman', 'focal'].includes(r))
+    );
+    if (teacher && userIdByEmail.get(teacher.email)) {
+      instructorByDept.set(d.code, userIdByEmail.get(teacher.email));
+    }
+  }
+
   let courseCount = 0;
+  let courseSkipped = 0;
   for (const c of payload.courses) {
     const deptId = deptIdByCode.get(c.departmentCode);
-    if (!deptId) continue;
-    const instructor = payload.users.find(u => u.departmentCode === c.departmentCode);
-    const instructorId = instructor ? userIdByEmail.get(instructor.email) : null;
+    if (!deptId) { courseSkipped++; continue; }
+    const credits = Math.max(1, Math.min(6, c.credits || 3));
 
     try {
       await Course.create({
@@ -257,8 +267,9 @@ async function seedDatabase(dbName, payload, reset) {
         title: c.title,
         description: `${c.title} (${c.code}) — QUEST scheme of studies`,
         department: deptId,
-        instructor: instructorId || undefined,
-        credits: c.credits || 3,
+        instructor: instructorByDept.get(c.departmentCode) || undefined,
+        credits,
+        hours: { theory: credits, practical: 0, total: credits },
         semester: 1,
         program: c.departmentCode,
         isActive: true,
@@ -267,12 +278,22 @@ async function seedDatabase(dbName, payload, reset) {
       });
       courseCount++;
     } catch (err) {
+      courseSkipped++;
       if (!String(err.message).includes('duplicate')) {
-        console.warn(`  ⚠️  Course ${c.code}: ${err.message}`);
+        console.warn(`  ⚠️  Course ${c.code} (${c.departmentCode}): ${err.message}`);
       }
     }
   }
-  console.log(`  ✅ Courses: ${courseCount}`);
+  console.log(`  ✅ Courses: ${courseCount} (${courseSkipped} skipped)`);
+
+  for (const [code, deptId] of deptIdByCode) {
+    const totalCourses = await Course.countDocuments({ department: deptId, isActive: true });
+    const totalTeachers = await User.countDocuments({ department: deptId, isActive: true, role: { $in: ['teacher', 'focal', 'chairman'] } });
+    await Department.findByIdAndUpdate(deptId, {
+      'statistics.totalCourses': totalCourses,
+      'statistics.totalTeachers': totalTeachers
+    });
+  }
 
   // Metadata + batch programs
   await uniDb.collection('_metadata').updateOne(
@@ -332,6 +353,16 @@ async function main() {
     const mongoose = require('mongoose');
     const payload = await loadPayload(options);
     if (!payload) return;
+
+    const emptyDepts = payload.departments.filter(d =>
+      !payload.courses.some(c => c.departmentCode === d.code)
+    );
+    if (emptyDepts.length) {
+      console.warn(`\n⚠️  ${emptyDepts.length} department(s) have no courses in payload. Run: npm run validate-quest`);
+    }
+    console.log(`\n📊 Payload: ${payload.faculties?.length || 0} faculties, ${payload.departments.length} depts, ${payload.users.length} users, ${payload.courses.length} courses`);
+    console.log('   Tip: run npm run validate-quest before seeding on production.\n');
+
     await seedDatabase(options.dbName, payload, options.reset);
   } catch (err) {
     console.error('❌', err.message);
