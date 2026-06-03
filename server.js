@@ -226,10 +226,32 @@ function formatCourseResponse(course) {
     };
 }
 
+const DEMO_CANONICAL_DB = 'obe_university_demo';
+
+function getCanonicalDatabaseName(university) {
+    if (!university) return null;
+    const code = (university.universityCode || '').toUpperCase();
+    if (code === 'DEMO') {
+        return DEMO_CANONICAL_DB;
+    }
+    return (university.databaseName || '').trim() || null;
+}
+
+async function syncUniversityDatabaseName(university) {
+    const canonical = getCanonicalDatabaseName(university);
+    if (canonical && university.databaseName !== canonical) {
+        university.databaseName = canonical;
+        await university.save();
+        console.log(`✅ Corrected university DB name → ${canonical}`);
+    }
+    return canonical;
+}
+
 async function findUniversityUserByCredentials(email, password) {
     const universities = await University.find({ isActive: true });
     for (const university of universities) {
-        const uniDb = mongoose.connection.useDb(university.databaseName);
+        const dbName = getCanonicalDatabaseName(university) || university.databaseName;
+        const uniDb = mongoose.connection.useDb(dbName);
         const { User } = getUniModels(uniDb);
         const uniUser = await User.findOne({ email: email.toLowerCase() });
         if (!uniUser || !uniUser.isActive) continue;
@@ -251,18 +273,27 @@ async function getUniversityDatabase(token) {
             : await University.findOne({ universityCode: decoded.universityCode });
     } else {
         const user = await PlatformUser.findById(decoded.userId);
-        if (!user || user.role !== 'university_superadmin') {
+        const allowedPlatformRoles = ['university_superadmin', 'superadmin'];
+        if (!user || !allowedPlatformRoles.includes(user.role)) {
             throw new Error('Not authorized');
         }
         university = await University.findById(user.university)
             || await University.findOne({ universityCode: user.universityCode });
+        if (!university && user.universityCode) {
+            university = await University.findOne({ universityCode: user.universityCode.toUpperCase() });
+        }
+        if (university && !user.university) {
+            user.university = university._id;
+            await user.save().catch(() => {});
+        }
     }
 
     if (!university) {
         throw new Error('University not found');
     }
 
-    const uniDb = mongoose.connection.useDb(university.databaseName);
+    const dbName = await syncUniversityDatabaseName(university);
+    const uniDb = mongoose.connection.useDb(dbName);
     return { uniDb, university, decoded };
 }
 

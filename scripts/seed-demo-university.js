@@ -79,7 +79,12 @@ async function ensurePlatformRecords(University, PlatformUser, Subscription) {
         university.isActive = true;
         university.city = university.city || DEMO.city;
         await university.save();
-        console.log('Updated existing DEMO university');
+        console.log(`Updated existing DEMO university (database: ${DEMO.dbName})`);
+    }
+    if (university.databaseName !== DEMO.dbName) {
+        university.databaseName = DEMO.dbName;
+        await university.save();
+        console.log(`Fixed databaseName → ${DEMO.dbName}`);
     }
 
     let superAdmin = await PlatformUser.findOne({ email: DEMO.superAdminEmail });
@@ -143,9 +148,11 @@ async function seedUniversityData(university, reset) {
     const Course = uniDb.model('Course', CourseSchema);
 
     const existingUsers = await User.countDocuments();
+    const existingCourses = await Course.countDocuments();
     if (existingUsers > 0 && !reset) {
-        console.log('Demo university data already exists. Use --reset to recreate.');
-        return { skipped: true };
+        console.log(`Demo data already in ${DEMO.dbName}: ${existingUsers} users, ${existingCourses} courses.`);
+        console.log('Use --reset to recreate from scratch.');
+        return { skipped: true, users: existingUsers, courses: existingCourses };
     }
     if (existingUsers > 0 && reset) {
         await User.deleteMany({});

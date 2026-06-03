@@ -558,6 +558,8 @@
                 }
             </style>
 
+            <div id="dashboardDataHint" style="display: none;" class="mb-3"></div>
+
             <!-- Colorful Stats Grid -->
             <div class="row g-4 mb-4">
                 <div class="col-lg-3 col-md-6">
@@ -2080,10 +2082,15 @@
                     document.getElementById('totalTeachers').textContent = teachers;
                     document.getElementById('totalStudents').textContent = students;
                     
-                    populateDepartmentFilter(); // Populate department filter
+                    populateDepartmentFilter();
                     createUsersChart();
+                    if (allUsers.length === 0) {
+                        showDataEmptyHint('users');
+                    }
                 } else {
-                    console.error('❌ Failed to load users');
+                    const err = await usersRes.json().catch(() => ({}));
+                    console.error('❌ Failed to load users', err);
+                    showApiLoadError('users', err.message || err.error || usersRes.status);
                 }
 
                 // Load courses
@@ -2096,8 +2103,13 @@
                     console.log(`✅ Loaded ${allCourses.length} courses`);
                     document.getElementById('totalCourses').textContent = allCourses.length;
                     createCoursesChart();
+                    if (allCourses.length === 0) {
+                        showDataEmptyHint('courses');
+                    }
                 } else {
-                    console.error('❌ Failed to load courses');
+                    const err = await coursesRes.json().catch(() => ({}));
+                    console.error('❌ Failed to load courses', err);
+                    showApiLoadError('courses', err.message || err.error || coursesRes.status);
                 }
 
                 // Load faculties
@@ -2157,6 +2169,26 @@
                 loadDatabaseStats();
             } catch (error) {
                 console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        function showDataEmptyHint(type) {
+            const el = document.getElementById('dashboardDataHint');
+            if (!el) return;
+            const msg = type === 'courses'
+                ? 'No courses in this university database. On the VPS run: <code>npm run seed-demo</code> or <code>npm run seed-demo -- --reset</code>.'
+                : 'No users in this university database. On the VPS run: <code>npm run seed-demo</code> or <code>npm run seed-demo -- --reset</code>.';
+            if (!el.innerHTML.includes('seed-demo')) {
+                el.innerHTML = `<div class="alert alert-warning mb-0"><i class="fas fa-database me-2"></i>${msg}</div>`;
+                el.style.display = 'block';
+            }
+        }
+
+        function showApiLoadError(type, message) {
+            const el = document.getElementById('dashboardDataHint');
+            if (el) {
+                el.innerHTML = `<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Could not load ${type}: ${message}. Try logging out and in again, or run <code>npm run seed-demo -- --reset</code> on the server.</div>`;
+                el.style.display = 'block';
             }
         }
 
@@ -2224,7 +2256,7 @@
 
             const deptCounts = {};
             allCourses.forEach(course => {
-                const dept = course.department || 'Other';
+                const dept = courseDeptName(course);
                 deptCounts[dept] = (deptCounts[dept] || 0) + 1;
             });
 
@@ -2407,10 +2439,11 @@
 
         // Populate department filter dropdown
         function populateDepartmentFilter() {
+            const select = document.getElementById('userDeptFilter');
+            if (!select) return;
             const depts = [...new Set(allUsers.map(u => {
                 return typeof u.department === 'object' ? (u.department?.name || '') : (u.department || '');
             }).filter(d => d))];
-            const select = document.getElementById('userDeptFilter');
             select.innerHTML = '<option value="all">All Departments</option>';
             depts.forEach(dept => {
                 select.innerHTML += `<option value="${dept}">${dept}</option>`;
@@ -2441,26 +2474,25 @@
         // Load Courses
         async function loadCourses() {
             try {
-                const token = localStorage.getItem('token');
                 const response = await fetch('/api/courses', {
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'X-User-Email': getUserEmail()
-                    }
+                    headers: getAPIHeaders()
                 });
 
                 if (response.ok) {
                     allCourses = await response.json();
                     displayCourses(allCourses);
                 } else {
+                    const err = await response.json().catch(() => ({}));
                     document.getElementById('coursesList').innerHTML = `
                         <div class="alert alert-danger">
                             <i class="fas fa-exclamation-triangle me-2"></i>
-                            Failed to load courses. Please refresh the page.
+                            Failed to load courses: ${err.message || err.error || response.status}. Run <code>npm run seed-demo</code> on the server if this is a fresh deploy.
                         </div>`;
                 }
             } catch (error) {
                 console.error('Error loading courses:', error);
+                document.getElementById('coursesList').innerHTML = `
+                    <div class="alert alert-danger">${error.message}</div>`;
             }
         }
 
