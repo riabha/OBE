@@ -201,6 +201,9 @@ userSchema.pre('save', async function(next) {
     }
 
     if (!this.isModified('password')) return next();
+
+    // Already bcrypt-hashed (seed import, platform password copy) — do not hash twice
+    if (/^\$2[aby]\$\d{2}\$/.test(String(this.password))) return next();
     
     try {
         const salt = await bcrypt.genSalt(12);

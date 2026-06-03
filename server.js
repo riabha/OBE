@@ -2047,9 +2047,10 @@ app.post('/api/users', async (req, res) => {
             delete req.body.department;
         }
         
-        // Hash password
-        const hashedPassword = await bcrypt.hash(req.body.password, 12);
-        req.body.password = hashedPassword;
+        // Password: assign plain text — User pre-save hook hashes once
+        if (!req.body.password) {
+            return res.status(400).json({ message: 'Password is required' });
+        }
         
         const user = new User(req.body);
         applyUniversityUserRoleDefaults(user, primaryRoles);
@@ -2112,7 +2113,10 @@ app.put('/api/users/:id', async (req, res) => {
         }
 
         if (req.body.password) {
-            user.password = await bcrypt.hash(req.body.password, 12);
+            if (String(req.body.password).length < 6) {
+                return res.status(400).json({ message: 'Password must be at least 6 characters' });
+            }
+            user.password = req.body.password;
         }
 
         if (req.body.designation) user.designation = req.body.designation;
@@ -2126,6 +2130,33 @@ app.put('/api/users/:id', async (req, res) => {
     } catch (error) {
         console.error('Error updating user:', error);
         res.status(500).json({ message: error.message || 'Error updating user', error: error.message });
+    }
+});
+
+// Reset university user password (admin) — always stores a single bcrypt hash
+app.post('/api/users/:id/reset-password', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+
+        const { uniDb } = await getUniversityDatabase(token);
+        const { User } = getUniModels(uniDb);
+        const { password } = req.body;
+
+        if (!password || String(password).length < 6) {
+            return res.status(400).json({ message: 'Password must be at least 6 characters' });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        user.password = password;
+        await user.save();
+
+        res.json({ message: `Password updated for ${user.email}. They can log in with the new password immediately.` });
+    } catch (error) {
+        console.error('Password reset error:', error);
+        res.status(500).json({ message: error.message || 'Error resetting password', error: error.message });
     }
 });
 

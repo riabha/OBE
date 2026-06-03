@@ -3465,6 +3465,7 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
         async function updateUser() {
             const id = document.getElementById('editUserId').value;
             const resetPassword = document.getElementById('editUserResetPassword').checked;
+            const token = localStorage.getItem('token');
 
             const selectedRoles = getSelectedUserRoles('editUserRole');
             if (!selectedRoles.length) {
@@ -3479,19 +3480,36 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
                 department: document.getElementById('editUserDepartment').value || null
             };
 
-            if (resetPassword) {
-                const password = document.getElementById('editUserPassword').value;
-                const confirmPassword = document.getElementById('editUserConfirmPassword').value;
-
-                if (!password || password !== confirmPassword) {
-                    alert('❌ Passwords do not match or are empty!');
-                    return;
-                }
-                userData.password = password;
-            }
-
             try {
-                const token = localStorage.getItem('token');
+                if (resetPassword) {
+                    const password = document.getElementById('editUserPassword').value;
+                    const confirmPassword = document.getElementById('editUserConfirmPassword').value;
+
+                    if (!password || password !== confirmPassword) {
+                        alert('❌ Passwords do not match or are empty!');
+                        return;
+                    }
+                    if (password.length < 6) {
+                        alert('❌ Password must be at least 6 characters.');
+                        return;
+                    }
+
+                    const pwdRes = await fetch(`/api/users/${id}/reset-password`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'X-User-Email': getUserEmail(),
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ password })
+                    });
+                    if (!pwdRes.ok) {
+                        const pwdErr = await pwdRes.json();
+                        alert(`❌ Password reset failed: ${pwdErr.message || pwdErr.error}`);
+                        return;
+                    }
+                }
+
                 const response = await fetch(`/api/users/${id}`, {
                     method: 'PUT',
                     headers: {
@@ -3503,14 +3521,14 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
                 });
 
                 if (response.ok) {
-                    alert('✅ User updated successfully!');
+                    alert(resetPassword ? '✅ User updated and password reset successfully!' : '✅ User updated successfully!');
                     const modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
                     modal.hide();
                     loadUsers();
                     loadDashboardStats();
                 } else {
                     const result = await response.json();
-                    alert(`❌ Error: ${result.message}`);
+                    alert(`❌ Error: ${result.message || result.error || 'Update failed'}`);
                 }
             } catch (error) {
                 alert(`❌ Error: ${error.message}`);
