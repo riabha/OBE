@@ -1698,7 +1698,6 @@ async function getUniCollectionData(req, res, collectionName) {
     }
 }
 
-app.get('/api/clos', (req, res) => getUniCollectionData(req, res, 'clos'));
 app.get('/api/plos', (req, res) => getUniCollectionData(req, res, 'plos'));
 app.get('/api/peos', (req, res) => getUniCollectionData(req, res, 'peos'));
 app.get('/api/programs', (req, res) => getUniCollectionData(req, res, 'programs'));
@@ -2378,6 +2377,284 @@ app.post('/api/courses/bulk', (req, res) => handleBulkImport(req, res, 'courses'
 app.post('/api/departments/bulk', (req, res) => handleBulkImport(req, res, 'departments'));
 app.post('/api/faculties/bulk', (req, res) => handleBulkImport(req, res, 'faculties'));
 app.post('/api/programs/bulk', (req, res) => handleBulkImport(req, res, 'programs'));
+
+function gradeFromPercentage(pct) {
+    if (pct >= 90) return 'A+';
+    if (pct >= 85) return 'A';
+    if (pct >= 80) return 'A-';
+    if (pct >= 75) return 'B+';
+    if (pct >= 70) return 'B';
+    if (pct >= 65) return 'B-';
+    if (pct >= 60) return 'C+';
+    if (pct >= 55) return 'C';
+    if (pct >= 50) return 'C-';
+    return 'F';
+}
+
+// Create course in university database
+app.post('/api/courses', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { User, Department, Course } = getUniModels(uniDb);
+
+        const body = { ...req.body };
+        if (body.name) body.title = body.name;
+        if (body.creditHours) body.credits = Number(body.creditHours);
+
+        if (body.department && typeof body.department === 'string') {
+            let dept = await Department.findOne({ name: { $regex: new RegExp(body.department, 'i') } });
+            if (!dept) {
+                dept = await Department.findOne({ code: body.department.toUpperCase() });
+            }
+            body.department = dept?._id;
+        }
+
+        if (body.instructor && typeof body.instructor === 'string') {
+            const teacher = await User.findOne({
+                $or: [
+                    { email: body.instructor.toLowerCase() },
+                    { employeeId: body.instructor }
+                ],
+                role: 'teacher'
+            });
+            body.instructor = teacher?._id;
+        }
+        if (!body.instructor) {
+            const teacher = await User.findOne({ role: 'teacher', isActive: true });
+            body.instructor = teacher?._id;
+        }
+
+        body.code = (body.code || '').toUpperCase();
+        body.program = body.program || 'BS';
+        body.semester = Number(body.semester) || 1;
+        body.credits = body.credits || 3;
+        body.hours = body.hours || { theory: body.credits, practical: 0, total: body.credits };
+        body.isActive = true;
+        body.enrolledStudents = body.enrolledStudents || [];
+        body.assessments = body.assessments || [];
+        body.learningOutcomes = body.learningOutcomes || [];
+
+        const course = await Course.create(body);
+        res.status(201).json({ message: 'Course created', course: formatCourseResponse(course) });
+    } catch (error) {
+        console.error('Error creating course:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Course enrollments for templates / bulk upload
+app.get('/api/courses/:code/enrollments', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { User, Course } = getUniModels(uniDb);
+
+        const course = await Course.findOne({ code: req.params.code.toUpperCase(), isActive: true });
+        if (!course) return res.status(404).json({ message: 'Course not found' });
+
+        const studentIds = (course.enrolledStudents || []).map(e => e.student).filter(Boolean);
+        const students = studentIds.length
+            ? await User.find({ _id: { $in: studentIds }, role: 'student' }).select('-password')
+            : [];
+
+        res.json(students.map(s => ({
+            ...formatUserResponse(s),
+            id: s.studentId || s._id,
+            studentId: s.studentId
+        })));
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// CLOs filtered by course
+app.get('/api/clos', async (req, res) => {
+    if (req.query.courseCode) {
+        try {
+            const token = req.headers.authorization?.split(' ')[1];
+            if (!token) return res.status(401).json({ message: 'No token' });
+            const { uniDb } = await getUniversityDatabase(token);
+            const clos = await uniDb.collection('clos').find({
+                courseCode: req.query.courseCode.toUpperCase()
+            }).sort({ code: 1 }).toArray();
+            return res.json(clos.map((c, i) => ({ ...c, id: c._id, title: c.description })));
+        } catch (error) {
+            return res.status(500).json({ message: 'Error', error: error.message });
+        }
+    }
+    return getUniCollectionData(req, res, 'clos');
+});
+
+// Assessments CRUD
+app.post('/api/assessments', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { Course } = getUniModels(uniDb);
+
+        const { courseCode, assessmentType, assessmentName, questions, totalMarks } = req.body;
+        const course = await Course.findOne({ code: (courseCode || '').toUpperCase(), isActive: true });
+        if (!course) return res.status(404).json({ message: 'Course not found' });
+
+        const tMarks = totalMarks || (questions || []).reduce((s, q) => s + (q.maxMarks || 0), 0);
+        const doc = {
+            title: `${assessmentName || assessmentType} — ${course.code}`,
+            name: assessmentName || assessmentType,
+            course: course._id,
+            courseCode: course.code,
+            type: assessmentType,
+            assessmentType,
+            questions: questions || [],
+            totalMarks: tMarks,
+            maxMarks: tMarks,
+            weightage: req.body.weight || 10,
+            weight: req.body.weight || 10,
+            dueDate: new Date(),
+            isActive: true,
+            createdAt: new Date()
+        };
+
+        const result = await uniDb.collection('assessments').insertOne(doc);
+        await Course.findByIdAndUpdate(course._id, {
+            $push: {
+                assessments: {
+                    name: doc.name,
+                    type: assessmentType,
+                    weight: doc.weight,
+                    dueDate: doc.dueDate,
+                    maxMarks: tMarks,
+                    isActive: true
+                }
+            }
+        });
+
+        res.status(201).json({
+            message: 'Assessment created',
+            assessment: { ...doc, _id: result.insertedId, id: result.insertedId }
+        });
+    } catch (error) {
+        console.error('Error creating assessment:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.put('/api/assessments/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+
+        const updates = { ...req.body, updatedAt: new Date() };
+        if (updates.totalMarks == null && updates.questions) {
+            updates.totalMarks = updates.questions.reduce((s, q) => s + (q.maxMarks || 0), 0);
+            updates.maxMarks = updates.totalMarks;
+        }
+
+        const result = await uniDb.collection('assessments').findOneAndUpdate(
+            { _id: new mongoose.Types.ObjectId(req.params.id) },
+            { $set: updates },
+            { returnDocument: 'after' }
+        );
+        if (!result) return res.status(404).json({ message: 'Assessment not found' });
+        res.json({ message: 'Assessment updated', assessment: { ...result, id: result._id } });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.delete('/api/assessments/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+
+        const result = await uniDb.collection('assessments').deleteOne({
+            _id: new mongoose.Types.ObjectId(req.params.id)
+        });
+        if (result.deletedCount === 0) return res.status(404).json({ message: 'Assessment not found' });
+        res.json({ message: 'Assessment deleted' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+// Import student results (individual or bulk CSV)
+app.post('/api/results/import', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { User, Course } = getUniModels(uniDb);
+
+        const { courseCode, records } = req.body;
+        if (!courseCode || !Array.isArray(records) || !records.length) {
+            return res.status(400).json({ message: 'courseCode and records required' });
+        }
+
+        const course = await Course.findOne({ code: courseCode.toUpperCase(), isActive: true });
+        if (!course) return res.status(404).json({ message: 'Course not found' });
+
+        const inserted = [];
+        for (const rec of records) {
+            const student = await User.findOne({
+                role: 'student',
+                $or: [
+                    { studentId: rec.studentId },
+                    { email: String(rec.studentId).toLowerCase() }
+                ]
+            });
+            if (!student) continue;
+
+            const maxMarks = rec.maxMarks || 100;
+            const obtained = rec.marksObtained ?? rec.marks ?? 0;
+            const pct = maxMarks ? Math.round((obtained / maxMarks) * 100) : 0;
+
+            const doc = {
+                student: student._id,
+                studentId: student.studentId,
+                studentName: `${student.firstName} ${student.lastName}`,
+                course: course._id,
+                courseCode: course.code,
+                courseTitle: course.title,
+                assessmentName: rec.assessmentName || rec.assessment || 'Assessment',
+                marksObtained: obtained,
+                maxMarks,
+                percentage: pct,
+                grade: gradeFromPercentage(pct),
+                semester: rec.semester || course.semesterName || 'Fall',
+                academicYear: course.academicYear || '2024-25',
+                createdAt: new Date()
+            };
+            await uniDb.collection('results').insertOne(doc);
+            inserted.push(doc);
+
+            const enIdx = (course.enrolledStudents || []).findIndex(e =>
+                e.student && e.student.toString() === student._id.toString()
+            );
+            if (enIdx >= 0) {
+                course.enrolledStudents[enIdx].totalMarks = (course.enrolledStudents[enIdx].totalMarks || 0) + obtained;
+                course.enrolledStudents[enIdx].percentage = Math.min(100, course.enrolledStudents[enIdx].totalMarks);
+                course.enrolledStudents[enIdx].finalGrade = gradeFromPercentage(course.enrolledStudents[enIdx].percentage);
+                course.enrolledStudents[enIdx].status = course.enrolledStudents[enIdx].percentage >= 50 ? 'completed' : 'failed';
+            }
+        }
+
+        if (inserted.length) await course.save();
+
+        res.json({
+            message: `Imported ${inserted.length} result record(s)`,
+            imported: inserted.length,
+            skipped: records.length - inserted.length
+        });
+    } catch (error) {
+        console.error('Error importing results:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
 
 // ============================================
 // ERROR HANDLING

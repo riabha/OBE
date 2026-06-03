@@ -1009,8 +1009,10 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="/js/dashboard-common.js"></script>
     <script src="/js/dashboard-data.js"></script>
+    <script src="/js/obe-writes.js"></script>
     <script src="js/reports-system.js"></script>
     <script>
         let currentUser = null;
@@ -1289,38 +1291,38 @@
             }
         }
 
-        function uploadResults() {
+        async function uploadResults() {
             const form = document.getElementById('uploadResultsForm');
             const formData = new FormData(form);
             const resultsData = Object.fromEntries(formData);
-            const file = document.getElementById('resultsFileInput').files[0];
-            
-            if (!resultsData.course || !resultsData.assessmentType || !resultsData.assessmentName || !file) {
-                showAlert('Please fill in all required fields and select a file', 'warning');
+            const file = document.getElementById('resultsFileInput')?.files[0];
+            if (!resultsData.course || !file) {
+                showAlert('Please select course and results file', 'warning');
                 return;
             }
-            
-            showAlert('Processing results file...', 'info');
-            
-            setTimeout(() => {
-                showAlert(`Results uploaded successfully for ${resultsData.assessmentName}!`, 'success');
+            try {
+                const result = await ObeWrites.importResultsFromCsvFile(file, resultsData.course);
+                showAlert(`Imported ${result.imported} result(s) for ${resultsData.course}.`, 'success');
                 form.reset();
+                await ObeWrites.refreshDashboard();
                 loadResults();
-            }, 2000);
+            } catch (err) {
+                showAlert('Upload failed: ' + err.message, 'danger');
+            }
         }
 
         let createdAssessments = [];
 
         function syncAssessmentsFromDb() {
             createdAssessments = (window.__dashboardData?.assessments || []).map((a, i) => ({
-                id: a._id || i + 1,
+                id: a._id || a.id || i + 1,
                 course: a.courseCode,
-                assessmentType: a.type,
+                assessmentType: a.type || a.assessmentType,
                 assessmentName: a.name || a.title,
-                questions: [],
-                totalMarks: a.maxMarks || a.totalMarks || 0,
+                questions: a.questions || [],
+                totalMarks: a.totalMarks || a.maxMarks || 0,
                 createdDate: DashboardData.fmtDate(a.createdAt),
-                structure: { questions: 0, cloPerQuestion: 1, type: (a.type || '').toLowerCase(), canModifyQuestions: false }
+                structure: { questions: (a.questions || []).length, cloPerQuestion: 1, type: (a.type || '').toLowerCase(), canModifyQuestions: false }
             }));
         }
         let currentQuestionCount = 0;
@@ -1337,55 +1339,20 @@
             'Final': { questions: 5, cloPerQuestion: 1, type: 'exam', canModifyQuestions: true, defaultMarks: 60, marksPerQuestion: 12 }
         };
 
-        // Course CLO Data
-        const courseCLOs = {
-            'CS-301': [
-                { id: 1, code: 'CLO1', title: 'Data Structure Implementation', description: 'Implement various data structures efficiently' },
-                { id: 2, code: 'CLO2', title: 'Algorithm Analysis', description: 'Analyze time and space complexity of algorithms' },
-                { id: 3, code: 'CLO3', title: 'Problem Solving', description: 'Apply data structures to solve real-world problems' }
-            ],
-            'CS-302': [
-                { id: 1, code: 'CLO1', title: 'Algorithm Design', description: 'Design efficient algorithms for computational problems' },
-                { id: 2, code: 'CLO2', title: 'Complexity Analysis', description: 'Evaluate algorithm performance and optimization' },
-                { id: 3, code: 'CLO3', title: 'Advanced Algorithms', description: 'Implement advanced algorithmic techniques' }
-            ],
-            'CS-401': [
-                { id: 1, code: 'CLO1', title: 'Database Design', description: 'Design normalized database schemas' },
-                { id: 2, code: 'CLO2', title: 'SQL Mastery', description: 'Write complex SQL queries and procedures' },
-                { id: 3, code: 'CLO3', title: 'Database Administration', description: 'Manage and optimize database systems' }
-            ]
-        };
+        const courseEnrollmentsData = {};
 
-        // Course Enrollment Data
-        const courseEnrollmentsData = {
-            'CS-301': [
-                { id: 'QUEST-2024-001', name: 'Ahmad Ali Khan', email: 'ahmad.ali@quest.edu.pk' },
-                { id: 'QUEST-2024-002', name: 'Sara Ahmed', email: 'sara.ahmed@quest.edu.pk' },
-                { id: 'QUEST-2024-003', name: 'Muhammad Hassan', email: 'hassan.muhammad@quest.edu.pk' },
-                { id: 'QUEST-2024-004', name: 'Fatima Sheikh', email: 'fatima.sheikh@quest.edu.pk' },
-                { id: 'QUEST-2024-005', name: 'Ali Raza', email: 'ali.raza@quest.edu.pk' },
-                { id: 'QUEST-2024-006', name: 'Aisha Malik', email: 'aisha.malik@quest.edu.pk' },
-                { id: 'QUEST-2024-007', name: 'Usman Khan', email: 'usman.khan@quest.edu.pk' },
-                { id: 'QUEST-2024-008', name: 'Zainab Ali', email: 'zainab.ali@quest.edu.pk' }
-            ],
-            'CS-302': [
-                { id: 'QUEST-2024-009', name: 'Hassan Raza', email: 'hassan.raza@quest.edu.pk' },
-                { id: 'QUEST-2024-010', name: 'Maryam Khan', email: 'maryam.khan@quest.edu.pk' },
-                { id: 'QUEST-2024-011', name: 'Bilal Ahmed', email: 'bilal.ahmed@quest.edu.pk' },
-                { id: 'QUEST-2024-012', name: 'Nida Sheikh', email: 'nida.sheikh@quest.edu.pk' },
-                { id: 'QUEST-2024-013', name: 'Tariq Ali', email: 'tariq.ali@quest.edu.pk' },
-                { id: 'QUEST-2024-014', name: 'Saima Malik', email: 'saima.malik@quest.edu.pk' }
-            ],
-            'CS-401': [
-                { id: 'QUEST-2024-015', name: 'Khalid Mahmood', email: 'khalid.mahmood@quest.edu.pk' },
-                { id: 'QUEST-2024-016', name: 'Nadia Khan', email: 'nadia.khan@quest.edu.pk' },
-                { id: 'QUEST-2024-017', name: 'Faisal Ahmed', email: 'faisal.ahmed@quest.edu.pk' },
-                { id: 'QUEST-2024-018', name: 'Rabia Sheikh', email: 'rabia.sheikh@quest.edu.pk' },
-                { id: 'QUEST-2024-019', name: 'Imran Ali', email: 'imran.ali@quest.edu.pk' },
-                { id: 'QUEST-2024-020', name: 'Hina Malik', email: 'hina.malik@quest.edu.pk' },
-                { id: 'QUEST-2024-021', name: 'Saad Khan', email: 'saad.khan@quest.edu.pk' }
-            ]
-        };
+        async function ensureCourseEnrollments(courseCode) {
+            if (!courseCode) return [];
+            if (!courseEnrollmentsData[courseCode]) {
+                const list = await ObeWrites.getCourseEnrollments(courseCode);
+                courseEnrollmentsData[courseCode] = (list || []).map(s => ({
+                    id: s.studentId || s.id,
+                    name: s.name,
+                    email: s.email
+                }));
+            }
+            return courseEnrollmentsData[courseCode];
+        }
 
         // Assessment Management Functions
         function updateAssessmentStructure() {
@@ -1426,20 +1393,25 @@
             }
         }
 
-        function loadCourseCLOs() {
+        async function loadCourseCLOs() {
             const courseSelect = document.getElementById('assessmentCourseSelect');
             const selectedCourse = courseSelect.value;
             const cloSection = document.getElementById('availableCLOsSection');
             const closList = document.getElementById('availableCLOsList');
             
-            if (selectedCourse && courseCLOs[selectedCourse]) {
-                availableCLOs = courseCLOs[selectedCourse];
+            if (selectedCourse) {
+                availableCLOs = await ObeWrites.getCourseClos(selectedCourse);
+                if (!availableCLOs.length && window.__dashboardData?.clos) {
+                    availableCLOs = window.__dashboardData.clos
+                        .filter(c => c.courseCode === selectedCourse)
+                        .map((c, i) => ({ ...c, id: c._id || i + 1, title: c.description || c.code }));
+                }
                 closList.innerHTML = availableCLOs.map(clo => `
                     <div class="badge bg-primary p-2">
-                        <strong>${clo.code}:</strong> ${clo.title}
+                        <strong>${clo.code}:</strong> ${clo.title || clo.description}
                     </div>
                 `).join('');
-                cloSection.style.display = 'block';
+                cloSection.style.display = availableCLOs.length ? 'block' : 'none';
             } else {
                 cloSection.style.display = 'none';
                 availableCLOs = [];
@@ -1571,149 +1543,82 @@
             }
         }
 
-        function createDefaultAssessmentsForCourse() {
-            const selectedCourse = document.getElementById('assessmentCourseSelect').value;
-            
-            if (!selectedCourse) {
-                showAlert('Please select a course first.', 'warning');
-                return;
+        async function saveDefaultAssessmentsForCourse(courseCode) {
+            const clos = await ObeWrites.getCourseClos(courseCode);
+            if (!clos.length) {
+                showAlert(`No CLOs found for ${courseCode}. Run seed-demo first.`, 'warning');
+                return 0;
             }
-            
-            // Check if user wants to create default assessments for this course
-            const confirmMessage = `Create default assessments for ${selectedCourse}?\n\nThis will create:\n• Quiz: 10 marks (1 question)\n• Assignment: 10 marks (1 question)\n• Midterm: 20 marks (2 questions, 10 each)\n• Final: 60 marks (5 questions, 12 each)`;
-            
-            if (!confirm(confirmMessage)) {
-                return;
-            }
-            
             const assessmentTypes = ['Quiz', 'Assignment', 'Midterm', 'Final'];
             let createdCount = 0;
-            
-            assessmentTypes.forEach(assessmentType => {
+            for (const assessmentType of assessmentTypes) {
+                if (createdAssessments.find(a => a.course === courseCode && a.assessmentType === assessmentType)) continue;
                 const structure = assessmentStructure[assessmentType];
-                const courseClos = courseCLOs[selectedCourse] || [];
-                
-                // Create questions based on assessment type
                 const questions = [];
                 let totalMarks = 0;
-                
                 for (let i = 1; i <= structure.questions; i++) {
                     const marks = structure.marksPerQuestion || structure.defaultMarks;
-                    const clo = courseClos[(i - 1) % courseClos.length] || courseClos[0];
-                    
+                    const clo = clos[(i - 1) % clos.length];
                     questions.push({
                         number: i,
                         description: `${assessmentType} Question ${i}`,
                         maxMarks: marks,
-                        cloId: clo.id,
+                        cloId: clo.id || clo._id,
                         cloCode: clo.code,
-                        cloTitle: clo.title
+                        cloTitle: clo.title || clo.description
                     });
-                    
                     totalMarks += marks;
                 }
-                
-                // Create assessment object
-                const assessment = {
-                    id: Date.now() + Math.random(), // Unique ID
-                    course: selectedCourse,
-                    assessmentType: assessmentType,
+                await ObeWrites.createAssessment({
+                    courseCode,
+                    assessmentType,
                     assessmentName: assessmentType,
-                    questions: questions,
-                    totalMarks: totalMarks,
-                    createdDate: new Date().toLocaleDateString(),
-                    structure: structure
-                };
-                
-                // Check if assessment already exists for this course and type
-                const existingAssessment = createdAssessments.find(a => 
-                    a.course === selectedCourse && a.assessmentType === assessmentType
-                );
-                
-                if (!existingAssessment) {
-                    createdAssessments.push(assessment);
-                    createdCount++;
-                }
-            });
-            
-            // Update the assessments table
-            loadAssessmentsTable();
-            
-            if (createdCount > 0) {
-                showAlert(`Successfully created ${createdCount} default assessments for ${selectedCourse}!\n\n• Quiz: 10 marks\n• Assignment: 10 marks\n• Midterm: 20 marks\n• Final: 60 marks`, 'success');
-            } else {
-                showAlert(`All default assessments already exist for ${selectedCourse}.`, 'info');
+                    questions,
+                    totalMarks
+                });
+                createdCount++;
+            }
+            return createdCount;
+        }
+
+        async function createDefaultAssessmentsForCourse() {
+            const selectedCourse = document.getElementById('assessmentCourseSelect').value;
+            if (!selectedCourse) {
+                showAlert('Please select a course first.', 'warning');
+                return;
+            }
+            const confirmMessage = `Create default assessments for ${selectedCourse} in the database?`;
+            if (!confirm(confirmMessage)) return;
+            try {
+                const createdCount = await saveDefaultAssessmentsForCourse(selectedCourse);
+                await ObeWrites.refreshDashboard();
+                syncAssessmentsFromDb();
+                loadAssessmentsTable();
+                showAlert(createdCount ? `Created ${createdCount} assessment(s) for ${selectedCourse}.` : `All default assessments already exist for ${selectedCourse}.`, createdCount ? 'success' : 'info');
+            } catch (err) {
+                showAlert('Failed: ' + err.message, 'danger');
             }
         }
 
-        function createDefaultAssessments() {
-            // Check if user wants to create default assessments
-            const confirmMessage = `Create default assessments for all courses?\n\nThis will create:\n• Quiz: 10 marks (1 question)\n• Assignment: 10 marks (1 question)\n• Midterm: 20 marks (2 questions, 10 each)\n• Final: 60 marks (5 questions, 12 each)\n\nFor courses: CS-301, CS-302, CS-401`;
-            
-            if (!confirm(confirmMessage)) {
+        async function createDefaultAssessments() {
+            const courses = (window.__dashboardData?.assignedCourses || window.__dashboardData?.courses || [])
+                .map(c => c.code).filter(Boolean);
+            if (!courses.length) {
+                showAlert('No assigned courses found.', 'warning');
                 return;
             }
-            
-            const courses = ['CS-301', 'CS-302', 'CS-401'];
-            const assessmentTypes = ['Quiz', 'Assignment', 'Midterm', 'Final'];
-            let createdCount = 0;
-            
-            courses.forEach(course => {
-                assessmentTypes.forEach(assessmentType => {
-                    const structure = assessmentStructure[assessmentType];
-                    const courseClos = courseCLOs[course] || [];
-                    
-                    // Create questions based on assessment type
-                    const questions = [];
-                    let totalMarks = 0;
-                    
-                    for (let i = 1; i <= structure.questions; i++) {
-                        const marks = structure.marksPerQuestion || structure.defaultMarks;
-                        const clo = courseClos[(i - 1) % courseClos.length] || courseClos[0];
-                        
-                        questions.push({
-                            number: i,
-                            description: `${assessmentType} Question ${i}`,
-                            maxMarks: marks,
-                            cloId: clo.id,
-                            cloCode: clo.code,
-                            cloTitle: clo.title
-                        });
-                        
-                        totalMarks += marks;
-                    }
-                    
-                    // Create assessment object
-                    const assessment = {
-                        id: Date.now() + Math.random(), // Unique ID
-                        course: course,
-                        assessmentType: assessmentType,
-                        assessmentName: assessmentType,
-                        questions: questions,
-                        totalMarks: totalMarks,
-                        createdDate: new Date().toLocaleDateString(),
-                        structure: structure
-                    };
-                    
-                    // Check if assessment already exists for this course and type
-                    const existingAssessment = createdAssessments.find(a => 
-                        a.course === course && a.assessmentType === assessmentType
-                    );
-                    
-                    if (!existingAssessment) {
-                        createdAssessments.push(assessment);
-                        createdCount++;
-                    }
-                });
-            });
-            
-            // Update the assessments table
-            loadAssessmentsTable();
-            
-            if (createdCount > 0) {
-                showAlert(`Successfully created ${createdCount} default assessments!\n\n• ${courses.length} courses\n• ${assessmentTypes.length} assessment types per course\n• All assessments ready for use`, 'success');
-            } else {
-                showAlert('All default assessments already exist for the selected courses.', 'info');
+            if (!confirm(`Create default assessments for ${courses.join(', ')}?`)) return;
+            try {
+                let total = 0;
+                for (const code of courses) {
+                    total += await saveDefaultAssessmentsForCourse(code);
+                }
+                await ObeWrites.refreshDashboard();
+                syncAssessmentsFromDb();
+                loadAssessmentsTable();
+                showAlert(`Created ${total} assessment(s) across your courses.`, 'success');
+            } catch (err) {
+                showAlert('Failed: ' + err.message, 'danger');
             }
         }
 
@@ -1735,7 +1640,7 @@
             showAlert(`Created Assessments:<br>${assessmentsList}`, 'info');
         }
 
-        function createAssessment() {
+        async function createAssessment() {
             const form = document.getElementById('assessmentSetupForm');
             const formData = new FormData(form);
             const isEditing = form.hasAttribute('data-editing-id');
@@ -1769,42 +1674,49 @@
                     return;
                 }
                 
-                const clo = availableCLOs.find(c => c.id == cloId);
+                const clo = availableCLOs.find(c => String(c.id) === String(cloId) || String(c._id) === String(cloId));
                 questions.push({
                     number: i,
                     description: desc,
                     maxMarks: parseInt(marks),
-                    cloId: parseInt(cloId),
-                    cloCode: clo.code,
-                    cloTitle: clo.title
+                    cloId: cloId,
+                    cloCode: clo?.code || 'CLO',
+                    cloTitle: clo?.title || clo?.description || ''
                 });
                 
                 totalMarks += parseInt(marks);
             }
             
-            // Create or update assessment object
-            const assessment = {
-                id: isEditing ? parseInt(editingId) : Date.now(),
-                course: course,
-                assessmentType: assessmentType,
-                assessmentName: assessmentType, // Use assessment type as name
-                questions: questions,
-                totalMarks: totalMarks,
-                createdDate: isEditing ? createdAssessments.find(a => a.id == editingId).createdDate : new Date().toLocaleDateString(),
-                structure: assessmentStructure[assessmentType] || { questions: questions.length, cloPerQuestion: 1, type: 'custom' }
+            const payload = {
+                courseCode: course,
+                assessmentType,
+                assessmentName: assessmentType,
+                questions,
+                totalMarks
             };
-            
-            if (isEditing) {
-                // Update existing assessment
-                const index = createdAssessments.findIndex(a => a.id == editingId);
-                if (index > -1) {
-                    createdAssessments[index] = assessment;
-                    showAlert(`Assessment "${assessmentType}" updated successfully with ${questions.length} questions (${totalMarks} marks total)!`, 'success');
+
+            try {
+                if (isEditing) {
+                    await ObeWrites.updateAssessment(editingId, payload);
+                    showAlert(`Assessment "${assessmentType}" updated (${totalMarks} marks).`, 'success');
+                } else {
+                    const saved = await ObeWrites.createAssessment(payload);
+                    createdAssessments.push({
+                        id: saved.assessment?.id || saved.assessment?._id,
+                        course,
+                        assessmentType,
+                        assessmentName: assessmentType,
+                        questions,
+                        totalMarks,
+                        createdDate: new Date().toLocaleDateString()
+                    });
+                    showAlert(`Assessment "${assessmentType}" saved to database (${totalMarks} marks).`, 'success');
                 }
-            } else {
-                // Create new assessment
-                createdAssessments.push(assessment);
-                showAlert(`Assessment "${assessmentType}" created successfully with ${questions.length} questions (${totalMarks} marks total)!`, 'success');
+                await ObeWrites.refreshDashboard();
+                syncAssessmentsFromDb();
+            } catch (err) {
+                showAlert('Failed to save assessment: ' + err.message, 'danger');
+                return;
             }
             
             // Reset form
@@ -1882,35 +1794,23 @@
             updateBulkActionsVisibility();
         }
 
-        function bulkDeleteAssessments() {
+        async function bulkDeleteAssessments() {
             const checkedBoxes = document.querySelectorAll('.assessment-checkbox:checked');
-            
             if (checkedBoxes.length === 0) {
                 showAlert('No assessments selected for deletion.', 'warning');
                 return;
             }
-            
             const selectedIds = Array.from(checkedBoxes).map(checkbox => checkbox.value);
-            const selectedAssessments = createdAssessments.filter(assessment => selectedIds.includes(assessment.id.toString()));
-            
-            const assessmentList = selectedAssessments.map(a => `• ${a.assessmentType} (${a.course})`).join('\n');
-            const confirmMessage = `Are you sure you want to delete ${selectedAssessments.length} assessment(s)?\n\n${assessmentList}\n\nThis action cannot be undone.`;
-            
-            if (!confirm(confirmMessage)) {
-                return;
+            if (!confirm(`Delete ${selectedIds.length} assessment(s)? This cannot be undone.`)) return;
+            for (const id of selectedIds) {
+                await ObeWrites.deleteAssessment(id);
             }
-            
-            // Remove selected assessments
-            createdAssessments = createdAssessments.filter(assessment => !selectedIds.includes(assessment.id.toString()));
-            
-            // Update table
-            const currentFilter = document.getElementById('courseFilterSelect').value;
-            loadAssessmentsTable(currentFilter);
-            
-            // Clear selections
+            createdAssessments = createdAssessments.filter(a => !selectedIds.includes(String(a.id)));
+            await ObeWrites.refreshDashboard();
+            syncAssessmentsFromDb();
+            loadAssessmentsTable(document.getElementById('courseFilterSelect').value);
             clearAllSelections();
-            
-            showAlert(`Successfully deleted ${selectedAssessments.length} assessment(s).`, 'success');
+            showAlert(`Deleted ${selectedIds.length} assessment(s) from database.`, 'success');
         }
 
         function loadAssessmentsTable(filterCourse = null) {
@@ -2102,23 +2002,19 @@
             }, 100); // End setTimeout
         }
 
-        function deleteAssessment(assessmentId) {
-            const assessment = createdAssessments.find(a => a.id === assessmentId);
+        async function deleteAssessment(assessmentId) {
+            const assessment = createdAssessments.find(a => String(a.id) === String(assessmentId));
             if (!assessment) {
-                showAlert('Assessment not found.', 'error');
+                showAlert('Assessment not found.', 'danger');
                 return;
             }
-            
-            const confirmMessage = `Are you sure you want to delete "${assessment.assessmentName}" for ${assessment.course}?\n\nThis will permanently remove:\n• ${assessment.questions.length} questions\n• ${assessment.totalMarks} total marks\n• All associated CLO mappings\n\nThis action cannot be undone.`;
-            
-            if (confirm(confirmMessage)) {
-                const index = createdAssessments.findIndex(a => a.id === assessmentId);
-                if (index > -1) {
-                    createdAssessments.splice(index, 1);
-                    loadAssessmentsTable();
-                    showAlert(`Assessment "${assessment.assessmentName}" deleted successfully.`, 'success');
-                }
-            }
+            if (!confirm(`Delete "${assessment.assessmentName}" for ${assessment.course}?`)) return;
+            await ObeWrites.deleteAssessment(assessmentId);
+            createdAssessments = createdAssessments.filter(a => String(a.id) !== String(assessmentId));
+            await ObeWrites.refreshDashboard();
+            syncAssessmentsFromDb();
+            loadAssessmentsTable();
+            showAlert(`Assessment deleted from database.`, 'success');
         }
 
         function cancelEdit() {
@@ -2268,35 +2164,26 @@
             }
         }
 
-        function uploadAssessmentResults() {
+        async function uploadAssessmentResults() {
             const fileInput = document.getElementById('resultsFileInput');
             const assessmentSelect = document.getElementById('uploadAssessmentSelect');
-            
             if (!fileInput.files.length || !assessmentSelect.value) {
                 showAlert('Please select both assessment and results file.', 'warning');
                 return;
             }
-            
-            const assessment = createdAssessments.find(a => a.id == assessmentSelect.value);
-            
-            // Simulate file processing
-            showAlert('Processing results file...', 'info');
-            
-            setTimeout(() => {
-                const studentsProcessed = Math.floor(Math.random() * 30) + 20;
-                showAlert(`Results uploaded successfully! Processed ${studentsProcessed} students for "${assessment.assessmentName}".`, 'success');
-                
-                // Reset upload form
+            const assessment = createdAssessments.find(a => String(a.id) === String(assessmentSelect.value));
+            if (!assessment) return;
+            try {
+                showAlert('Saving results to database...', 'info');
+                const result = await ObeWrites.importResultsFromCsvFile(fileInput.files[0], assessment.course);
+                showAlert(`Saved ${result.imported} result(s) for "${assessment.assessmentName}".`, 'success');
                 fileInput.value = '';
                 assessmentSelect.value = '';
-                document.getElementById('assessmentDetailsSection').style.display = 'none';
-                document.getElementById('templatePreviewSection').style.display = 'none';
-                document.getElementById('downloadTemplateBtn').disabled = true;
-                document.getElementById('uploadResultsBtn').disabled = true;
-                
-                // Update uploaded results table
+                await ObeWrites.refreshDashboard();
                 loadResults();
-            }, 2000);
+            } catch (err) {
+                showAlert('Upload failed: ' + err.message, 'danger');
+            }
         }
 
         // Results Management Functions
@@ -2365,7 +2252,7 @@
             }
         }
 
-        function submitIndividualEntry() {
+        async function submitIndividualEntry() {
             const courseSelect = document.getElementById('individualCourseSelect');
             const assessmentSelect = document.getElementById('individualAssessmentSelect');
             const studentIdInput = document.getElementById('studentIdInput');
@@ -2413,26 +2300,26 @@
                 return;
             }
             
-            // Simulate saving
-            showAlert('Saving student results...', 'info');
-            
-            setTimeout(() => {
-                showAlert(`Results saved successfully for ${studentId}!<br>
-                    • Assessment: ${assessment.assessmentName}<br>
-                    • Total Marks: ${totalMarks}/${assessment.totalMarks}<br>
-                    • Questions: ${marks.length}`, 'success');
-                
-                // Reset form
+            try {
+                const records = marks.map(m => ({
+                    studentId,
+                    assessmentName: `${assessment.assessmentName} Q${m.questionNumber}`,
+                    marksObtained: m.marks,
+                    maxMarks: m.maxMarks
+                }));
+                const result = await ObeWrites.importResults(selectedCourse, records);
+                showAlert(`Saved ${result.imported} result row(s) for ${studentId} (${totalMarks}/${assessment.totalMarks}).`, 'success');
                 document.getElementById('individualEntryForm').reset();
                 document.getElementById('assessmentQuestionsSection').style.display = 'none';
                 document.getElementById('submitIndividualBtnSection').style.display = 'none';
-                
-                // Update results table
+                await ObeWrites.refreshDashboard();
                 loadResults();
-            }, 2000);
+            } catch (err) {
+                showAlert('Save failed: ' + err.message, 'danger');
+            }
         }
 
-        function loadCourseAssessmentsForBulk() {
+        async function loadCourseAssessmentsForBulk() {
             const courseSelect = document.getElementById('bulkCourseSelect');
             const selectedCourse = courseSelect.value;
             const assessmentsSection = document.getElementById('bulkCourseAssessmentsSection');
@@ -2455,8 +2342,7 @@
                     assessmentsSection.style.display = 'block';
                 }
                 
-                // Load enrolled students
-                const enrolledStudents = courseEnrollmentsData[selectedCourse] || [];
+                const enrolledStudents = await ensureCourseEnrollments(selectedCourse);
                 studentsList.innerHTML = enrolledStudents.map(student => 
                     `<div class="badge bg-success me-2 mb-2">${student.id} - ${student.name}</div>`
                 ).join('');
@@ -2608,45 +2494,25 @@
             }
         }
 
-        function uploadBulkResults() {
+        async function uploadBulkResults() {
             const fileInput = document.getElementById('bulkResultsFileInput');
             const courseSelect = document.getElementById('bulkCourseSelect');
-            
-            const courseAssessments = createdAssessments.filter(a => a.course === courseSelect.value);
-            
-            if (!fileInput.files.length || !courseSelect.value || courseAssessments.length === 0) {
-                showAlert('Please select course, create assessments, and upload results file.', 'warning');
+            const selectedCourse = courseSelect.value;
+            if (!fileInput.files.length || !selectedCourse) {
+                showAlert('Please select course and results file.', 'warning');
                 return;
             }
-            
-            const selectedCourse = courseSelect.value;
-            const enrolledStudents = courseEnrollmentsData[selectedCourse] || [];
-            
-            // Simulate file processing
-            showAlert('Processing bulk results file...', 'info');
-            
-            setTimeout(() => {
-                const studentsProcessed = enrolledStudents.length;
-                const assessmentsProcessed = courseAssessments.length;
-                const totalMarksProcessed = courseAssessments.reduce((sum, a) => sum + a.totalMarks, 0);
-                
-                showAlert(`Bulk results uploaded successfully!<br>
-                    • ${studentsProcessed} students processed<br>
-                    • ${assessmentsProcessed} assessments processed<br>
-                    • ${totalMarksProcessed} total marks across all assessments`, 'success');
-                
-                // Reset upload form
+            try {
+                showAlert('Importing bulk results...', 'info');
+                const result = await ObeWrites.importResultsFromCsvFile(fileInput.files[0], selectedCourse);
+                showAlert(`Imported ${result.imported} result(s) into database.`, 'success');
                 fileInput.value = '';
                 courseSelect.value = '';
-                document.getElementById('bulkCourseAssessmentsSection').style.display = 'none';
-                document.getElementById('bulkEnrolledStudentsSection').style.display = 'none';
-                document.getElementById('bulkTemplatePreviewSection').style.display = 'none';
-                document.getElementById('downloadBulkTemplateBtn').disabled = true;
-                document.getElementById('uploadBulkResultsBtn').disabled = true;
-                
-                // Update uploaded results table
+                await ObeWrites.refreshDashboard();
                 loadResults();
-            }, 3000);
+            } catch (err) {
+                showAlert('Bulk upload failed: ' + err.message, 'danger');
+            }
         }
 
         // Unified Upload Functions
@@ -2673,8 +2539,7 @@
                     assessmentsSection.style.display = 'block';
                 }
                 
-                // Load enrolled students
-                const enrolledStudents = courseEnrollmentsData[selectedCourse] || [];
+                const enrolledStudents = await ensureCourseEnrollments(selectedCourse);
                 studentsList.innerHTML = enrolledStudents.map(student => 
                     `<div class="badge bg-success me-2 mb-2">${student.id} - ${student.name}</div>`
                 ).join('');
@@ -2840,43 +2705,24 @@
             }
         }
 
-        function uploadUnifiedResults() {
+        async function uploadUnifiedResults() {
             const fileInput = document.getElementById('unifiedResultsFileInput');
             const courseSelect = document.getElementById('unifiedCourseSelect');
-            
-            if (!fileInput.files.length || !courseSelect.value || currentCourseAssessments.length === 0) {
-                showAlert('Please select course, create assessments, and upload results file.', 'warning');
+            const selectedCourse = courseSelect.value;
+            if (!fileInput.files.length || !selectedCourse) {
+                showAlert('Please select course and upload results file.', 'warning');
                 return;
             }
-            
-            const selectedCourse = courseSelect.value;
-            const enrolledStudents = courseEnrollmentsData[selectedCourse] || [];
-            
-            // Simulate file processing
-            showAlert('Processing unified results file...', 'info');
-            
-            setTimeout(() => {
-                const studentsProcessed = enrolledStudents.length;
-                const assessmentsProcessed = currentCourseAssessments.length;
-                const totalMarksProcessed = currentCourseAssessments.reduce((sum, a) => sum + a.totalMarks, 0);
-                
-                showAlert(`Unified results uploaded successfully!<br>
-                    • ${studentsProcessed} students processed<br>
-                    • ${assessmentsProcessed} assessments processed<br>
-                    • ${totalMarksProcessed} total marks across all assessments`, 'success');
-                
-                // Reset upload form
+            try {
+                const result = await ObeWrites.importResultsFromCsvFile(fileInput.files[0], selectedCourse);
+                showAlert(`Imported ${result.imported} result(s) into database.`, 'success');
                 fileInput.value = '';
                 courseSelect.value = '';
-                document.getElementById('courseAssessmentsSection').style.display = 'none';
-                document.getElementById('enrolledStudentsSection').style.display = 'none';
-                document.getElementById('unifiedTemplatePreviewSection').style.display = 'none';
-                document.getElementById('downloadUnifiedTemplateBtn').disabled = true;
-                document.getElementById('uploadUnifiedResultsBtn').disabled = true;
-                
-                // Update uploaded results table
+                await ObeWrites.refreshDashboard();
                 loadResults();
-            }, 3000);
+            } catch (err) {
+                showAlert('Upload failed: ' + err.message, 'danger');
+            }
         }
 
         function loadCLOAttainment() {
@@ -3018,28 +2864,61 @@
             showAlert(`Downloading results for ${assessment}`, 'info');
         }
 
-        function showCreateAssessmentModal() {
-            showAlert('Assessment creation functionality will be implemented', 'info');
-        }
-
         function generateReport() {
-            showAlert('Report generation functionality will be implemented', 'info');
+            const rows = (window.__dashboardData?.results || []).map(r => ({
+                studentId: r.studentId,
+                course: r.courseCode,
+                assessment: r.assessmentName || r.assessment,
+                marks: r.marksObtained,
+                maxMarks: r.maxMarks,
+                grade: r.grade
+            }));
+            if (!rows.length) {
+                showAlert('No results in database to export.', 'warning');
+                return;
+            }
+            ObeWrites.downloadCsv('obe-results-report.csv', rows);
+            showAlert('Results report downloaded.', 'success');
         }
 
         function generateCourseReport() {
-            showAlert('Course report generation functionality will be implemented', 'info');
+            const rows = (window.__dashboardData?.courses || []).map(c => ({
+                code: c.code,
+                name: c.name,
+                department: c.department,
+                semester: c.semester,
+                credits: c.credits
+            }));
+            if (!rows.length) return showAlert('No courses to export.', 'warning');
+            ObeWrites.downloadCsv('obe-courses-report.csv', rows);
+            showAlert('Course report downloaded.', 'success');
         }
 
         function generateCLOReport() {
-            showAlert('CLO report generation functionality will be implemented', 'info');
+            const rows = (window.__dashboardData?.clos || []).map(c => ({
+                code: c.code,
+                course: c.courseCode,
+                description: c.description || c.title
+            }));
+            if (!rows.length) return showAlert('No CLOs to export.', 'warning');
+            ObeWrites.downloadCsv('obe-clos-report.csv', rows);
+            showAlert('CLO report downloaded.', 'success');
         }
 
         function generateStudentReport() {
-            showAlert('Student report generation functionality will be implemented', 'info');
+            const rows = (window.__dashboardData?.students || window.__dashboardData?.enrollments || []).map(s => ({
+                studentId: s.studentId || s.id,
+                name: s.name,
+                email: s.email,
+                department: s.department
+            }));
+            if (!rows.length) return showAlert('No students to export.', 'warning');
+            ObeWrites.downloadCsv('obe-students-report.csv', rows);
+            showAlert('Student report downloaded.', 'success');
         }
 
         function loadReports() {
-            showAlert('Reports section loaded', 'info');
+            generateReport();
         }
     </script>
 </body>
