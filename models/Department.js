@@ -22,23 +22,24 @@ const departmentSchema = new mongoose.Schema({
         maxlength: [500, 'Description cannot exceed 500 characters']
     },
     
-    // Faculty Information
+    // Faculty (full QUEST faculty name, e.g. "Faculty of Computer Engineering")
     faculty: {
         type: String,
         required: [true, 'Faculty is required'],
-        enum: {
-            values: ['Engineering', 'Sciences', 'Management', 'Arts', 'Medicine'],
-            message: 'Faculty must be one of: Engineering, Sciences, Management, Arts, Medicine'
-        }
+        trim: true,
+        maxlength: 150
+    },
+    facultyRef: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Faculty',
+        default: null
     },
     
     // Leadership
     chairman: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: function() {
-            return this.isActive;
-        }
+        default: null
     },
     focalPersons: [{
         user: {

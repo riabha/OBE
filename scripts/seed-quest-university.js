@@ -22,7 +22,7 @@ const DEFAULT_PASSWORD = 'quest123';
 const DATA_FILE = path.join(__dirname, 'data', 'quest-scraped.json');
 
 const COLLECTIONS = [
-  '_metadata', 'departments', 'users', 'courses', 'sections',
+  '_metadata', 'faculties', 'departments', 'users', 'courses', 'sections',
   'enrollments', 'assessments', 'results', 'clos', 'plos',
   'peos', 'programs', 'attainments', 'reports', 'settings'
 ];
@@ -82,6 +82,7 @@ async function seedDatabase(dbName, payload, reset) {
   const UserSchema = require('../models/User');
   const DepartmentSchema = require('../models/Department');
   const CourseSchema = require('../models/Course');
+  const FacultySchema = require('../models/Faculty');
 
   const University = mongoose.models.University || mongoose.model('University', universitySchema);
   const university = await University.findOne({ databaseName: dbName });
@@ -94,6 +95,7 @@ async function seedDatabase(dbName, payload, reset) {
   const Department = uniDb.models.Department || uniDb.model('Department', DepartmentSchema);
   const User = uniDb.models.User || uniDb.model('User', UserSchema);
   const Course = uniDb.models.Course || uniDb.model('Course', CourseSchema);
+  const Faculty = uniDb.models.Faculty || uniDb.model('Faculty', FacultySchema);
 
   if (reset) {
     console.log('🗑️  Resetting university database…');
@@ -109,14 +111,39 @@ async function seedDatabase(dbName, payload, reset) {
   const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 12);
   const deptIdByCode = new Map();
   const userIdByEmail = new Map();
+  const facultyIdByName = new Map();
+
+  function codeFromFacultyName(name) {
+    const words = String(name || '').replace(/Faculty of /i, '').split(/\s+/).filter(Boolean);
+    if (words.length >= 2) return words.map(w => w[0]).join('').toUpperCase().slice(0, 8);
+    return String(name || 'FAC').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8) || 'FAC';
+  }
+
+  // Faculties
+  const facultyList = payload.faculties?.length ? payload.faculties : [...new Map(
+    payload.departments.map(d => [d.facultyName || d.faculty, { name: d.facultyName || d.faculty }])
+  ).values()].map(f => ({ name: f.name, code: codeFromFacultyName(f.name) }));
+
+  for (const f of facultyList) {
+    const fac = await Faculty.create({
+      name: f.name,
+      code: f.code || codeFromFacultyName(f.name),
+      description: `${f.name} — QUEST Nawabshah`,
+      questFacultyId: f.questFacultyId || null
+    });
+    facultyIdByName.set(f.name, fac._id);
+    console.log(`  ✅ Faculty: ${f.name}`);
+  }
 
   // Departments
   for (const d of payload.departments) {
+    const facultyName = d.facultyName || d.faculty;
     const dept = await Department.create({
       name: d.name,
       code: d.code,
-      description: `${d.name} — ${d.facultyName}`,
-      faculty: d.faculty,
+      description: `${d.name} — ${facultyName}`,
+      faculty: facultyName,
+      facultyRef: facultyIdByName.get(facultyName) || null,
       contactInfo: {
         email: `${d.code.toLowerCase()}@quest.edu.pk`,
         phone: '2449370367'
@@ -197,6 +224,24 @@ async function seedDatabase(dbName, payload, reset) {
     await Department.findByIdAndUpdate(deptId, update);
   }
 
+  // Assign deans to faculties
+  for (const f of facultyList) {
+    const dean = payload.users.find(u =>
+      u.facultyName === f.name && (u.roles || []).includes('dean')
+    );
+    if (dean && userIdByEmail.get(dean.email)) {
+      const facId = facultyIdByName.get(f.name);
+      await Faculty.findByIdAndUpdate(facId, { dean: userIdByEmail.get(dean.email) });
+      const deptIds = payload.departments
+        .filter(d => (d.facultyName || d.faculty) === f.name)
+        .map(d => deptIdByCode.get(d.code))
+        .filter(Boolean);
+      await User.findByIdAndUpdate(userIdByEmail.get(dean.email), {
+        $addToSet: { assignedFaculties: { $each: deptIds } }
+      });
+    }
+  }
+
   // Courses
   let courseCount = 0;
   for (const c of payload.courses) {
@@ -248,9 +293,14 @@ async function seedDatabase(dbName, payload, reset) {
     payload.departments.map(d => ({
       name: d.program.name,
       code: d.program.code,
+      department: d.name,
       departmentCode: d.code,
-      batches: d.program.batches,
-      level: 'Undergraduate',
+      departmentId: deptIdByCode.get(d.code),
+      batches: d.program.batches || ['2022', '2023', '2024', '2025'],
+      level: d.program.level || 'Undergraduate',
+      duration: d.program.duration || 4,
+      creditHours: d.program.credits || 130,
+      credits: d.program.credits || 130,
       isActive: true,
       createdAt: new Date()
     })),

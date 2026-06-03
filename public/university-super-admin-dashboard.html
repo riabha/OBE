@@ -1397,6 +1397,50 @@
         </div>
     </div>
 
+    <!-- Edit Faculty Modal -->
+    <div class="modal fade" id="editFacultyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Faculty</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editFacultyId">
+                    <form id="editFacultyForm">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Faculty Name *</label>
+                                <input type="text" class="form-control" id="editFacultyName" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Faculty Code *</label>
+                                <input type="text" class="form-control" id="editFacultyCode" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" id="editFacultyDescription" rows="2"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Dean</label>
+                                <select class="form-select" id="editFacultyDean">
+                                    <option value="">Not assigned</option>
+                                </select>
+                                <small class="text-muted">Select an existing user with Dean role, or assign later from User Management</small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" onclick="saveFacultyEdit()">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Department Modal -->
     <div class="modal fade" id="addDepartmentModal" tabindex="-1">
         <div class="modal-dialog">
@@ -1424,7 +1468,9 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Department Head/Chairman</label>
-                            <input type="text" class="form-control" id="newDeptHead" placeholder="e.g., Dr. Ahmed Ali">
+                            <select class="form-select" id="newDeptChairman">
+                                <option value="">Assign later...</option>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Description</label>
@@ -1465,12 +1511,14 @@
                             <label class="form-label">Faculty *</label>
                             <select class="form-select" id="editDeptFaculty" required>
                                 <option value="">Select Faculty...</option>
-                                <option value="Engineering">Engineering</option>
-                                <option value="Sciences">Sciences</option>
-                                <option value="Management">Management</option>
-                                <option value="Arts">Arts</option>
-                                <option value="Medicine">Medicine</option>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Chairman / Head</label>
+                            <select class="form-select" id="editDeptChairman">
+                                <option value="">Not assigned</option>
+                            </select>
+                            <small class="text-muted">Assign a faculty member as department chairman</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Contact Email *</label>
@@ -1533,8 +1581,14 @@
                                 <input type="number" class="form-control" id="newProgramCredits" value="136" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Department</label>
-                                <input type="text" class="form-control" id="newProgramDepartment">
+                                <label class="form-label">Department *</label>
+                                <select class="form-select" id="newProgramDepartment" required>
+                                    <option value="">Select Department...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Batches (comma-separated)</label>
+                                <input type="text" class="form-control" id="newProgramBatches" value="2022,2023,2024,2025" placeholder="2022,2023,2024,2025">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Program Coordinator</label>
@@ -1551,6 +1605,69 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary-gradient" onclick="saveProgram()">
                         <i class="fas fa-save me-2"></i>Save Program
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Program Modal -->
+    <div class="modal fade" id="editProgramModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Program</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editProgramId">
+                    <form id="editProgramForm">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Program Code *</label>
+                                <input type="text" class="form-control" id="editProgramCode" required>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Program Name *</label>
+                                <input type="text" class="form-control" id="editProgramName" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Level *</label>
+                                <select class="form-select" id="editProgramLevel" required>
+                                    <option value="Undergraduate">Undergraduate</option>
+                                    <option value="Graduate">Graduate (MS)</option>
+                                    <option value="Doctoral">Doctoral (PhD)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Duration (Years)</label>
+                                <input type="number" class="form-control" id="editProgramDuration" min="1" max="8">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Credit Hours</label>
+                                <input type="number" class="form-control" id="editProgramCredits" min="30">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Department *</label>
+                                <select class="form-select" id="editProgramDepartment" required>
+                                    <option value="">Select Department...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Batches (comma-separated)</label>
+                                <input type="text" class="form-control" id="editProgramBatches" placeholder="2022,2023,2024,2025">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" id="editProgramDescription" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" onclick="saveProgramEdit()">
+                        <i class="fas fa-save me-2"></i>Save Changes
                     </button>
                 </div>
             </div>
@@ -1590,7 +1707,9 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Department</label>
-                                <input type="text" class="form-control" id="editUserDepartment">
+                                <select class="form-select" id="editUserDepartment">
+                                    <option value="">None / Not applicable</option>
+                                </select>
                             </div>
                             <div class="col-12">
                                 <div class="form-check form-switch">
@@ -1655,7 +1774,9 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Department</label>
-                                <input type="text" class="form-control" id="newUserDepartment">
+                                <select class="form-select" id="newUserDepartment">
+                                    <option value="">None / Not applicable</option>
+                                </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Password *</label>
@@ -1818,6 +1939,76 @@
         let allFaculties = [];
         let allDepartments = [];
         let usersChart, coursesChart;
+
+        function normId(val) {
+            if (!val) return '';
+            if (typeof val === 'object' && val._id) return String(val._id);
+            return String(val);
+        }
+
+        function populateFacultySelect(selectEl, selectedId) {
+            if (!selectEl) return;
+            selectEl.innerHTML = '<option value="">Select Faculty...</option>';
+            allFaculties.forEach(f => {
+                const id = normId(f.id || f._id);
+                selectEl.innerHTML += `<option value="${id}">${f.name} (${f.code || ''})</option>`;
+            });
+            if (selectedId) selectEl.value = normId(selectedId);
+        }
+
+        function populateDepartmentSelect(selectEl, selectedId, includeEmpty = true) {
+            if (!selectEl) return;
+            selectEl.innerHTML = includeEmpty
+                ? '<option value="">None / Not assigned</option>'
+                : '<option value="">Select Department...</option>';
+            allDepartments.forEach(d => {
+                const id = normId(d._id || d.id);
+                selectEl.innerHTML += `<option value="${id}">${d.name} (${d.code || ''})</option>`;
+            });
+            if (selectedId) selectEl.value = normId(selectedId);
+        }
+
+        function populateChairmanSelect(selectEl, selectedId) {
+            if (!selectEl) return;
+            selectEl.innerHTML = '<option value="">Not assigned</option>';
+            const candidates = allUsers.filter(u => {
+                const roles = userRolesList(u);
+                return roles.some(r => ['teacher', 'chairman', 'focal', 'dean'].includes(r));
+            }).sort((a, b) => userDisplayName(a).localeCompare(userDisplayName(b)));
+            candidates.forEach(u => {
+                selectEl.innerHTML += `<option value="${userId(u)}">${userDisplayName(u)} — ${u.email}</option>`;
+            });
+            if (selectedId) selectEl.value = normId(selectedId);
+        }
+
+        function populateDeanSelect(selectEl, selectedId) {
+            if (!selectEl) return;
+            selectEl.innerHTML = '<option value="">Not assigned</option>';
+            const deans = allUsers.filter(u => userRolesList(u).includes('dean'))
+                .sort((a, b) => userDisplayName(a).localeCompare(userDisplayName(b)));
+            deans.forEach(u => {
+                selectEl.innerHTML += `<option value="${userId(u)}">${userDisplayName(u)} — ${u.email}</option>`;
+            });
+            if (selectedId) selectEl.value = normId(selectedId);
+        }
+
+        async function ensureDepartmentsLoaded() {
+            if (allDepartments.length) return;
+            const token = localStorage.getItem('token');
+            const response = await fetch('/api/departments', {
+                headers: { 'Authorization': `Bearer ${token}`, 'X-User-Email': getUserEmail() }
+            });
+            if (response.ok) allDepartments = await response.json();
+        }
+
+        async function ensureUsersLoaded() {
+            if (allUsers.length) return;
+            const token = localStorage.getItem('token');
+            const response = await fetch('/api/users', {
+                headers: { 'Authorization': `Bearer ${token}`, 'X-User-Email': getUserEmail() }
+            });
+            if (response.ok) allUsers = await response.json();
+        }
 
         // Update UI with user info
         if (user.name) {
@@ -2061,8 +2252,15 @@
             if (section === 'faculties') loadFaculties();
             else if (section === 'users') loadUsers();
             else if (section === 'courses') loadCourses();
-            else if (section === 'departments') loadDepartments();
-            else if (section === 'programs') loadPrograms();
+            else if (section === 'departments') {
+                loadFaculties();
+                loadUsers();
+                loadDepartments();
+            }
+            else if (section === 'programs') {
+                loadDepartments();
+                loadPrograms();
+            }
             else if (section === 'assessments') loadAssessments();
             else if (section === 'obe') loadOBEData();
             else if (section === 'settings') loadDatabaseStats();
@@ -2669,13 +2867,13 @@
                                     </div>
                                     ${f.description ? `<p class="text-muted small">${f.description}</p>` : ''}
                                     <div class="d-flex gap-2 mt-3">
-                                        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="viewFaculty(${f.id})">
+                                        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="viewFaculty('${normId(f.id || f._id)}')">
                                             <i class="fas fa-eye me-1"></i>View
                                         </button>
-                                        <button class="btn btn-sm btn-outline-warning" onclick="editFaculty(${f.id})">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="editFaculty('${normId(f.id || f._id)}')">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteFaculty(${f.id})">
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteFaculty('${normId(f.id || f._id)}')">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -2758,7 +2956,7 @@
                                     ` : ''}
                                     <div class="mb-2">
                                         <small class="text-muted">Chairman/Head</small>
-                                        <div>${d.head || 'Not Assigned'}</div>
+                                        <div>${d.head || d.headName || 'Not Assigned'}</div>
                                     </div>
                                     ${d.description ? `<p class="text-muted small mt-2">${d.description}</p>` : ''}
                                     <div class="d-flex gap-2 mt-3">
@@ -2779,19 +2977,27 @@
 
         // Edit Department
         async function editDepartment(id) {
-            const dept = allDepartments.find(d => d._id === id);
+            await ensureUsersLoaded();
+            const dept = allDepartments.find(d => normId(d._id || d.id) === normId(id));
             if (!dept) return;
 
-            // Populate edit form
-            document.getElementById('editDeptId').value = dept._id;
+            document.getElementById('editDeptId').value = normId(dept._id || dept.id);
             document.getElementById('editDeptName').value = dept.name;
             document.getElementById('editDeptCode').value = dept.code;
-            document.getElementById('editDeptFaculty').value = dept.faculty || '';
             document.getElementById('editDeptDescription').value = dept.description || '';
             document.getElementById('editDeptEmail').value = dept.contactInfo?.email || '';
             document.getElementById('editDeptPhone').value = dept.contactInfo?.phone || '';
 
-            // Show modal
+            populateFacultySelect(document.getElementById('editDeptFaculty'), dept.facultyRef || '');
+            const facultySelect = document.getElementById('editDeptFaculty');
+            if (dept.faculty && !dept.facultyRef) {
+                for (const opt of facultySelect.options) {
+                    if (opt.text.startsWith(dept.faculty)) { facultySelect.value = opt.value; break; }
+                }
+            }
+
+            populateChairmanSelect(document.getElementById('editDeptChairman'), dept.chairmanId || dept.chairman?._id || dept.chairman);
+
             const modal = new bootstrap.Modal(document.getElementById('editDepartmentModal'));
             modal.show();
         }
@@ -2799,11 +3005,13 @@
         // Save Department Edit
         async function saveDepartmentEdit() {
             const id = document.getElementById('editDeptId').value;
+            const chairmanId = document.getElementById('editDeptChairman').value;
             const data = {
                 name: document.getElementById('editDeptName').value,
                 code: document.getElementById('editDeptCode').value.toUpperCase(),
-                faculty: document.getElementById('editDeptFaculty').value,
+                facultyId: document.getElementById('editDeptFaculty').value,
                 description: document.getElementById('editDeptDescription').value,
+                chairmanId: chairmanId || null,
                 contactInfo: {
                     email: document.getElementById('editDeptEmail').value,
                     phone: document.getElementById('editDeptPhone').value
@@ -2931,18 +3139,22 @@
                                             <div class="fw-bold">${p.duration || '4'} Years</div>
                                         </div>
                                         <div class="col-6">
+                                            <small class="text-muted">Batches</small>
+                                            <div class="fw-bold">${Array.isArray(p.batchList) ? p.batchList.length : (p.batches || 0)}</div>
+                                        </div>
+                                        <div class="col-6">
                                             <small class="text-muted">Department</small>
                                             <div class="fw-bold">${p.department || 'N/A'}</div>
                                         </div>
                                     </div>
                                     <div class="d-flex gap-2">
-                                        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="viewProgram(${p.id})">
+                                        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="viewProgram('${normId(p.id || p._id)}')">
                                             <i class="fas fa-eye me-1"></i>View
                                         </button>
-                                        <button class="btn btn-sm btn-outline-warning" onclick="editProgram(${p.id})">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="editProgram('${normId(p.id || p._id)}')">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteProgram(${p.id})">
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteProgram('${normId(p.id || p._id)}')">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -2957,7 +3169,12 @@
         // Update Program Stats
         function updateProgramStats(programs) {
             document.getElementById('totalPrograms').textContent = programs.length;
-            document.getElementById('totalBatches').textContent = programs.reduce((sum, p) => sum + (p.batches || 0), 0);
+            document.getElementById('totalBatches').textContent = programs.reduce((sum, p) => {
+                if (Array.isArray(p.batchList)) return sum + p.batchList.length;
+                if (typeof p.batches === 'number') return sum + p.batches;
+                if (Array.isArray(p.batches)) return sum + p.batches.length;
+                return sum;
+            }, 0);
             document.getElementById('enrolledStudents').textContent = programs.reduce((sum, p) => sum + (p.students || 0), 0);
             document.getElementById('graduatingBatches').textContent = programs.filter(p => p.status === 'graduating').length;
         }
@@ -2983,18 +3200,77 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
         let allPrograms = [];
 
         function viewProgram(id) { 
-            const program = allPrograms.find(p => p.id === id);
+            const program = allPrograms.find(p => normId(p.id || p._id) === normId(id));
             if (program) {
-                alert(`🎓 Program Details\n\nCode: ${program.code}\nName: ${program.name}\nLevel: ${program.level}\nDuration: ${program.duration} years\nCredit Hours: ${program.creditHours}\nDepartment: ${program.department || 'N/A'}\nDescription: ${program.description || 'N/A'}`);
+                const batches = Array.isArray(program.batchList) ? program.batchList.join(', ') : (Array.isArray(program.batches) ? program.batches.join(', ') : (program.batches || 'N/A'));
+                alert(`🎓 Program Details\n\nCode: ${program.code}\nName: ${program.name}\nLevel: ${program.level}\nDuration: ${program.duration} years\nCredit Hours: ${program.creditHours || program.credits}\nDepartment: ${program.department || 'N/A'}\nBatches: ${batches}\nDescription: ${program.description || 'N/A'}`);
             }
         }
         
-        function editProgram(id) {
-            alert('✏️ Edit Program\n\nProgram ID: ' + id + '\n\nEdit modal coming in next batch!'); 
+        async function editProgram(id) {
+            await ensureDepartmentsLoaded();
+            const program = allPrograms.find(p => normId(p.id || p._id) === normId(id));
+            if (!program) return;
+
+            document.getElementById('editProgramId').value = normId(program.id || program._id);
+            document.getElementById('editProgramCode').value = program.code || '';
+            document.getElementById('editProgramName').value = program.name || '';
+            document.getElementById('editProgramLevel').value = program.level || 'Undergraduate';
+            document.getElementById('editProgramDuration').value = program.duration || 4;
+            document.getElementById('editProgramCredits').value = program.creditHours || program.credits || 130;
+            document.getElementById('editProgramDescription').value = program.description || '';
+
+            const batchStr = Array.isArray(program.batchList) ? program.batchList.join(',')
+                : (Array.isArray(program.batches) ? program.batches.join(',') : '');
+            document.getElementById('editProgramBatches').value = batchStr;
+
+            populateDepartmentSelect(document.getElementById('editProgramDepartment'), program.departmentId || '');
+
+            const modal = new bootstrap.Modal(document.getElementById('editProgramModal'));
+            modal.show();
+        }
+
+        async function saveProgramEdit() {
+            const id = document.getElementById('editProgramId').value;
+            const batchesRaw = document.getElementById('editProgramBatches').value;
+            const programData = {
+                code: document.getElementById('editProgramCode').value,
+                name: document.getElementById('editProgramName').value,
+                level: document.getElementById('editProgramLevel').value,
+                duration: document.getElementById('editProgramDuration').value,
+                creditHours: document.getElementById('editProgramCredits').value,
+                departmentId: document.getElementById('editProgramDepartment').value,
+                batches: batchesRaw.split(',').map(b => b.trim()).filter(Boolean),
+                description: document.getElementById('editProgramDescription').value
+            };
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/programs/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'X-User-Email': getUserEmail()
+                    },
+                    body: JSON.stringify(programData)
+                });
+
+                if (response.ok) {
+                    showNotification('Program updated successfully', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('editProgramModal')).hide();
+                    loadPrograms();
+                } else {
+                    const result = await response.json();
+                    showNotification(result.message || 'Failed to update program', 'danger');
+                }
+            } catch (error) {
+                showNotification('Error updating program: ' + error.message, 'danger');
+            }
         }
         
         async function deleteProgram(id) {
-            const program = allPrograms.find(p => p.id === id);
+            const program = allPrograms.find(p => normId(p.id || p._id) === normId(id));
             if(!confirm(`⚠️ Delete Program?\n\nCode: ${program.code}\nName: ${program.name}\n\nThis action cannot be undone!`)) {
                 return;
             }
@@ -3118,7 +3394,8 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
         }
 
         // User edit function
-        function editUser(id) {
+        async function editUser(id) {
+            await ensureDepartmentsLoaded();
             const userToEdit = allUsers.find(u => String(userId(u)) === String(id));
             if (!userToEdit) return;
 
@@ -3126,8 +3403,12 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
             document.getElementById('editUserName').value = userDisplayName(userToEdit);
             document.getElementById('editUserEmail').value = userToEdit.email;
             setSelectedUserRoles('editUserRole', userRolesList(userToEdit));
-            const dept = typeof userToEdit.department === 'object' ? (userToEdit.department?.name || '') : (userToEdit.department || '');
-            document.getElementById('editUserDepartment').value = dept;
+
+            const deptId = typeof userToEdit.department === 'object'
+                ? normId(userToEdit.department?._id || userToEdit.department?.id)
+                : normId(userToEdit.department);
+            populateDepartmentSelect(document.getElementById('editUserDepartment'), deptId);
+
             document.getElementById('editUserResetPassword').checked = false;
             document.getElementById('editPasswordFields').style.display = 'none';
 
@@ -3298,6 +3579,9 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
         // Modal Functions
         function showAddUserModal() {
             document.getElementById('addUserForm').reset();
+            ensureDepartmentsLoaded().then(() => {
+                populateDepartmentSelect(document.getElementById('newUserDepartment'));
+            });
             const modal = new bootstrap.Modal(document.getElementById('addUserModal'));
             modal.show();
         }
@@ -3480,18 +3764,65 @@ PhD-CS,Doctor of Philosophy in Computer Science,Doctoral,4,Computer Science,18,R
         }
 
         function viewFaculty(id) {
-            const faculty = allFaculties.find(f => f.id === id);
+            const faculty = allFaculties.find(f => normId(f.id || f._id) === normId(id));
             if (faculty) {
                 alert(`🏛️ Faculty Details\n\nCode: ${faculty.code}\nName: ${faculty.name}\nDean: ${faculty.deanName || 'Not Assigned'}\nEmail: ${faculty.deanEmail || 'N/A'}\nDepartments: ${faculty.departmentCount || 0}\nDescription: ${faculty.description || 'N/A'}`);
             }
         }
 
-        function editFaculty(id) {
-            alert('✏️ Edit Faculty\n\nFaculty ID: ' + id + '\n\nEdit modal coming in next batch!');
+        async function editFaculty(id) {
+            await ensureUsersLoaded();
+            const faculty = allFaculties.find(f => normId(f.id || f._id) === normId(id));
+            if (!faculty) return;
+
+            document.getElementById('editFacultyId').value = normId(faculty.id || faculty._id);
+            document.getElementById('editFacultyName').value = faculty.name || '';
+            document.getElementById('editFacultyCode').value = faculty.code || '';
+            document.getElementById('editFacultyDescription').value = faculty.description || '';
+            populateDeanSelect(document.getElementById('editFacultyDean'), faculty.deanId || '');
+
+            const modal = new bootstrap.Modal(document.getElementById('editFacultyModal'));
+            modal.show();
+        }
+
+        async function saveFacultyEdit() {
+            const id = document.getElementById('editFacultyId').value;
+            const deanId = document.getElementById('editFacultyDean').value;
+            const data = {
+                name: document.getElementById('editFacultyName').value,
+                code: document.getElementById('editFacultyCode').value,
+                description: document.getElementById('editFacultyDescription').value,
+                deanId: deanId || null
+            };
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/faculties/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'X-User-Email': getUserEmail()
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showNotification('Faculty updated successfully', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('editFacultyModal')).hide();
+                    loadFaculties();
+                    loadDepartments();
+                } else {
+                    const result = await response.json();
+                    showNotification(result.message || 'Failed to update faculty', 'danger');
+                }
+            } catch (error) {
+                showNotification('Error updating faculty: ' + error.message, 'danger');
+            }
         }
 
         async function deleteFaculty(id) {
-            const faculty = allFaculties.find(f => f.id === id);
+            const faculty = allFaculties.find(f => normId(f.id || f._id) === normId(id));
             if(!confirm(`⚠️ Delete Faculty?\n\nCode: ${faculty.code}\nName: ${faculty.name}\n\nWarning: This will unlink all departments from this faculty!\n\nThis action cannot be undone!`)) {
                 return;
             }
@@ -3538,19 +3869,17 @@ FOBM,Faculty of Business Management,dean.biz@example.com,Faculty of business and
         function showAddDepartmentModal() {
             document.getElementById('addDepartmentForm').reset();
             
-            // Populate Faculty dropdown
             const facultySelect = document.getElementById('newDeptFaculty');
-            
-            facultySelect.innerHTML = '<option value="">Select Faculty...</option>';
-            allFaculties.forEach(faculty => {
-                facultySelect.innerHTML += `<option value="${faculty.id}">${faculty.name} (${faculty.code})</option>`;
-            });
+            populateFacultySelect(facultySelect);
 
             if (allFaculties.length === 0) {
-                facultySelect.innerHTML = '<option value="">No Faculties found - Create a Faculty first!</option>';
                 alert('⚠️ No Faculties Available\n\nPlease create at least one Faculty before adding departments.\n\nFaculties → Add Faculty');
                 return;
             }
+
+            ensureUsersLoaded().then(() => {
+                populateChairmanSelect(document.getElementById('newDeptChairman'));
+            });
 
             const modal = new bootstrap.Modal(document.getElementById('addDepartmentModal'));
             modal.show();
@@ -3563,12 +3892,17 @@ FOBM,Faculty of Business Management,dean.biz@example.com,Faculty of business and
                 return;
             }
 
+            const chairmanId = document.getElementById('newDeptChairman').value;
             const deptData = {
                 name: document.getElementById('newDeptName').value,
                 code: document.getElementById('newDeptCode').value,
                 facultyId: document.getElementById('newDeptFaculty').value,
-                head: document.getElementById('newDeptHead').value,
-                description: document.getElementById('newDeptDescription').value
+                chairmanId: chairmanId || null,
+                description: document.getElementById('newDeptDescription').value,
+                contactInfo: {
+                    email: `${document.getElementById('newDeptCode').value.toLowerCase()}@quest.edu.pk`,
+                    phone: '2449370367'
+                }
             };
 
             try {
@@ -3599,8 +3933,11 @@ FOBM,Faculty of Business Management,dean.biz@example.com,Faculty of business and
             }
         }
 
-        function showAddProgramModal() {
+        async function showAddProgramModal() {
+            await ensureDepartmentsLoaded();
             document.getElementById('addProgramForm').reset();
+            document.getElementById('newProgramBatches').value = '2022,2023,2024,2025';
+            populateDepartmentSelect(document.getElementById('newProgramDepartment'), '', false);
             const modal = new bootstrap.Modal(document.getElementById('addProgramModal'));
             modal.show();
         }
@@ -3612,13 +3949,15 @@ FOBM,Faculty of Business Management,dean.biz@example.com,Faculty of business and
                 return;
             }
 
+            const batchesRaw = document.getElementById('newProgramBatches').value;
             const programData = {
                 code: document.getElementById('newProgramCode').value,
                 name: document.getElementById('newProgramName').value,
                 level: document.getElementById('newProgramLevel').value,
                 duration: document.getElementById('newProgramDuration').value,
                 creditHours: document.getElementById('newProgramCredits').value,
-                department: document.getElementById('newProgramDepartment').value,
+                departmentId: document.getElementById('newProgramDepartment').value,
+                batches: batchesRaw.split(',').map(b => b.trim()).filter(Boolean),
                 coordinator: document.getElementById('newProgramCoordinator').value,
                 description: document.getElementById('newProgramDescription').value
             };

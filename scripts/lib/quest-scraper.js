@@ -328,14 +328,15 @@ function buildSeedPayload(scraped) {
     const key = normalizeDeptKey(deptName);
     const facInfo = scraped.deptToFaculty[key] || {};
     const fac = scraped.faculties.find(f => f.id === facInfo.facultyId);
-    const bucket = fac?.bucket || 'Engineering';
+    const facultyName = facInfo.facultyName || fac?.name || 'Faculty of Engineering';
 
     if (!deptMap.has(code)) {
       deptMap.set(code, {
         name: deptName,
         code,
-        faculty: bucket,
-        facultyName: facInfo.facultyName || fac?.name || 'Engineering',
+        faculty: facultyName,
+        facultyName,
+        questFacultyId: fac?.id || facInfo.facultyId || null,
         program: {
           name: `Bachelor of ${deptName.replace(/ Engineering.*| Technology.*/i, '')}`,
           code: `B${code}`.slice(0, 10),
@@ -382,6 +383,32 @@ function buildSeedPayload(scraped) {
     }
   }
 
+  // Chairman from staff directory when faculty page has no chairman
+  for (const [, dept] of deptMap) {
+    const staffList = scraped.staffByDept[dept.name] || scraped.staffByDept[`${dept.name} Department`] || [];
+    const chairmanStaff = staffList.find(s => /chairman|head of department|hod/i.test(s.designation || ''));
+    if (chairmanStaff) {
+      const email = chairmanStaff.emailFromSite || slugEmail(chairmanStaff.firstName, chairmanStaff.lastName, dept.code, usedEmails);
+      const existing = users.find(u => u.email === email);
+      if (existing) {
+        existing.roles = [...new Set([...(existing.roles || [existing.role]), 'chairman'])];
+        existing.departmentCode = dept.code;
+      } else {
+        usedEmails.add(email);
+        users.push({
+          firstName: chairmanStaff.firstName,
+          lastName: chairmanStaff.lastName,
+          email,
+          roles: ['chairman', 'teacher'],
+          role: 'chairman',
+          designation: chairmanStaff.designation || 'Chairman',
+          departmentCode: dept.code,
+          employeeId: `CH${dept.code}`
+        });
+      }
+    }
+  }
+
   // Chairman from faculty pages if not in directory
   for (const fac of scraped.faculties) {
     for (const d of fac.departments) {
@@ -412,17 +439,32 @@ function buildSeedPayload(scraped) {
     departments.push(dept);
   }
 
+  const faculties = scraped.faculties.map(f => ({
+    name: f.name,
+    code: facultyCodeFromName(f.name),
+    questFacultyId: f.id,
+    deanName: f.deanName
+  }));
+
   return {
+    faculties,
     departments,
     users,
     courses,
     stats: {
+      faculties: faculties.length,
       departments: departments.length,
       users: users.length,
       courses: courses.length,
       batches: BATCHES
     }
   };
+}
+
+function facultyCodeFromName(name) {
+  const words = String(name || '').replace(/Faculty of /i, '').split(/\s+/).filter(Boolean);
+  if (words.length >= 2) return words.map(w => w[0]).join('').toUpperCase().slice(0, 8);
+  return String(name || 'FAC').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8) || 'FAC';
 }
 
 module.exports = {

@@ -355,12 +355,20 @@ async function getDefaultPlatformSettings() {
 const UserSchema = require('./models/User');
 const DepartmentSchema = require('./models/Department');
 const CourseSchema = require('./models/Course');
+const FacultySchema = require('./models/Faculty');
 
 function getUniModels(uniDb) {
     const User = uniDb.models.User || uniDb.model('User', UserSchema);
     const Department = uniDb.models.Department || uniDb.model('Department', DepartmentSchema);
     const Course = uniDb.models.Course || uniDb.model('Course', CourseSchema);
-    return { User, Department, Course };
+    const Faculty = uniDb.models.Faculty || uniDb.model('Faculty', FacultySchema);
+    return { User, Department, Course, Faculty };
+}
+
+function facultyCodeFromName(name) {
+    const words = String(name || '').replace(/Faculty of /i, '').split(/\s+/).filter(Boolean);
+    if (words.length >= 2) return words.map(w => w[0]).join('').toUpperCase().slice(0, 8);
+    return String(name || 'FAC').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8) || 'FAC';
 }
 
 function formatUserResponse(user) {
@@ -438,7 +446,7 @@ const DEMO_CANONICAL_DB = 'obe_university_demo';
 const LEGACY_DEMO_DB_NAMES = new Set(['obe_demo', 'obe_university_DEMO', '']);
 
 const UNI_DB_COLLECTIONS = [
-    '_metadata', 'departments', 'users', 'courses', 'sections', 'enrollments',
+    '_metadata', 'faculties', 'departments', 'users', 'courses', 'sections', 'enrollments',
     'assessments', 'results', 'clos', 'plos', 'peos', 'programs', 'attainments', 'reports', 'settings'
 ];
 
@@ -1967,28 +1975,31 @@ app.post('/api/users', async (req, res) => {
         
         // Handle department - if it's a string, find or create the department
         if (req.body.department && typeof req.body.department === 'string') {
-            let department = await Department.findOne({ 
-                name: { $regex: new RegExp(req.body.department, 'i') } 
-            });
-            
-            if (!department) {
-                // Create default department if it doesn't exist
-                const departmentCode = req.body.department.toUpperCase().replace(/\s+/g, '').substring(0, 5);
-                department = new Department({
-                    name: req.body.department,
-                    code: departmentCode,
-                    description: `${req.body.department} Department`,
-                    faculty: 'Engineering', // Default faculty
-                    contactInfo: {
-                        email: `${departmentCode.toLowerCase()}@university.edu`,
-                        phone: '000-000-0000'
-                    }
+            if (/^[a-f\d]{24}$/i.test(req.body.department)) {
+                // department ID passed directly
+            } else {
+                let department = await Department.findOne({
+                    name: { $regex: new RegExp(req.body.department, 'i') }
                 });
-                await department.save();
-                console.log(`✅ Created department: ${department.name}`);
+
+                if (!department) {
+                    const departmentCode = req.body.department.toUpperCase().replace(/\s+/g, '').substring(0, 5);
+                    department = new Department({
+                        name: req.body.department,
+                        code: departmentCode,
+                        description: `${req.body.department} Department`,
+                        faculty: 'General',
+                        contactInfo: {
+                            email: `${departmentCode.toLowerCase()}@university.edu`,
+                            phone: '000-000-0000'
+                        }
+                    });
+                    await department.save();
+                    console.log(`✅ Created department: ${department.name}`);
+                }
+
+                req.body.department = department._id;
             }
-            
-            req.body.department = department._id;
         }
         
         // For controller and dean roles, department is not required
@@ -2055,10 +2066,14 @@ app.put('/api/users/:id', async (req, res) => {
         }
 
         if (req.body.department && typeof req.body.department === 'string') {
-            const department = await Department.findOne({
-                name: { $regex: new RegExp(`^${req.body.department}$`, 'i') }
-            });
-            req.body.department = department ? department._id : undefined;
+            if (/^[a-f\d]{24}$/i.test(req.body.department)) {
+                req.body.department = req.body.department;
+            } else {
+                const department = await Department.findOne({
+                    name: { $regex: new RegExp(`^${req.body.department}$`, 'i') }
+                });
+                req.body.department = department ? department._id : undefined;
+            }
         }
         
         if (Array.isArray(req.body.roles) && req.body.roles.length) {
@@ -2178,7 +2193,128 @@ async function getUniCollectionData(req, res, collectionName) {
 
 app.get('/api/plos', (req, res) => getUniCollectionData(req, res, 'plos'));
 app.get('/api/peos', (req, res) => getUniCollectionData(req, res, 'peos'));
-app.get('/api/programs', (req, res) => getUniCollectionData(req, res, 'programs'));
+app.get('/api/programs', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { Department } = getUniModels(uniDb);
+
+        const departments = await Department.find({ isActive: true });
+        const deptByCode = new Map(departments.map(d => [d.code, d]));
+        const deptById = new Map(departments.map(d => [String(d._id), d]));
+
+        const raw = await uniDb.collection('programs').find({ isActive: { $ne: false } }).sort({ code: 1 }).toArray();
+
+        const programs = raw.map(p => {
+            const dept = p.departmentId
+                ? deptById.get(String(p.departmentId))
+                : (p.departmentCode ? deptByCode.get(p.departmentCode) : null);
+            const batchList = Array.isArray(p.batches) ? p.batches : (p.batch ? [p.batch] : []);
+            return {
+                ...p,
+                id: p._id,
+                department: dept?.name || p.department || p.departmentName || 'N/A',
+                departmentId: dept?._id || p.departmentId || null,
+                departmentCode: dept?.code || p.departmentCode || null,
+                batches: batchList.length,
+                batchList,
+                duration: p.duration || 4,
+                creditHours: p.creditHours || p.credits || 130,
+                level: p.level || 'Undergraduate',
+                students: p.students || 0
+            };
+        });
+
+        res.json(programs);
+    } catch (error) {
+        console.error('Error fetching programs:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.post('/api/programs', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { Department } = getUniModels(uniDb);
+
+        const { code, name, level, duration, creditHours, department, departmentId, batches, description, coordinator } = req.body;
+        if (!code || !name) return res.status(400).json({ message: 'Program code and name are required' });
+
+        let dept = null;
+        if (departmentId) dept = await Department.findById(departmentId);
+        else if (department) dept = await Department.findOne({ name: { $regex: new RegExp(`^${department}$`, 'i') } });
+
+        const batchList = Array.isArray(batches) ? batches : (batches ? String(batches).split(',').map(b => b.trim()) : ['2024', '2025']);
+
+        const doc = {
+            code: code.toUpperCase(),
+            name,
+            level: level || 'Undergraduate',
+            duration: Number(duration) || 4,
+            creditHours: Number(creditHours) || 130,
+            credits: Number(creditHours) || 130,
+            department: dept?.name || department || null,
+            departmentId: dept?._id || null,
+            departmentCode: dept?.code || null,
+            batches: batchList,
+            description: description || '',
+            coordinator: coordinator || null,
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+
+        const result = await uniDb.collection('programs').insertOne(doc);
+        res.status(201).json({ message: 'Program created', program: { ...doc, id: result.insertedId, _id: result.insertedId } });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.put('/api/programs/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { Department } = getUniModels(uniDb);
+
+        const updates = { ...req.body, updatedAt: new Date() };
+        delete updates.id;
+        delete updates._id;
+
+        if (updates.departmentId) {
+            const dept = await Department.findById(updates.departmentId);
+            if (dept) {
+                updates.department = dept.name;
+                updates.departmentCode = dept.code;
+            }
+        } else if (updates.department && typeof updates.department === 'string') {
+            const dept = await Department.findOne({ name: { $regex: new RegExp(`^${updates.department}$`, 'i') } });
+            if (dept) {
+                updates.departmentId = dept._id;
+                updates.departmentCode = dept.code;
+            }
+        }
+
+        if (updates.creditHours) updates.credits = Number(updates.creditHours);
+        if (typeof updates.batches === 'string') {
+            updates.batches = updates.batches.split(',').map(b => b.trim()).filter(Boolean);
+        }
+
+        const result = await uniDb.collection('programs').findOneAndUpdate(
+            { _id: new mongoose.Types.ObjectId(req.params.id) },
+            { $set: updates },
+            { returnDocument: 'after' }
+        );
+        if (!result) return res.status(404).json({ message: 'Program not found' });
+        res.json({ message: 'Program updated', program: result });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
 app.get('/api/assessments', (req, res) => getUniCollectionData(req, res, 'assessments'));
 app.get('/api/results', (req, res) => getUniCollectionData(req, res, 'results'));
 
@@ -2389,40 +2525,155 @@ app.get('/api/dashboard/overview', async (req, res) => {
     }
 });
 
-// Faculties derived from department faculty groupings
+// Faculties CRUD (proper Faculty collection)
 app.get('/api/faculties', async (req, res) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) return res.status(401).json({ message: 'No token' });
 
         const { uniDb } = await getUniversityDatabase(token);
-        const { User, Department } = getUniModels(uniDb);
+        const { User, Department, Faculty } = getUniModels(uniDb);
+
+        let faculties = await Faculty.find({ isActive: true }).populate('dean', 'firstName lastName email').sort({ name: 1 });
+
+        // Migrate legacy: if no Faculty docs, build from department.faculty strings
+        if (!faculties.length) {
+            const deptFacultyNames = [...new Set((await Department.find({ isActive: true })).map(d => d.faculty).filter(Boolean))];
+            for (const name of deptFacultyNames) {
+                await Faculty.create({
+                    name,
+                    code: facultyCodeFromName(name),
+                    description: `${name} at the university`
+                }).catch(() => {});
+            }
+            faculties = await Faculty.find({ isActive: true }).populate('dean', 'firstName lastName email').sort({ name: 1 });
+        }
 
         const departments = await Department.find({ isActive: true });
-        const deans = await User.find({ role: 'dean', isActive: true });
-
-        const facultyNames = [...new Set(departments.map(d => d.faculty).filter(Boolean))];
-        const faculties = facultyNames.map((name, idx) => {
-            const depts = departments.filter(d => d.faculty === name);
-            const deptIds = new Set(depts.map(d => d._id.toString()));
-            const dean = deans.find(d =>
-                Array.isArray(d.assignedFaculties) &&
-                d.assignedFaculties.some(af => deptIds.has(af.toString()))
+        const result = faculties.map(f => {
+            const depts = departments.filter(d =>
+                (d.facultyRef && String(d.facultyRef) === String(f._id)) || d.faculty === f.name
             );
+            const dean = f.dean;
             return {
-                id: idx + 1,
-                name,
-                code: name.replace(/\s+/g, '').substring(0, 4).toUpperCase(),
-                deanName: dean ? `${dean.firstName} ${dean.lastName}` : null,
+                id: f._id,
+                _id: f._id,
+                name: f.name,
+                code: f.code,
+                description: f.description,
+                deanId: dean?._id || null,
+                deanName: dean ? `${dean.firstName} ${dean.lastName}`.trim() : null,
                 deanEmail: dean?.email || null,
                 departmentCount: depts.length,
-                description: `${name} faculty`
+                departments: depts.map(d => ({ id: d._id, name: d.name, code: d.code }))
             };
         });
 
-        res.json(faculties);
+        res.json(result);
     } catch (error) {
         console.error('Error fetching faculties:', error);
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.post('/api/faculties', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { User, Faculty } = getUniModels(uniDb);
+
+        const { name, code, description, deanId, createDean, deanName, deanEmail, deanPassword, deanDepartment } = req.body;
+        if (!name) return res.status(400).json({ message: 'Faculty name is required' });
+
+        let deanUserId = deanId || null;
+        let deanCreated = null;
+
+        if (createDean && deanEmail && deanPassword) {
+            const parts = String(deanName || 'Dean User').trim().split(/\s+/);
+            const hashed = await bcrypt.hash(deanPassword, 12);
+            const dean = await User.create({
+                firstName: parts[0],
+                lastName: parts.slice(1).join(' ') || parts[0],
+                email: deanEmail.toLowerCase(),
+                password: hashed,
+                role: 'dean',
+                roles: ['dean', 'teacher'],
+                phone: '3000000000',
+                designation: 'Dean',
+                qualification: 'PhD',
+                employeeId: `DEAN${Date.now()}`.slice(-8)
+            });
+            deanUserId = dean._id;
+            deanCreated = { email: dean.email, password: deanPassword, name: deanName };
+        }
+
+        const faculty = await Faculty.create({
+            name: name.trim(),
+            code: (code || facultyCodeFromName(name)).toUpperCase(),
+            description: description || '',
+            dean: deanUserId || undefined
+        });
+
+        if (deanUserId) {
+            await User.findByIdAndUpdate(deanUserId, { $addToSet: { assignedFaculties: faculty._id } }).catch(() => {});
+        }
+
+        res.status(201).json({
+            message: 'Faculty created',
+            faculty,
+            deanCreated,
+            deanName: deanCreated?.name,
+            deanEmail: deanCreated?.email,
+            deanPassword: deanCreated?.password
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.put('/api/faculties/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { User, Department, Faculty } = getUniModels(uniDb);
+
+        const updates = {};
+        if (req.body.name) updates.name = req.body.name.trim();
+        if (req.body.code) updates.code = req.body.code.toUpperCase();
+        if (req.body.description !== undefined) updates.description = req.body.description;
+        if (req.body.deanId) updates.dean = req.body.deanId;
+
+        const faculty = await Faculty.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true })
+            .populate('dean', 'firstName lastName email');
+        if (!faculty) return res.status(404).json({ message: 'Faculty not found' });
+
+        if (updates.name) {
+            await Department.updateMany({ facultyRef: faculty._id }, { $set: { faculty: faculty.name } });
+            await Department.updateMany({ faculty: req.body.oldName }, { $set: { faculty: faculty.name, facultyRef: faculty._id } });
+        }
+
+        res.json({ message: 'Faculty updated', faculty });
+    } catch (error) {
+        res.status(500).json({ message: 'Error', error: error.message });
+    }
+});
+
+app.delete('/api/faculties/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const { uniDb } = await getUniversityDatabase(token);
+        const { Department, Faculty } = getUniModels(uniDb);
+
+        const faculty = await Faculty.findById(req.params.id);
+        if (!faculty) return res.status(404).json({ message: 'Faculty not found' });
+
+        await Faculty.findByIdAndUpdate(faculty._id, { isActive: false });
+        await Department.updateMany({ facultyRef: faculty._id }, { $unset: { facultyRef: '' } });
+        res.json({ message: `Faculty "${faculty.name}" deactivated` });
+    } catch (error) {
         res.status(500).json({ message: 'Error', error: error.message });
     }
 });
@@ -2503,10 +2754,14 @@ app.get('/api/departments', async (req, res) => {
         
         res.json(departments.map(d => {
             const obj = d.toObject();
+            const chairman = obj.chairman;
             return {
                 ...obj,
                 id: obj._id,
-                headName: obj.chairman ? `${obj.chairman.firstName} ${obj.chairman.lastName}` : null
+                facultyName: obj.faculty,
+                head: chairman ? `${chairman.firstName} ${chairman.lastName}`.trim() : null,
+                headName: chairman ? `${chairman.firstName} ${chairman.lastName}`.trim() : null,
+                chairmanId: chairman?._id || null
             };
         }));
         
@@ -2640,16 +2895,54 @@ app.get('/api/debug/database-info', async (req, res) => {
 });
 
 // Departments CRUD
+async function resolveDepartmentFaculty(uniDb, body) {
+    const { Faculty } = getUniModels(uniDb);
+    const facultyId = body.facultyId || body.facultyRef;
+    if (facultyId) {
+        const fac = await Faculty.findById(facultyId);
+        if (fac) return { faculty: fac.name, facultyRef: fac._id };
+    }
+    if (body.faculty) {
+        const fac = await Faculty.findOne({ name: body.faculty });
+        if (fac) return { faculty: fac.name, facultyRef: fac._id };
+        return { faculty: body.faculty, facultyRef: null };
+    }
+    return { faculty: 'General', facultyRef: null };
+}
+
 app.post('/api/departments', async (req, res) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) return res.status(401).json({ message: 'No token' });
         const { uniDb } = await getUniversityDatabase(token);
-        const { Department } = getUniModels(uniDb);
-        const faculty = ['Engineering', 'Sciences', 'Management', 'Arts', 'Medicine'].includes(req.body.faculty)
-            ? req.body.faculty : 'Engineering';
-        const dept = new Department({ ...req.body, faculty, isActive: true });
-        await dept.save();
+        const { Department, User } = getUniModels(uniDb);
+
+        const { name, code, description, chairmanId, contactInfo } = req.body;
+        const facFields = await resolveDepartmentFaculty(uniDb, req.body);
+
+        const payload = {
+            name,
+            code: String(code).toUpperCase(),
+            description: description || `${name} department`,
+            ...facFields,
+            contactInfo: contactInfo || {
+                email: `${String(code).toLowerCase()}@quest.edu.pk`,
+                phone: '2449370367'
+            },
+            isActive: true
+        };
+
+        if (chairmanId) payload.chairman = chairmanId;
+
+        const dept = await Department.create(payload);
+
+        if (chairmanId) {
+            await User.findByIdAndUpdate(chairmanId, {
+                $addToSet: { roles: 'chairman', managedDepartments: dept._id },
+                role: 'chairman'
+            }).catch(() => {});
+        }
+
         res.status(201).json({ message: 'Department created', department: dept });
     } catch (error) {
         res.status(500).json({ message: 'Error', error: error.message });
@@ -2661,10 +2954,43 @@ app.put('/api/departments/:id', async (req, res) => {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) return res.status(401).json({ message: 'No token' });
         const { uniDb } = await getUniversityDatabase(token);
-        const { Department } = getUniModels(uniDb);
-        const dept = await Department.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const { Department, User } = getUniModels(uniDb);
+
+        const updates = { ...req.body };
+        delete updates.head;
+        delete updates.headName;
+        delete updates.facultyName;
+
+        if (updates.facultyId || updates.facultyRef || updates.faculty) {
+            Object.assign(updates, await resolveDepartmentFaculty(uniDb, updates));
+            delete updates.facultyId;
+        }
+
+        if (updates.chairmanId !== undefined) {
+            updates.chairman = updates.chairmanId || null;
+            delete updates.chairmanId;
+            if (updates.chairman) {
+                await User.findByIdAndUpdate(updates.chairman, {
+                    $addToSet: { roles: 'chairman', managedDepartments: req.params.id }
+                }).catch(() => {});
+            }
+        }
+
+        const dept = await Department.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true })
+            .populate('chairman', 'firstName lastName email');
         if (!dept) return res.status(404).json({ message: 'Department not found' });
-        res.json({ message: 'Department updated', department: dept });
+
+        const obj = dept.toObject();
+        res.json({
+            message: 'Department updated',
+            department: {
+                ...obj,
+                id: obj._id,
+                facultyName: obj.faculty,
+                head: obj.chairman ? `${obj.chairman.firstName} ${obj.chairman.lastName}`.trim() : null,
+                headName: obj.chairman ? `${obj.chairman.firstName} ${obj.chairman.lastName}`.trim() : null
+            }
+        });
     } catch (error) {
         res.status(500).json({ message: 'Error', error: error.message });
     }
@@ -2736,40 +3062,6 @@ app.delete('/api/programs/:id', async (req, res) => {
         const result = await uniDb.collection('programs').deleteOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
         if (result.deletedCount === 0) return res.status(404).json({ message: 'Program not found' });
         res.json({ message: 'Program deleted' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error', error: error.message });
-    }
-});
-
-// Faculties create/delete (faculty = department grouping field)
-app.post('/api/faculties', async (req, res) => {
-    try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) return res.status(401).json({ message: 'No token' });
-        const { name, code, description } = req.body;
-        if (!name) return res.status(400).json({ message: 'Faculty name required' });
-        res.status(201).json({
-            message: 'Faculty registered. Assign departments to this faculty when creating departments.',
-            faculty: { name, code: code || name.substring(0, 4).toUpperCase(), description }
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Error', error: error.message });
-    }
-});
-
-app.delete('/api/faculties/:id', async (req, res) => {
-    try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) return res.status(401).json({ message: 'No token' });
-        const { uniDb } = await getUniversityDatabase(token);
-        const { Department } = getUniModels(uniDb);
-        const facultiesRes = await Department.find({ isActive: true });
-        const facultyNames = [...new Set(facultiesRes.map(d => d.faculty).filter(Boolean))];
-        const idx = parseInt(req.params.id, 10) - 1;
-        const facultyName = facultyNames[idx];
-        if (!facultyName) return res.status(404).json({ message: 'Faculty not found' });
-        await Department.updateMany({ faculty: facultyName }, { $set: { faculty: 'Engineering' } });
-        res.json({ message: `Faculty "${facultyName}" removed; departments reassigned to Engineering` });
     } catch (error) {
         res.status(500).json({ message: 'Error', error: error.message });
     }
