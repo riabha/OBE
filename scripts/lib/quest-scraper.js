@@ -3,6 +3,7 @@
  * Does NOT scrape private student records (not public).
  */
 const cheerio = require('cheerio');
+const { facultyCodeFromName } = require('../../utils/faculty-code');
 
 const BASE = 'https://www.quest.edu.pk';
 const FACULTY_IDS = [1, 2, 3, 4, 5, 6];
@@ -439,9 +440,10 @@ function buildSeedPayload(scraped) {
     departments.push(dept);
   }
 
+  const usedFacultyCodes = new Set();
   const faculties = scraped.faculties.map(f => ({
     name: f.name,
-    code: facultyCodeFromName(f.name),
+    code: facultyCodeFromName(f.name, usedFacultyCodes),
     questFacultyId: f.id,
     deanName: f.deanName
   }));
@@ -459,12 +461,6 @@ function buildSeedPayload(scraped) {
       batches: BATCHES
     }
   };
-}
-
-function facultyCodeFromName(name) {
-  const words = String(name || '').replace(/Faculty of /i, '').split(/\s+/).filter(Boolean);
-  if (words.length >= 2) return words.map(w => w[0]).join('').toUpperCase().slice(0, 8);
-  return String(name || 'FAC').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8) || 'FAC';
 }
 
 module.exports = {

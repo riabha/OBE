@@ -356,6 +356,7 @@ const UserSchema = require('./models/User');
 const DepartmentSchema = require('./models/Department');
 const CourseSchema = require('./models/Course');
 const FacultySchema = require('./models/Faculty');
+const { facultyCodeFromName } = require('./utils/faculty-code');
 
 function getUniModels(uniDb) {
     const User = uniDb.models.User || uniDb.model('User', UserSchema);
@@ -363,12 +364,6 @@ function getUniModels(uniDb) {
     const Course = uniDb.models.Course || uniDb.model('Course', CourseSchema);
     const Faculty = uniDb.models.Faculty || uniDb.model('Faculty', FacultySchema);
     return { User, Department, Course, Faculty };
-}
-
-function facultyCodeFromName(name) {
-    const words = String(name || '').replace(/Faculty of /i, '').split(/\s+/).filter(Boolean);
-    if (words.length >= 2) return words.map(w => w[0]).join('').toUpperCase().slice(0, 8);
-    return String(name || 'FAC').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8) || 'FAC';
 }
 
 function formatUserResponse(user) {

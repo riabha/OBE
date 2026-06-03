@@ -15,6 +15,7 @@ require('dotenv').config({ path: './.env', override: false });
 
 const fs = require('fs');
 const path = require('path');
+const { facultyCodeFromName } = require('../utils/faculty-code');
 const { scrapeAll, buildSeedPayload } = require('./lib/quest-scraper');
 
 const DEFAULT_DB = 'obe_quest';
@@ -112,22 +113,22 @@ async function seedDatabase(dbName, payload, reset) {
   const deptIdByCode = new Map();
   const userIdByEmail = new Map();
   const facultyIdByName = new Map();
-
-  function codeFromFacultyName(name) {
-    const words = String(name || '').replace(/Faculty of /i, '').split(/\s+/).filter(Boolean);
-    if (words.length >= 2) return words.map(w => w[0]).join('').toUpperCase().slice(0, 8);
-    return String(name || 'FAC').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8) || 'FAC';
-  }
+  const usedFacultyCodes = new Set();
 
   // Faculties
   const facultyList = payload.faculties?.length ? payload.faculties : [...new Map(
     payload.departments.map(d => [d.facultyName || d.faculty, { name: d.facultyName || d.faculty }])
-  ).values()].map(f => ({ name: f.name, code: codeFromFacultyName(f.name) }));
+  ).values()].map(f => ({
+    name: f.name,
+    code: facultyCodeFromName(f.name, usedFacultyCodes),
+    questFacultyId: f.questFacultyId || null
+  }));
 
   for (const f of facultyList) {
+    const code = f.code || facultyCodeFromName(f.name, usedFacultyCodes);
     const fac = await Faculty.create({
       name: f.name,
-      code: f.code || codeFromFacultyName(f.name),
+      code,
       description: `${f.name} — QUEST Nawabshah`,
       questFacultyId: f.questFacultyId || null
     });
